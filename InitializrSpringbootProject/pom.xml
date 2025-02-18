@@ -29,11 +29,12 @@
 	<properties>
 		<java.version>21</java.version>
 	</properties>
+
+
+	<!-- ✅ Dependencias básicas de Spring Boot -->
 	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
+
+		<!-- ✅ Spring Boot Starter Web -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -41,20 +42,89 @@
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+
+		<!-- ✅ Spring Boot DevTools -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+
+		<!-- ✅ Lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<scope>provided</scope>
 		</dependency>
+
+		<!-- ✅ Spring Boot Starter Test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- ✅ MySQL Connector -->
+		<!-- Necesario para conectar la aplicación con una base de datos MySQL -->
+		<dependency>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Permite trabajar con bases de datos relacionales usando JPA e Hibernate -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+		<!-- Nos permite usar Bootstrap en nuestras vistas sin depender de un CDN -->
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>bootstrap</artifactId>
+			<version>5.3.3</version>
+		</dependency>
+
+
+		<!-- Incluye íconos modernos que podemos usar en los botones, formularios y diseño -->
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>font-awesome</artifactId>
+			<version>6.7.1</version>
+		</dependency>
+
+		<!-- Necesario para ejecutar scripts interactivos en el frontend -->
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>jquery</artifactId>
+			<version>3.7.1</version>
+		</dependency>
+
+		<!-- Popper.js es requerido por Bootstrap para manejar tooltips y popovers -->
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>popper.js</artifactId>
+			<version>2.11.7</version>
+		</dependency>
+
+		<!-- Ayuda a Spring Boot a localizar automáticamente los WebJars en nuestra aplicación -->
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>webjars-locator</artifactId>
+			<version>0.52</version>
+		</dependency>
+
+		<!-- Opcional: Firebase  -->
+		<!-- Si NO lo necesitamos ahora, podemos ignorarlo -->
+		<dependency>
+			<groupId>com.google.firebase</groupId>
+			<artifactId>firebase-admin</artifactId>
+			<version>9.4.1</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
