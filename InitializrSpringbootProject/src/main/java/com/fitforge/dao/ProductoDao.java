@@ -5,13 +5,11 @@
 
 package com.fitforge.dao;
 
-/**
- *
- * @author ktrejos
- */
 
 import com.fitforge.domain.Producto;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ProductoDao extends JpaRepository<Producto, Long> {
+public interface ProductoDao extends JpaRepository<User, Long> {
+    User findByEmail(String email);
+    User findByResetToken(String resetToken);
 }

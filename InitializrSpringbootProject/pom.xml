@@ -46,6 +46,17 @@
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
 
+<!-- Spring Security para autenticación y cifrado -->
+                <dependency>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-security</artifactId>
+                </dependency>
+
+                <!-- Spring Boot Starter Mail para envío de emails -->
+                <dependency>
+                <groupId>org.springframework.boot</groupId>
+                 <artifactId>spring-boot-starter-mail</artifactId>
+                </dependency>
 		<!-- ✅ Spring Boot DevTools -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
