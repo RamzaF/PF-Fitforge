@@ -1,9 +1,17 @@
 package com.fitforge.domain;
 
-import lombok.Data;
-import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 /**
  *
@@ -19,7 +27,7 @@ public class Categoria implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_categoria")
-    private long idCategoria;
+    private Long idCategoria;
 
     private String descripcion;
     private boolean activo;
@@ -33,22 +41,6 @@ public class Categoria implements Serializable {
 
     public Categoria(String descripcion, boolean activo) {
         this.descripcion = descripcion;
-        this.activo = activo;
-    }
-
-    public long getIdCategoria() {
-        return idCategoria;
-    }
-
-    public void setIdCategoria(long idCategoria) {
-        this.idCategoria = idCategoria;
-    }
-
-    public boolean isActivo() {
-        return activo;
-    }
-
-    public void setActivo(boolean activo) {
         this.activo = activo;
     }
 }

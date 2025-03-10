@@ -10,101 +10,120 @@
          <!-- Hero Section -->
     <div class="container-fluid position-relative" th:fragment="hero-section">
         <!-- Imagen de fondo -->
-        <div class="position-absolute top-0 start-0 w-100 h-100">
+        <!-- <div class="position-absolute top-0 start-0 w-100 h-100">
             <img src="https://img.freepik.com/premium-photo/grey-sport-clothing-fabric-texture-background_76080-1885.jpg" alt="Background" class="w-100 h-100 object-fit-cover">
-        </div>
+        </div> -->
 
         <!-- Contenido del hero -->
-        <div class="position-relative z-1 text-center text-white py-5">
-            <h1 class="display-1 fw-bold" style="font-size: 48px;">Sports</h1>
-            <p class="lead" style="font-size: 18px;">Best sports clothes</p>
-            <a href="#" class="btn btn-dark btn-lg mt-3">Shop collection</a>
+        <div class="hero-section position-relative" th:fragment="hero-section">
+            <!-- Imagen de fondo mejorada -->
+            <div class="position-absolute top-0 start-0 w-100 h-100 hero-bg">
+                <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80" 
+                     alt="Background" class="w-100 h-100 object-fit-cover opacity-75">
+            </div>
+
+                <!-- Hero con animación -->
+    <div class="position-relative py-5 my-4 hero-content">
+        <div class="container text-center text-white py-5">
+            <h1 class="display-1 fw-bold mb-3 fade-in">FITFORGE</h1>
+            <p class="lead fs-3 mb-4 slide-up">Potencia tu rendimiento con nuestra exclusiva colección deportiva</p>
+            <a href="/tienda/tienda" class="btn btn-light btn-lg px-5 py-3 fw-bold slide-up-delay">COMPRAR AHORA</a>
         </div>
     </div>
+</div>
         
           <!-- Image Section -->
     <div class="container my-5" th:fragment="image-section">
         <div class="row">
             <div class="col-md-6">
-                <div class="card border-0">
+                <!-- <div class="card border-0">
                     <img src="https://media.revistagq.com/photos/61ef4e59fed8925d535f2299/16:9/w_2560%2Cc_limit/09_LEFTIES-SPORTSWEAR_WE-ARE-SPORT-MAN-COLLECTION-SS22.jpg" alt="Sports" class="card-img-top rounded">
                     <div class="card-body">
                         <h5 class="card-title">Sports Collection</h5>
                         <p class="card-text">Explore our best sports clothes.</p>
                     </div>
-                </div>
+                </div> -->
             </div>
-            <div class="col-md-6">
+            <!-- <div class="col-md-6">
                 <div class="card border-0">
-                    <!--  <img id="blah" th:src="@{${producto.rutaImagen}}" alt="your image" height="200"/>-->
+                     <img id="blah" th:src="@{${producto.imagen}}" alt="your image" height="200"/>
                   <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWvvTUqaYJ24a__ytfTcwY8Oh7hq2NxIyMEA&s" alt="Mountains" class="card-img-top rounded">
                     <div class="card-body">
                         <h5 class="card-title">Outdoor Adventures</h5>
                         <p class="card-text">Gear up for your next adventure.</p>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
           
-            <!-- Sección de Trending -->
-            
-            
-            
-             <!-- Sección de Trending -->
-    <div class="container mt-4" th:fragment="trending">
-        <div class="row">
-            <!-- Círculo con imagen: Trending -->
-            <div class="col text-center">
-                <div class="circle-image rounded-circle overflow-hidden d-inline-block mb-2" style="width: 87px; height: 87px;">
-                    <a href="#">
-                    <img src="https://titanboxwear.com/wp-content/uploads/ropa-detalles-reflectantes-tendencia-2025.jpg" alt="Trending" class="img-fluid"/>
-                    </a>
-                </div>
-                <p class="text-dark fw-bold" style="font-family: 'Source Sans Pro', sans-serif; font-size: 14px;">Trending</p>
-            </div>
-
-            <!-- Círculo con imagen: Sale -->
-            <div class="col text-center">
-                <div class="circle-image rounded-circle overflow-hidden d-inline-block mb-2" style="width: 87px; height: 87px;">
-                    <a href="#">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIQ2JdonT-m7gPBRFeh9bAmrMiCpJVZ4U-Kg&s" alt="Sale" class="img-fluid"/>
-                    </a>
-                </div>
-                <p class="text-dark fw-bold" style="font-family: 'Source Sans Pro', sans-serif; font-size: 14px;">Sale</p>
-            </div>
-
-            <!-- Círculo con imagen: Brands -->
-            <div class="col text-center">
-                <div class="circle-image rounded-circle overflow-hidden d-inline-block mb-2" style="width: 87px; height: 87px;">
-                    <a href="#">
-                    <img src="https://media.ambito.com/p/7cb30197ac499206218566a39ec377b1/adjuntos/239/imagenes/036/877/0036877839/marcasjpg.jpg" alt="Brands" class="img-fluid"/>
-                    </a>
-                </div>
-                <p class="text-dark fw-bold" style="font-family: 'Source Sans Pro', sans-serif; font-size: 14px;">Brands</p>
-            </div>
-
-            <!-- Círculo con imagen: Top Rated -->
-            <div class="col text-center">
-                <div class="circle-image rounded-circle overflow-hidden d-inline-block mb-2" style="width: 87px; height: 87px;">
-                    <a href="#">
-                    <img src="https://tdsportswear.com/wp-content/uploads/2025/01/d52-1170x658.png" alt="Top Rated" class="img-fluid"/>
-                    </a>
-                </div>
-                <p class="text-dark fw-bold" style="font-family: 'Source Sans Pro', sans-serif; font-size: 14px;">Top Rated</p>
-            </div>
-
-            <!-- Círculo con imagen: Best Sellers -->
-            <div class="col text-center">
-                <div class="circle-image rounded-circle overflow-hidden d-inline-block mb-2" style="width: 87px; height: 87px;">
-                    <a href="#">
-                    <img src="https://www.neo2.com/wp-content/uploads/2025/02/new-balance-klutch-athletics-ropa-deportiva-06.jpg" alt="Best Seller" class="img-fluid"/>
-                    </a>
-                </div>
-                <p class="text-dark fw-bold"  style="font-family: 'Source Sans Pro', sans-serif; font-size: 14px;  ">Best Sellers</p>
-            </div>
+<!-- Círculo con imagen: Trending -->
+<!-- <div class="col-6 col-md-4 col-lg-2 text-center category-item">
+    <a href="/categoria/trending" class="text-decoration-none">
+        <div class="circle-image rounded-circle overflow-hidden d-inline-block mb-3 zoom-effect">
+            <img src="https://titanboxwear.com/wp-content/uploads/ropa-detalles-reflectantes-tendencia-2025.jpg" 
+                 alt="Trending" class="img-fluid"/>
         </div>
-    </div>
+        <h5 class="fw-bold">Trending</h5>
+    </a>
+</div> -->
+
+<!-- Círculo con imagen: Sale -->
+<!-- <div class="col-6 col-md-4 col-lg-2 text-center category-item">
+    <a href="/categoria/sale" class="text-decoration-none">
+        <div class="circle-image rounded-circle overflow-hidden d-inline-block mb-3 zoom-effect">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIQ2JdonT-m7gPBRFeh9bAmrMiCpJVZ4U-Kg&s" 
+                 alt="Sale" class="img-fluid"/>
+        </div>
+        <h5 class="fw-bold">Ofertas</h5>
+    </a>
+</div> -->
+
+<!-- Círculo con imagen: Brands -->
+<!-- <div class="col-6 col-md-4 col-lg-2 text-center category-item">
+    <a href="/categoria/brands" class="text-decoration-none">
+        <div class="circle-image rounded-circle overflow-hidden d-inline-block mb-3 zoom-effect">
+            <img src="https://media.ambito.com/p/7cb30197ac499206218566a39ec377b1/adjuntos/239/imagenes/036/877/0036877839/marcasjpg.jpg" 
+                 alt="Brands" class="img-fluid"/>
+        </div>
+        <h5 class="fw-bold">Marcas</h5>
+    </a>
+</div> -->
+
+<!-- Círculo con imagen: Top Rated -->
+<!-- <div class="col-6 col-md-4 col-lg-2 text-center category-item">
+    <a href="/categoria/top-rated" class="text-decoration-none">
+        <div class="circle-image rounded-circle overflow-hidden d-inline-block mb-3 zoom-effect">
+            <img src="https://tdsportswear.com/wp-content/uploads/2025/01/d52-1170x658.png" 
+                 alt="Top Rated" class="img-fluid"/>
+        </div>
+        <h5 class="fw-bold">Mejor Valorados</h5>
+    </a>
+</div> -->
+
+<!-- Círculo con imagen: Best Sellers -->
+<!-- <div class="col-6 col-md-4 col-lg-2 text-center category-item">
+    <a href="/categoria/best-sellers" class="text-decoration-none">
+        <div class="circle-image rounded-circle overflow-hidden d-inline-block mb-3 zoom-effect">
+            <img src="https://www.neo2.com/wp-content/uploads/2025/02/new-balance-klutch-athletics-ropa-deportiva-06.jpg" 
+                 alt="Best Seller" class="img-fluid"/>
+        </div>
+        <h5 class="fw-bold">Más Vendidos</h5>
+    </a>
+</div> -->
+
+<!-- Círculo con imagen: Nuevos -->
+<!-- <div class="col-6 col-md-4 col-lg-2 text-center category-item">
+    <a href="/categoria/new" class="text-decoration-none">
+        <div class="circle-image rounded-circle overflow-hidden d-inline-block mb-3 zoom-effect">
+            <img src="https://img.freepik.com/free-photo/new-tag-black-background_23-2147981269.jpg" 
+                 alt="New" class="img-fluid"/>
+        </div>
+        <h5 class="fw-bold">Nuevos</h5>
+    </a>
+</div> -->
+</div>
+</div>
              
     </body>
 </html>

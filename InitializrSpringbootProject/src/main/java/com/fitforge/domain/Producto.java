@@ -1,79 +1,59 @@
 package com.fitforge.domain;
 
-import jakarta.persistence.*;
-import lombok.Data;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 @Data
 @Entity
 @Table(name = "producto")
 public class Producto implements Serializable {
-
+    
     private static final long serialVersionUID = 1L;
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_producto")
     private Long idProducto;
-    private String rutaImagen;
-   /* 
-    @Column(name = "id_categoria")
-    private Long idCategoria;
-*/
-    @Column(name = "descripcion")
+    
     private String descripcion;
-
-    @Column(name = "detalle")
     private String detalle;
-
-    @Column(name = "precio")
-    private Double precio; 
-
-    @Column(name = "imagen")
     private String imagen;
-
-    @Column(name = "activo")
-    private Boolean activo; 
-
+    private double precio;
+    private boolean activo;
+    
     @ManyToOne
     @JoinColumn(name = "id_categoria")
     private Categoria categoria;
-
+    
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductoColorTalla> productoColorTallas; 
-
-    // Constructor vacío
+    private List<ProductoColorTalla> coloresTallas = new ArrayList<>();
+    
     public Producto() {
     }
-    public Producto(String rutaImagen) {
-        this.rutaImagen = rutaImagen;
-    }
 
-    public Producto(String descripcion, String detalle, Double precio, String imagen, Boolean activo) {
+    public Producto(String descripcion, String detalle, String imagen, double precio, boolean activo) {
         this.descripcion = descripcion;
         this.detalle = detalle;
-        this.precio = precio;
         this.imagen = imagen;
+        this.precio = precio;
         this.activo = activo;
     }
     
-
-    public boolean isActivo() {
-        return activo;
-    }
-
-    public void setActivo(boolean activo) {
-        this.activo = activo;
-    }
-    public void setImagen(String imagen) {
-    this.imagen = imagen;
-}
+    // Método adicional para compatibilidad con AdminController
     public void setRutaImagen(String rutaImagen) {
-         this.rutaImagen = rutaImagen;
-     }
-    
-    public Long getIdProducto() {
-    return idProducto;
-}
+        this.imagen = rutaImagen;
+    }
 }

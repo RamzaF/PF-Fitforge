@@ -1,218 +1,186 @@
-/*
-    Created on : 7 mar 2025, 22:32:39
-    Author     : bryam
-*/
+/* --- Ajustes para los productos destacados del Home FitForge --- */
 
-/* Fuente personalizada */
-@font-face {
-    font-family: 'sourcesanspro';
-    font-style: normal;
-    font-weight: 400;
-    font-display: block;
-    src: url(https://design.penpot.app/fonts/sourcesanspro-regular.woff) format('woff');
+/* Estilo personalizado para las tarjetas de productos */
+.featured-products .card {
+    transition: transform 0.3s, box-shadow 0.3s;
+    border-radius: 12px; /* bordes suaves */
+    overflow: hidden; /* evitar que las imágenes sobresalgan */
 }
 
+.featured-products .card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 16px rgba(30, 30, 30, 0.2); /* sombra suave con el negro de la marca #1E1E1E */
+}
+
+/* Estilos para las imágenes */
+.featured-products .card-img-top {
+    height: 250px;
+    object-fit: cover; /* Imágenes cubren todo el espacio sin deformarse */
+}
+
+/* Colores principales FitForge en botones */
+.featured-products .btn-primary {
+    background-color: #2ECC71; /* verde esmeralda de la marca */
+    border: none;
+    transition: background-color 0.3s;
+}
+
+.featured-products .btn-primary:hover {
+    background-color: #1A9AAA; /* azul de la marca */
+}
+
+/* Color del precio */
+.featured-products .text-success {
+    color: #1A9AAA !important; /* precio con el azul de la marca */
+}
+
+/* Fondo general más limpio */
 body {
-    font-family: 'sourcesanspro', sans-serif;
-    background-color: #f8f9fa;
-    margin: 0;
-    padding: 0;
+    background-color: #FFFFFF; /* blanco de la marca */
 }
 
-.container {
-    margin-top: 20px;
+/* Títulos del home más destacados */
+.featured-products h2 {
+    color: #1E1E1E; /* negro elegante de la marca */
+    font-weight: 700;
+    margin-bottom: 30px;
 }
 
-h2 {
-    font-size: 24px;
-    font-weight: 400;
-    margin-bottom: 20px;
+/* Fondo claro y suave para sección categorías destacadas */
+.featured-categories {
+    background-color: #D9D9D9; /* gris platinum de la marca */
+    padding-top: 50px;
+    padding-bottom: 50px;
 }
 
-.form-control {
-    margin-bottom: 15px;
+.featured-categories h2 {
+    color: #1E1E1E; /* negro elegante de la marca */
+    font-weight: 700;
+    margin-bottom: 40px;
+}
+
+/* Estilos para página principal - FitForge */
+
+/* Estilos para tarjetas de productos */
+.product-card {
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.product-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(30, 30, 30, 0.1) !important; /* sombra con negro de la marca */
+}
+
+.product-img {
+    height: 250px;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-img {
+    transform: scale(1.05);
+}
+
+.product-btn {
+    transition: all 0.3s ease;
+    border-radius: 5px;
+    border-color: #2ECC71;
+    color: #2ECC71;
+}
+
+.product-btn:hover {
+    color: #FFFFFF;
+    background-color: #2ECC71;
+    border-color: #2ECC71;
+}
+
+/* Estilos para secciones */
+.hero-banner {
+    margin-bottom: 30px;
+}
+
+/* Estilos para títulos de sección */
+.section-title {
+    position: relative;
+    padding-bottom: 15px;
+    color: #1E1E1E;
+}
+
+.section-title:after {
+    content: "";
+    position: absolute;
+    width: 60px;
+    height: 3px;
+    background-color: #2ECC71; /* verde de la marca para la línea decorativa */
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Banner promocional */
+.promo-banner {
+    background: linear-gradient(135deg, #1A9AAA, #2ECC71); /* gradiente con colores de la marca */
+}
+
+/* Estilos para productos destacados */
+.featured-products {
+    background-color: #FFFFFF; /* fondo blanco de la marca */
+}
+
+.products-catalog {
+    background-color: #D9D9D9; /* fondo gris de la marca */
+}
+
+/* Mejora de componentes generales */
+.btn {
+    transition: all 0.2s ease;
+}
+
+.btn-outline-primary {
+    border-color: #2ECC71;
+    color: #2ECC71;
+}
+
+.btn-outline-primary:hover {
+    background-color: #2ECC71;
+    border-color: #2ECC71;
+    color: #FFFFFF;
 }
 
 .btn-primary {
-    width: 100%;
-    padding: 10px;
-    font-size: 18px;
+    background-color: #2ECC71;
+    border-color: #2ECC71;
 }
 
-.map-pinned {
-    position: relative;
-    width: 229px;
-    height: 24px;
-    margin-bottom: 20px;
+.btn-primary:hover {
+    background-color: #1A9AAA;
+    border-color: #1A9AAA;
 }
 
-.map-pinned svg {
-    position: absolute;
-    top: 0;
-    left: 0;
+.text-primary {
+    color: #2ECC71 !important;
 }
 
-.product-details-section {
-    margin-top: 20px;
+.shadow {
+    box-shadow: 0 .5rem 1rem rgba(30, 30, 30, 0.1) !important; /* sombras con negro de la marca */
 }
 
-.product-image {
-    background-color: #B1B2B5;
-    height: 561px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.shadow-sm {
+    box-shadow: 0 .125rem .25rem rgba(30, 30, 30, 0.075) !important; /* sombras con negro de la marca */
 }
 
-.product-details {
-    padding: 20px;
+/* Ajustes para el banner promocional */
+.promo-banner .btn-light {
+    background-color: #FFFFFF;
+    color: #1A9AAA;
+    border-color: #FFFFFF;
 }
 
-.product-title, .product-price {
-    font-size: 24px;
-    font-weight: 400;
-    margin-bottom: 20px;
+.promo-banner .btn-light:hover {
+    background-color: #D9D9D9;
+    color: #1E1E1E;
+    border-color: #D9D9D9;
 }
 
-.product-color h2, .product-size h2, .product-quantity h2 {
-    font-size: 24px;
-    font-weight: 400;
-    margin-bottom: 10px;
-}
-
-.color-options, .size-options, .quantity-control {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.color-option {
-    width: 35px; 
-    height: 35px; 
-    border-radius: 50%;
-    border: 1px solid #ccc; 
-    cursor: pointer;
-    transition: transform 0.2s; 
-}
-
-.color-option:hover {
-    transform: scale(1.1); 
-}
-
-.color-option.white { background-color: #ffffff; }
-.color-option.green { background-color: green; }
-.color-option.black { background-color: #000000; }
-.color-option.blue { background-color: blue; }
-.color-option.red { background-color: red; }
-.color-option.no-color { background-color: gray; } /* Para casos sin color */
-
-/* Estilos para opciones de talla dinámicas */
-.size-option {
-    width: 35px; 
-    height: 35px;
-    background-color: #B1B2B5;
-    border: 1px solid #ccc;
-    border-radius: 5px; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.2s;
-}
-
-.size-option:hover {
-    background-color: #999; 
-}
-
-.quantity-btn {
-    width: 35px;
-    height: 35px;
-    background-color: #B1B2B5;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
-.quantity-input {
-    width: 50px;
-    text-align: center;
-}
-
-.add-to-cart {
-    width: 100%;
-    padding: 10px;
-    font-size: 18px;
-}
-
-.icon-small {
-    width: 24px;
-    height: 24px;
-}
-
-.tienda-productos-section {
-    padding: 20px;
-}
-
-.filter-icon {
-    vertical-align: middle;
-}
-
-/* Estilos para badges de colores en la tienda */
-.badge.rounded-circle {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: inline-block;
-    margin: 0 5px; /* Espaciado entre badges */
-    border: 1px solid #ccc; /* Borde sutil */
-}
-
-
-.card-title {
-    font-size: 24px;
-    font-weight: 400;
-    margin-bottom: 10px;
-}
-
-.card-footer .btn {
-    font-size: 18px;
-    padding: 5px 10px;
-}
-
-.info-contacto h5 {
-    font-size: 18px;
-    font-weight: 400;
-    margin-bottom: 10px;
-}
-
-.info-contacto p {
-    font-size: 16px;
-    margin-bottom: 20px;
-}
-
-.text-node {
-    background-clip: text !important;
-    -webkit-background-clip: text !important;
-}
-
-.rectangle {
-    background: #B1B2B5;
-    border-radius: 0px;
-}
-
-.text-content {
-    color: rgba(140, 140, 140, 1);
-    font-size: 24px;
-    line-height: 1.2;
-    text-align: left;
-}
-
-.text-content-black {
-    color: rgba(0, 0, 0, 1);
-    font-size: 24px;
-    line-height: 1.2;
-    text-align: left;
-}
