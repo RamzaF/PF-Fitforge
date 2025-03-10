@@ -15,12 +15,12 @@
             </div>
         </section>
         
-        <!-- Catálogo de productos con nuevo diseño -->
-        <section class="products-catalog py-5 bg-light">
+        <!-- Catálogo de productos -->
+        <section class="products-catalog py-5">
             <div class="container">
                 <h2 class="text-center mb-5 fw-bold section-title">Nuestra Colección</h2>
                 <div class="row g-4">
-                    <!-- Tarjeta de producto mejorada -->
+                    <!-- Tarjeta de producto-->
                     <div class="col-md-4 mb-4" th:each="producto : ${productos}">
                         <div class="card h-100 border-0 shadow product-card">
                             <div class="overflow-hidden">
@@ -47,15 +47,26 @@
             </div>
         </section>
         
+        <!-- Call to Action Banner -->
+        <div th:replace="~{Home/fragmentos :: cta-banner}"></div>
+        
         <!-- Productos destacados -->
-        <section class="featured-products py-5">
+        <!-- <section class="featured-products py-5">
             <div class="container">
                 <h2 class="text-center mb-5 fw-bold section-title">Productos destacados</h2>
                 <div th:replace="~{Home/fragmentos :: image-section}"></div>
             </div>
+        </section> -->
+        
+        <!-- Sección de marcas  -->
+        <section class="brands-section py-5">
+            <div class="container">
+                <h2 class="text-center mb-5 fw-bold section-title">Nuestras Marcas</h2>
+                <div th:replace="~{Home/fragmentos :: brands-section}"></div>
+            </div>
         </section>
         
-        <!-- Banner promocional mejorado -->
+        <!-- Banner promocional -->
         <section class="promo-banner py-5 text-white text-center">
             <div class="container py-4">
                 <h2 class="display-5 fw-bold mb-3">OBTÉN 20% DE DESCUENTO</h2>

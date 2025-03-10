@@ -1,67 +1,67 @@
-/* --- Ajustes para los productos destacados del Home FitForge --- */
+/* --- Mis ajustes para los productos destacados del Home FitForge --- */
 
-/* Estilo personalizado para las tarjetas de productos */
+/* Personalicé las tarjetas de productos con estas características */
 .featured-products .card {
     transition: transform 0.3s, box-shadow 0.3s;
-    border-radius: 12px; /* bordes suaves */
-    overflow: hidden; /* evitar que las imágenes sobresalgan */
+    border-radius: 12px; /* Agregué bordes suaves */
+    overflow: hidden; /* Evito que las imágenes sobresalgan */
 }
 
 .featured-products .card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 8px 16px rgba(30, 30, 30, 0.2); /* sombra suave con el negro de la marca #1E1E1E */
+    box-shadow: 0 8px 16px rgba(30, 30, 30, 0.2); /* Añadí sombra suave con el negro de la marca #1E1E1E */
 }
 
-/* Estilos para las imágenes */
+/* Mis estilos para las imágenes de productos */
 .featured-products .card-img-top {
     height: 250px;
-    object-fit: cover; /* Imágenes cubren todo el espacio sin deformarse */
+    object-fit: cover; /* Hago que las imágenes cubran todo el espacio sin deformarse */
 }
 
-/* Colores principales FitForge en botones */
+/* Apliqué los colores principales de FitForge en botones */
 .featured-products .btn-primary {
-    background-color: #2ECC71; /* verde esmeralda de la marca */
+    background-color: #2ECC71; /* Verde esmeralda de nuestra marca */
     border: none;
     transition: background-color 0.3s;
 }
 
 .featured-products .btn-primary:hover {
-    background-color: #1A9AAA; /* azul de la marca */
+    background-color: #1A9AAA; /* Azul de nuestra marca */
 }
 
-/* Color del precio */
+/* Personalicé el color del precio */
 .featured-products .text-success {
-    color: #1A9AAA !important; /* precio con el azul de la marca */
+    color: #1A9AAA !important; /* Precio con el azul de nuestra marca */
 }
 
-/* Fondo general más limpio */
+/* Fondo limpio para toda la página */
 body {
-    background-color: #FFFFFF; /* blanco de la marca */
+    background-color: #FFFFFF; /* Blanco de nuestra marca */
 }
 
-/* Títulos del home más destacados */
+/* Destaqué los títulos del home */
 .featured-products h2 {
-    color: #1E1E1E; /* negro elegante de la marca */
+    color: #1E1E1E; /* Negro elegante de nuestra marca */
     font-weight: 700;
     margin-bottom: 30px;
 }
 
-/* Fondo claro y suave para sección categorías destacadas */
+/* Añadí un fondo suave para la sección de categorías destacadas */
 .featured-categories {
-    background-color: #D9D9D9; /* gris platinum de la marca */
+    background-color: #D9D9D9; /* Gris platinum de nuestra marca */
     padding-top: 50px;
     padding-bottom: 50px;
 }
 
 .featured-categories h2 {
-    color: #1E1E1E; /* negro elegante de la marca */
+    color: #1E1E1E; /* Negro elegante de nuestra marca */
     font-weight: 700;
     margin-bottom: 40px;
 }
 
-/* Estilos para página principal - FitForge */
+/* --- Mis estilos para la página principal de FitForge --- */
 
-/* Estilos para tarjetas de productos */
+/* Personalicé las tarjetas de productos */
 .product-card {
     transition: all 0.3s ease;
     border-radius: 10px;
@@ -70,7 +70,7 @@ body {
 
 .product-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 10px 20px rgba(30, 30, 30, 0.1) !important; /* sombra con negro de la marca */
+    box-shadow: 0 10px 20px rgba(30, 30, 30, 0.1) !important; /* Sombra con negro de nuestra marca */
 }
 
 .product-img {
@@ -96,12 +96,12 @@ body {
     border-color: #2ECC71;
 }
 
-/* Estilos para secciones */
+/* Mejoré el espaciado para secciones */
 .hero-banner {
     margin-bottom: 30px;
 }
 
-/* Estilos para títulos de sección */
+/* Personalicé los títulos de sección */
 .section-title {
     position: relative;
     padding-bottom: 15px;
@@ -113,27 +113,27 @@ body {
     position: absolute;
     width: 60px;
     height: 3px;
-    background-color: #2ECC71; /* verde de la marca para la línea decorativa */
+    background-color: #2ECC71; /* Añadí una línea decorativa verde de nuestra marca */
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
 }
 
-/* Banner promocional */
+/* Creé un banner promocional con gradiente */
 .promo-banner {
-    background: linear-gradient(135deg, #1A9AAA, #2ECC71); /* gradiente con colores de la marca */
+    background: linear-gradient(135deg, #1A9AAA, #2ECC71); /* Usé un gradiente con colores de nuestra marca */
 }
 
-/* Estilos para productos destacados */
+/* Definí los fondos para secciones de productos */
 .featured-products {
-    background-color: #FFFFFF; /* fondo blanco de la marca */
+    background-color: #FFFFFF; /* Fondo blanco de nuestra marca */
 }
 
 .products-catalog {
-    background-color: #D9D9D9; /* fondo gris de la marca */
+    background-color: #D9D9D9; /* Fondo gris de nuestra marca */
 }
 
-/* Mejora de componentes generales */
+/* Mejoré los componentes generales */
 .btn {
     transition: all 0.2s ease;
 }
@@ -164,14 +164,14 @@ body {
 }
 
 .shadow {
-    box-shadow: 0 .5rem 1rem rgba(30, 30, 30, 0.1) !important; /* sombras con negro de la marca */
+    box-shadow: 0 .5rem 1rem rgba(30, 30, 30, 0.1) !important; /* Usé sombras con negro de nuestra marca */
 }
 
 .shadow-sm {
-    box-shadow: 0 .125rem .25rem rgba(30, 30, 30, 0.075) !important; /* sombras con negro de la marca */
+    box-shadow: 0 .125rem .25rem rgba(30, 30, 30, 0.075) !important; /* Sombras suaves con negro de nuestra marca */
 }
 
-/* Ajustes para el banner promocional */
+/* Ajusté el banner promocional */
 .promo-banner .btn-light {
     background-color: #FFFFFF;
     color: #1A9AAA;
@@ -182,5 +182,233 @@ body {
     background-color: #D9D9D9;
     color: #1E1E1E;
     border-color: #D9D9D9;
+}
+
+/* --- Mis estilos adicionales para fragmentos --- */
+
+/* === Hero section === */
+.hero-bg {
+    position: relative;
+    height: 100%;
+}
+
+/* Aumenté el tamaño del hero y mejoré su centrado */
+.hero-section {
+    min-height: 65vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+}
+
+.hero-content {
+    z-index: 2;
+    width: 100%;
+    text-align: center;
+}
+
+.py-hero {
+    padding-top: 80px;
+    padding-bottom: 80px;
+    width: 100%;
+}
+
+.overlay-dark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(30, 30, 30, 0.4);
+    z-index: 1;
+}
+
+.hero-bg img {
+    position: relative;
+    z-index: 0;
+}
+
+/* Creé animaciones para el hero */
+.fade-in {
+    animation: fadeIn 1.5s ease-in-out;
+}
+
+.slide-up {
+    animation: slideUp 1s ease-in-out 0.5s both;
+}
+
+.slide-up-delay {
+    animation: slideUp 1s ease-in-out 0.8s both;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* === Personalicé los botones con colores de nuestra marca === */
+.btn-accent {
+    background-color: #2ECC71;
+    color: #FFFFFF;
+    border: none;
+}
+
+.btn-accent:hover {
+    background-color: #1A9AAA;
+    color: #FFFFFF;
+}
+
+.btn-light-accent {
+    background-color: #FFFFFF;
+    color: #1A9AAA;
+    border-color: #FFFFFF;
+}
+
+.btn-light-accent:hover {
+    background-color: #D9D9D9;
+    color: #1E1E1E;
+    border-color: #D9D9D9;
+}
+
+.btn-brand-primary {
+    background-color: #2ECC71;
+    color: #FFFFFF;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-brand-primary:hover {
+    background-color: #1A9AAA;
+    color: #FFFFFF;
+}
+
+/* === Personalicé el CTA Banner === */
+.cta-banner {
+    background: linear-gradient(135deg, #1A9AAA, #2ECC71);
+    color: #FFFFFF;
+}
+
+/* === Diseñé la sección de marcas === */
+.brands-section {
+    background-color: #FFFFFF;
+    padding: 50px 0;
+}
+
+.brand-logo {
+    height: 180px;
+    width: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto; /* Centré horizontalmente */
+    padding: 15px;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    filter: grayscale(100%);
+}
+
+.brand-logo:hover {
+    opacity: 1;
+    filter: grayscale(0%);
+    transform: scale(1.1);
+}
+
+.brand-logo img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain; /* Mantuve la proporción correcta */
+}
+
+.brands-container {
+    padding: 30px 0;
+}
+
+/* === Mis estilos para la plantilla principal === */
+
+/* Definí estilos generales */
+body {
+    font-family: 'Montserrat', sans-serif;
+    color: #1E1E1E;
+}
+
+/* Personalicé la barra superior */
+.top-header {
+    font-size: 0.85rem;
+    background-color: #1E1E1E !important;
+}
+
+.top-header a:hover {
+    color: #2ECC71 !important;
+}
+
+/* Creé la navegación con fondo negro */
+.navbar {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    background-color: #1E1E1E !important;
+}
+
+.navbar-nav .nav-link {
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    padding-left: 1rem;
+    padding-right: 1rem;
+    transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+    color: #2ECC71;
+}
+
+.nav-btn-primary {
+    background-color: #2ECC71;
+    color: #FFFFFF;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.nav-btn-primary:hover {
+    background-color: #1A9AAA;
+    color: #FFFFFF;
+}
+
+/* Mejoré los menús desplegables */
+.dropdown-item:active {
+    background-color: #2ECC71;
+}
+
+/* Personalicé el footer */
+footer {
+    background-color: #1E1E1E !important;
+}
+
+footer h5, footer h6 {
+    color: #2ECC71;
+}
+
+footer a:hover {
+    color: #2ECC71 !important;
+}
+
+footer .border-secondary {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Ajusté los botones outline */
+.btn-outline-dark:hover {
+    background-color: #1E1E1E;
+    border-color: #1E1E1E;
 }
 
