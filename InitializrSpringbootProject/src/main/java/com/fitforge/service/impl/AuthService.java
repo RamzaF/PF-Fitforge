@@ -1,14 +1,15 @@
-package com.fitforge.service;
+package com.fitforge.service.impl;
 
-import com.fitforge.model.User;
-import com.fitforge.repository.UserRepository;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import com.fitforge.model.User;
+import com.fitforge.repository.UserRepository;
 
 @Service
 public class AuthService {
