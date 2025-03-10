@@ -1,14 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 
 package com.fitforge.service.impl;
 
-/**
- *
- * @author ktrejos
- */
+
 
 import com.fitforge.dao.ProductoDao;
 import com.fitforge.domain.Producto;

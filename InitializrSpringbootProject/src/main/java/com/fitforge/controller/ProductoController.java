@@ -30,8 +30,8 @@ public class ProductoController {
 
     @GetMapping("/productos")
     public String listado(Model model) {
-        var lista = productoService.getProductos(false);
-        var categoria = categoriaService.getCategoria(false);
+        var lista = productoService.listarProductos(); // Cambiado de getProductos(false)
+        var categoria = categoriaService.getCategoria(false); // Asumiendo que este método existe
         model.addAttribute("productos", lista);
         model.addAttribute("categoria", categoria);
         model.addAttribute("totalProductos", lista.size());
@@ -42,14 +42,14 @@ public class ProductoController {
     @GetMapping("/detalles/{id}")
     public String detallesProducto(@PathVariable("id") Long id, Model model) {
         // Buscar el producto por su ID
-        Producto producto = productoService.getProductoById(id);
+        Producto producto = productoService.obtenerProductoPorId(id); // Cambiado de getProductoById(id)
 
         if (producto != null) {
             // Agregar el producto al modelo para que esté disponible en la vista
             model.addAttribute("producto", producto);
             return "/productos/detalles"; // Nombre de la vista de detalles
         } else {
-            // Si el producto no existe, redirigir a una página de error o a la lista de productos
+            // Si el producto no existe, redirigir a la lista de productos
             return "redirect:/productos/productos";
         }
     }

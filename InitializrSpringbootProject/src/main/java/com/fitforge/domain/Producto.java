@@ -1,14 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package com.fitforge.domain;
-
-/**
- *
- * @author ktrejos
- */
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -39,9 +29,11 @@ public class Producto implements Serializable {
 
     private Boolean activo;
 
+    // Constructor vacío
     public Producto() {
     }
 
+    // Constructor con parámetros
     public Producto(Long idCategoria, String descripcion, String detalle, Double precio, Integer existencias, String rutaImagen, Boolean activo) {
         this.idCategoria = idCategoria;
         this.descripcion = descripcion;
@@ -49,6 +41,72 @@ public class Producto implements Serializable {
         this.precio = precio;
         this.existencias = existencias;
         this.rutaImagen = rutaImagen;
+        this.activo = activo;
+    }
+
+    // Métodos getter y setter para todos los campos
+
+    public Long getIdProducto() {
+        return idProducto;
+    }
+
+    public void setIdProducto(Long idProducto) {
+        this.idProducto = idProducto;
+    }
+
+    public Long getIdCategoria() {
+        return idCategoria;
+    }
+
+    public void setIdCategoria(Long idCategoria) {
+        this.idCategoria = idCategoria;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public String getDetalle() {
+        return detalle;
+    }
+
+    public void setDetalle(String detalle) {
+        this.detalle = detalle;
+    }
+
+    public Double getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(Double precio) {
+        this.precio = precio;
+    }
+
+    public Integer getExistencias() {
+        return existencias;
+    }
+
+    public void setExistencias(Integer existencias) {
+        this.existencias = existencias;
+    }
+
+    public String getRutaImagen() {
+        return rutaImagen;
+    }
+
+    public void setRutaImagen(String rutaImagen) {
+        this.rutaImagen = rutaImagen;
+    }
+
+    public Boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(Boolean activo) {
         this.activo = activo;
     }
 }
