@@ -1,7 +1,8 @@
-
-
 package com.fitforge.dao;
-
+/**
+ *
+ * @author bryam
+ */
 import com.fitforge.domain.Producto;
 import org.springframework.data.jpa.repository.JpaRepository;
 

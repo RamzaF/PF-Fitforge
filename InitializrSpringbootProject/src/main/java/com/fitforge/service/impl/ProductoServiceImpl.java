@@ -1,8 +1,8 @@
-
 package com.fitforge.service.impl;
-
-
-
+/**
+ *
+ * @author bryam
+ */
 import com.fitforge.dao.ProductoDao;
 import com.fitforge.domain.Producto;
 import com.fitforge.service.ProductoService;
@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductoServiceImpl implements ProductoService {
@@ -22,7 +23,24 @@ public class ProductoServiceImpl implements ProductoService {
     public List<Producto> listarProductos() {
         return productoDao.findAll();
     }
+    @Override
+    @Transactional(readOnly = true)
+    public List<Producto> getProductos(boolean activos) {
+        var lista = productoDao.findAll();
+        if (activos) {
+            lista = lista.stream()
+                    .filter(Producto::isActivo) // Cambiado a isActivo
+                    .collect(Collectors.toList());
+        }
+        return lista;
+    }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Producto getProducto(Producto producto) {
+        return productoDao.findById(producto.getIdProducto()).orElse(null);
+    }
+    
     @Override
     @Transactional(readOnly = true)
     public Producto obtenerProductoPorId(Long id) {
@@ -39,5 +57,11 @@ public class ProductoServiceImpl implements ProductoService {
     @Transactional
     public void eliminarProducto(Long id) {
         productoDao.deleteById(id);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Producto getProductoById(Long id) {
+        return productoDao.findById(id).orElse(null);
     }
 }

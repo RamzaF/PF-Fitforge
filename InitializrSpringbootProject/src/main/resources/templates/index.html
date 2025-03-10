@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{layout/plantilla :: head}">
+        <title>Prueba</title>
+    </head>
+    <body>
+        <header th:replace="~{layout/plantilla :: header}"/>
+        <section>
+            <!-- Incluir el fragmento del trending -->
+            <div th:replace="~{Home/fragmentos :: trending}"></div>
+            <!-- Incluir el fragmento del hero section -->
+            <div th:replace="~{Home/fragmentos :: hero-section}"></div>
+            <!-- Incluir el fragmento de la sección de imágenes -->
+            <div th:replace="~{Home/fragmentos :: image-section}"></div>
+
+        </section>
+        <footer th:replace="~{layout/plantilla :: footer}"/>
+    </body>
+</html>

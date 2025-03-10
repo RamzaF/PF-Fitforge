@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+    <head th:replace="~{layout/plantilla :: head}">
+        <title>Fitforge</title>
+        <link rel="stylesheet" href="estilos.css">
+    </head>
+    <body>
+        <div th:fragment="formulario"> 
+       <!-- Formulario de contacto -->
+    <div class="container mt-5">
+        <h2 class="mb-4">Mantengase en contacto</h2>
+        <form th:action="@{/enviar}" method="post">
+            <!-- Campo Nombre -->
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese su nombre" required>
+            </div>
+            <!-- Campo Apellido -->
+            <div class="mb-3">
+                <label for="email" class="form-label">Apellido</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Ingrese su apellido" required>
+            </div>
+            <!-- Campo Email -->
+            <div class="mb-3">
+                <label for="email" class="form-label">Correo</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Ingrese su correo" required>
+            </div>
+
+            <!-- Campo Mensaje -->
+            <div class="mb-3">
+                <label for="mensaje" class="form-label">Mensaje</label>
+                <textarea class="form-control" id="mensaje" name="mensaje" rows="4" placeholder="Ingrese su correo" required></textarea>
+            </div>
+
+            <!-- Botón Enviar -->
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+    </div>
+        </div>
+        
+        
+        <div th:fragment="Contacto"> 
+              <!-- Información de contacto -->
+    <div class="container mt-5">
+        <h2 class="mb-4">Visita nuestra tienda</h2>
+
+        <!-- Mapa -->
+        <div class="map-pinned mb-4">
+            <svg width="229" height="24" viewBox="2334 1159 229 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- SVG content here -->
+            </svg>
+        </div>
+
+        <!-- Dirección -->
+        <div class="mb-3">
+            <h5>Dirección</h5>
+            <p th:text="${direccion}">xxxxxxxxxxxxxxxxx</p>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="mb-3">
+            <h5>Teléfono</h5>
+            <p th:text="${telefono}">xxxxxxxxxxxxxxxxx</p>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+            <h5>Correo</h5>
+            <p th:text="${email}">xxxxxxxxxxxxxxxxx</p>
+        </div>
+
+        <!-- Horario -->
+        <div class="mb-3">
+            <h5>Horario </h5>
+            <p th:text="${horario}">xxxxxxxxxxxxxxxxx</p>
+        </div>
+    </div>
+        </div>
+    </body>
+</html>
+

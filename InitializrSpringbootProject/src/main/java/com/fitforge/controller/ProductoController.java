@@ -37,7 +37,7 @@ public class ProductoController {
         model.addAttribute("totalProductos", lista.size());
         return "/productos/productos";
     }
-
+/*
     // Método para mostrar los detalles de un producto
     @GetMapping("/detalles/{id}")
     public String detallesProducto(@PathVariable("id") Long id, Model model) {
@@ -51,6 +51,28 @@ public class ProductoController {
         } else {
             // Si el producto no existe, redirigir a la lista de productos
             return "redirect:/productos/productos";
+        }
+    }
+*/
+    
+    @GetMapping("/tienda")
+    public String mostrarTienda(Model model) {
+        var lista = productoService.getProductos(false);
+        var categoria = categoriaService.getCategoria(false);
+        model.addAttribute("productos", lista);
+        model.addAttribute("categoria", categoria);
+        model.addAttribute("totalProductos", lista.size());
+        return "tienda/tienda";
+    }
+
+    @GetMapping("/{id}")
+    public String detallesProducto(@PathVariable("id") Long id, Model model) {
+        Producto producto = productoService.getProductoById(id);
+        if (producto != null) {
+            model.addAttribute("producto", producto);
+            return "productos/productos";
+        } else {
+            return "redirect:/productos/tienda";
         }
     }
 }

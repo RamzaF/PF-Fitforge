@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{layout/plantilla :: head}">
+        <title>Prueba</title>
+    </head>
+    <body>
+        <header th:replace="~{layout/plantilla :: header}"/>
+        <div class="container">
+            <div class="row">
+                <!-- Aside a la izquierda -->
+                <div class="col-md-4">
+                    <aside th:replace="~{productos/fragmentos :: aside}"/>
+                </div>
+                <!-- Sección de detalles del producto a la derecha -->
+                <div class="col-md-8">
+                    <section th:replace="~{productos/fragmentos :: product-details}"/>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

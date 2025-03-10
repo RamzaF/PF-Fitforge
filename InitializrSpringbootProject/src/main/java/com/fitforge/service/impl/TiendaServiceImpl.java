@@ -1,20 +1,22 @@
 package com.fitforge.service.impl;
-
-import com.fitforge.dao.ProductoDao;
-import com.fitforge.domain.Producto;
-import com.fitforge.service.TiendaService;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 /**
  *
  * @author bryam
  */
+import com.fitforge.dao.ProductoDao;
+import com.fitforge.domain.Producto;
+import com.fitforge.service.TiendaService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
-public class TiendaServiceImpl implements TiendaService{
-@Autowired
+public class TiendaServiceImpl implements TiendaService {
+
+    @Autowired
     private ProductoDao productoDao;
 
     @Override
@@ -22,7 +24,9 @@ public class TiendaServiceImpl implements TiendaService{
     public List<Producto> getProducto(boolean activos) {
         var lista = productoDao.findAll();
         if (activos) {
-            lista.removeIf(e -> !e.isActivo());
+            lista = lista.stream()
+                    .filter(Producto::isActivo) // Cambiado a isActivo
+                    .collect(Collectors.toList());
         }
         return lista;
     }

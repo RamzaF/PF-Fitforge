@@ -86,7 +86,46 @@ h2 {
     margin-bottom: 20px;
 }
 
-.color-option, .size-option, .quantity-btn {
+.color-option {
+    width: 35px; 
+    height: 35px; 
+    border-radius: 50%;
+    border: 1px solid #ccc; 
+    cursor: pointer;
+    transition: transform 0.2s; 
+}
+
+.color-option:hover {
+    transform: scale(1.1); 
+}
+
+.color-option.white { background-color: #ffffff; }
+.color-option.green { background-color: green; }
+.color-option.black { background-color: #000000; }
+.color-option.blue { background-color: blue; }
+.color-option.red { background-color: red; }
+.color-option.no-color { background-color: gray; } /* Para casos sin color */
+
+/* Estilos para opciones de talla dinámicas */
+.size-option {
+    width: 35px; 
+    height: 35px;
+    background-color: #B1B2B5;
+    border: 1px solid #ccc;
+    border-radius: 5px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+.size-option:hover {
+    background-color: #999; 
+}
+
+.quantity-btn {
     width: 35px;
     height: 35px;
     background-color: #B1B2B5;
@@ -95,18 +134,6 @@ h2 {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-}
-
-.color-option.white {
-    background-color: #ffffff;
-}
-
-.color-option.pink {
-    background-color: #ffc0cb;
-}
-
-.color-option.black {
-    background-color: #000000;
 }
 
 .quantity-input {
@@ -133,10 +160,16 @@ h2 {
     vertical-align: middle;
 }
 
-.color-blue, .color-green, .color-red {
-    display: inline-block;
+/* Estilos para badges de colores en la tienda */
+.badge.rounded-circle {
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
+    display: inline-block;
+    margin: 0 5px; /* Espaciado entre badges */
+    border: 1px solid #ccc; /* Borde sutil */
 }
+
 
 .card-title {
     font-size: 24px;

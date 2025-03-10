@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+    <head th:replace="~{layout/plantilla :: head}">
+        <title>Fitforge</title>
+    </head>
+    <body>
+        <!-- Fragmento existente: product-details -->
+        <section th:fragment="product-details" class="product-details-section">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="product-image">
+                        <img src="#" alt="Product Image" class="img-fluid">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="product-details">
+                        <h1 class="product-title">Ribbed modal T-shirt</h1>
+                        <p class="product-price">$20.00</p>
+                        <div class="product-color">
+                            <h2>Color: White</h2>
+                            <div class="color-options">
+                                <button class="color-option white"></button>
+                                <button class="color-option pink"></button>
+                                <button class="color-option black"></button>
+                            </div>
+                        </div>
+                        <div class="product-size">
+                            <h2>Size: S</h2>
+                            <div class="size-options">
+                                <button class="size-option">S</button>
+                                <button class="size-option">M</button>
+                                <button class="size-option">L</button>
+                            </div>
+                        </div>
+                        <div class="product-quantity">
+                            <h2>Quantity</h2>
+                            <div class="quantity-control">
+                                <button class="quantity-btn">-</button>
+                                <input type="text" class="quantity-input" value="1">
+                                    <button class="quantity-btn">+</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section th:fragment="tienda-productos" class="tienda-productos-section py-4">
+    <!-- Banner de "New Arrival" -->
+    <div class="banner mb-4" style="background-image: url('https://www.shutterstock.com/shutterstock/videos/1111374139/thumb/7.jpg?ip=x480'); background-size: cover; background-position: center; height: 144px; max-width: 1241px; margin: 0 auto;">
+        <div class="d-flex justify-content-center align-items-center h-100">
+            <h1 class="display-5 text-white" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">Nuevos arribos</h1>
+        </div>
+    </div>
+
+    <!-- Botón de filtro -->
+    <div class="d-flex align-items-center mb-4">
+        <button class="btn btn-outline-secondary d-flex align-items-center">
+            <i class="bi bi-funnel me-2"></i>
+            <span>Filtro</span>
+        </button>
+    </div>
+
+    <!-- Lista de productos -->
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        <div th:each="producto : ${productos}" class="col">
+            <div class="card h-100">
+                <!-- Imagen del producto -->
+                <img th:src="@{${producto.imagen}}" alt="Producto" class="card-img-top"
+                     style="height: 300px; object-fit: cover;">
+                <div class="card-body text-center">
+                    <!-- Nombre del producto -->
+                    <h5 class="card-title" th:text="${producto.descripcion}">T shirt</h5>
+                    <!-- Opciones de color dinámicas -->
+                    <div class="d-flex justify-content-center gap-2 mt-2">
+                        <span th:each="pct : ${producto.productoColorTallas}"
+                              th:if="${pct.color != null}"
+                              class="badge rounded-circle"
+                              th:style="'width: 20px; height: 20px; background-color: ' + ${pct.color.nombreColor}">
+                        </span>
+                        <!-- Si no hay colores -->
+                        <span th:if="${#lists.isEmpty(producto.productoColorTallas)}" 
+                              class="text-muted">Sin colores</span>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <a th:href="@{/productos/{id}(id=${producto.idProducto})}" class="btn btn-primary">Ver Detalles</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+    </body>
+</html>
