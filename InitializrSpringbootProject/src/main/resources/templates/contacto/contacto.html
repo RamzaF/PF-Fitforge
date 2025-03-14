@@ -2,20 +2,22 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
     <head th:replace="~{layout/plantilla :: head}">
-        <title>Prueba</title>
+        <title>Contacto - FitForge</title>
     </head>
     <body>
+        <!-- Header -->
         <header th:replace="~{layout/plantilla :: header}"/>
-        <section>
-           <!-- Imagen de fondo con overlay para mejor contraste -->
-            <div class="position-absolute top-0 start-0 w-100 h-50 hero-bg">
-                <div class="overlay-dark"></div>
-                <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80" 
-                     alt="Background" class="w-100 h-100 object-fit-cover">
+        
+        <!-- Hero Section -->
+        <section class="position-relative hero-section">
+            <!-- Imagen de fondo con overlay para mejor contraste -->
+            <div class="hero-bg position-absolute top-0 start-0 w-100" style="min-height: 50vh;">
+                <div class="overlay-dark position-absolute top-0 start-0 w-100 h-100"></div>
+                <img th:src="@{/uploads/Banner.PNG}" alt="Background" class="w-100 h-100 object-fit-cover position-absolute top-0 start-0">
             </div>
-            <!-- Hero con animación y colores de marca  -->
-            <div class="position-relative hero-content d-flex align-items-center justify-content-center w-100">
-                <div class="container text-center text-white py-hero">
+            <!-- Hero con animación y colores de marca -->
+            <div class="position-relative hero-content d-flex align-items-center justify-content-center w-100" style="min-height: 50vh;">
+                <div class="container text-center text-white py-5">
                     <div class="row justify-content-center">
                         <div class="col-12 col-md-10 col-lg-8">
                             <h1 class="display-2 fw-bold mb-3 fade-in">FITFORGE</h1>
@@ -24,8 +26,25 @@
                     </div>
                 </div>
             </div>
-            <div th:replace="~{contacto/fragmentos :: contacto}"/>
         </section>
+
+        <!-- Sección de contacto y formulario alineados horizontalmente -->
+        <section class="py-5" style="background-color: #D9D9D9; min-height: 100%;">
+            <div class="container-fluid p-0" >
+                <div class="row g-0">
+                    <!-- Fragmento contacto (40% del ancho) con fondo gris -->
+                    <div class="col-md-5 col-lg-4" >
+                        <div th:replace="~{contacto/fragmentos :: contacto}"></div>
+                    </div>
+                    <!-- Fragmento contacto-formulario (60% del ancho) -->
+                    <div class="col-md-7 col-lg-8">
+                        <div th:replace="~{contacto/fragmentos :: contacto-formulario}"></div>
+                    </div>
+                </div>
+            </div>
+        </section> 
+
+        <!-- Footer -->
         <footer th:replace="~{layout/plantilla :: footer}"/>
     </body>
 </html>

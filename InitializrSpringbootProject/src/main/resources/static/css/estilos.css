@@ -18,7 +18,7 @@
     object-fit: cover; /* Hago que las imágenes cubran todo el espacio sin deformarse */
 }
 
-/* Apliqué los colores principales de FitForge en botones */
+/*  colores principales de FitForge en botones */
 .featured-products .btn-primary {
     background-color: #2ECC71; /* Verde esmeralda de nuestra marca */
     border: none;
@@ -29,7 +29,7 @@
     background-color: #1A9AAA; /* Azul de nuestra marca */
 }
 
-/* Personalicé el color del precio */
+/*  color del precio */
 .featured-products .text-success {
     color: #1A9AAA !important; /* Precio con el azul de nuestra marca */
 }
@@ -39,14 +39,14 @@ body {
     background-color: #FFFFFF; /* Blanco de nuestra marca */
 }
 
-/* Destaqué los títulos del home */
+/*  títulos del home */
 .featured-products h2 {
     color: #1E1E1E; /* Negro elegante de nuestra marca */
     font-weight: 700;
     margin-bottom: 30px;
 }
 
-/* Añadí un fondo suave para la sección de categorías destacadas */
+/* fondo suave para la sección de categorías destacadas */
 .featured-categories {
     background-color: #D9D9D9; /* Gris platinum de nuestra marca */
     padding-top: 50px;
@@ -61,7 +61,7 @@ body {
 
 /* --- Mis estilos para la página principal de FitForge --- */
 
-/* Personalicé las tarjetas de productos */
+/* tarjetas de productos */
 .product-card {
     transition: all 0.3s ease;
     border-radius: 10px;
@@ -96,12 +96,12 @@ body {
     border-color: #2ECC71;
 }
 
-/* Mejoré el espaciado para secciones */
+/*  espaciado para secciones */
 .hero-banner {
     margin-bottom: 30px;
 }
 
-/* Personalicé los títulos de sección */
+/*  títulos de sección */
 .section-title {
     position: relative;
     padding-bottom: 15px;
@@ -113,18 +113,18 @@ body {
     position: absolute;
     width: 60px;
     height: 3px;
-    background-color: #2ECC71; /* Añadí una línea decorativa verde de nuestra marca */
+    background-color: #2ECC71; /* línea decorativa verde de nuestra marca */
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
 }
 
-/* Creé un banner promocional con gradiente */
+/* banner promocional con gradiente */
 .promo-banner {
-    background: linear-gradient(135deg, #1A9AAA, #2ECC71); /* Usé un gradiente con colores de nuestra marca */
+    background: linear-gradient(135deg, #1A9AAA, #2ECC71); /*  gradiente con colores de nuestra marca */
 }
 
-/* Definí los fondos para secciones de productos */
+/*  fondos para secciones de productos */
 .featured-products {
     background-color: #FFFFFF; /* Fondo blanco de nuestra marca */
 }
@@ -133,7 +133,7 @@ body {
     background-color: #D9D9D9; /* Fondo gris de nuestra marca */
 }
 
-/* Mejoré los componentes generales */
+/*  componentes generales */
 .btn {
     transition: all 0.2s ease;
 }
@@ -164,14 +164,14 @@ body {
 }
 
 .shadow {
-    box-shadow: 0 .5rem 1rem rgba(30, 30, 30, 0.1) !important; /* Usé sombras con negro de nuestra marca */
+    box-shadow: 0 .5rem 1rem rgba(30, 30, 30, 0.1) !important; /*  sombras con negro de nuestra marca */
 }
 
 .shadow-sm {
     box-shadow: 0 .125rem .25rem rgba(30, 30, 30, 0.075) !important; /* Sombras suaves con negro de nuestra marca */
 }
 
-/* Ajusté el banner promocional */
+/*  banner promocional */
 .promo-banner .btn-light {
     background-color: #FFFFFF;
     color: #1A9AAA;
@@ -192,7 +192,7 @@ body {
     height: 100%;
 }
 
-/* Aumenté el tamaño del hero y mejoré su centrado */
+/* Aumento del tamaño del hero y su centrado */
 .hero-section {
     min-height: 65vh;
     display: flex;
@@ -229,7 +229,7 @@ body {
     z-index: 0;
 }
 
-/* Creé animaciones para el hero */
+/*  animaciones para el hero */
 .fade-in {
     animation: fadeIn 1.5s ease-in-out;
 }
@@ -258,7 +258,7 @@ body {
     }
 }
 
-/* === Personalicé los botones con colores de nuestra marca === */
+/* === Personalizacion ee los botones con colores de nuestra marca === */
 .btn-accent {
     background-color: #2ECC71;
     color: #FFFFFF;
@@ -294,13 +294,13 @@ body {
     color: #FFFFFF;
 }
 
-/* === Personalicé el CTA Banner === */
+/* ===  CTA Banner === */
 .cta-banner {
     background: linear-gradient(135deg, #1A9AAA, #2ECC71);
     color: #FFFFFF;
 }
 
-/* === Diseñé la sección de marcas === */
+/* ===  sección de marcas === */
 .brands-section {
     background-color: #FFFFFF;
     padding: 50px 0;
@@ -312,7 +312,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto; /* Centré horizontalmente */
+    margin: 0 auto; /* Centra horizontalmente */
     padding: 15px;
     opacity: 0.8;
     transition: all 0.3s ease;
@@ -328,7 +328,7 @@ body {
 .brand-logo img {
     max-height: 100%;
     max-width: 100%;
-    object-fit: contain; /* Mantuve la proporción correcta */
+    object-fit: contain; /*  proporción correcta */
 }
 
 .brands-container {
@@ -343,7 +343,7 @@ body {
     color: #1E1E1E;
 }
 
-/* Personalicé la barra superior */
+/*  barra superior */
 .top-header {
     font-size: 0.85rem;
     background-color: #1E1E1E !important;
@@ -353,7 +353,7 @@ body {
     color: #2ECC71 !important;
 }
 
-/* Creé la navegación con fondo negro */
+/* navegación con fondo negro */
 .navbar {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     background-color: #1E1E1E !important;
@@ -384,7 +384,7 @@ body {
     color: #FFFFFF;
 }
 
-/* Mejoré los menús desplegables */
+/*  menús desplegables */
 .dropdown-item:active {
     background-color: #2ECC71;
 }
@@ -406,9 +406,51 @@ footer .border-secondary {
     border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Ajusté los botones outline */
+/*  botones outline */
 .btn-outline-dark:hover {
     background-color: #1E1E1E;
     border-color: #1E1E1E;
+}
+
+/* === Estilos para el Hero Section Responsive === */
+.hero-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-bg {
+    z-index: 0;
+}
+
+.hero-bg img {
+    object-fit: cover;
+}
+
+.overlay-dark {
+    background: rgba(0, 0, 0, 0.5); /* Oscurece la imagen para mejor contraste */
+    z-index: 1;
+}
+
+.hero-content {
+    z-index: 2;
+    min-height: 50vh; /* Altura mínima basada en el viewport */
+}
+
+@media (max-width: 768px) {
+    .hero-content {
+        min-height: 40vh; /*  para pantallas pequeñas */
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-content {
+        min-height: 30vh; /*  para pantallas muy pequeñas */
+    }
+    .hero-content h1 {
+        font-size: 2rem; /* Reducir tamaño del título en móviles */
+    }
+    .hero-content p {
+        font-size: 1.2rem; /* tamaño del texto en móviles */
+    }
 }
 
