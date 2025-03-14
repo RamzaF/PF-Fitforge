@@ -13,13 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
  * @author bryam
  */
 @Service
-public class ContactoServiceImpl implements ContactoService{
-@Autowired
+public class ContactoServiceImpl implements ContactoService {
+
+    @Autowired
     private ContactoDao contactoDao;
 
     @Override
     @Transactional(readOnly = true)
-    public List<Contacto> getContacto(boolean activos) {
+    public List<Contacto> getContactos(boolean activos) {
         var lista = contactoDao.findAll();
         if (activos) {
             lista.removeIf(e -> !e.isActivo());
@@ -35,13 +36,13 @@ public class ContactoServiceImpl implements ContactoService{
 
     @Override
     @Transactional
-    public void save(Contacto contacto) {
+    public void saveContacto(Contacto contacto) {
         contactoDao.save(contacto);
     }
 
     @Override
     @Transactional
-    public void delete(Contacto contacto) {
+    public void deleteContacto(Contacto contacto) {
         contactoDao.delete(contacto);
     }
 }

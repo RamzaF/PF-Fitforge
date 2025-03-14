@@ -6,6 +6,30 @@
     </head>
     <body>
         <header th:replace="~{layout/plantilla :: header}"/>
-        <section th:replace="~{contacto/contacto :: contacto}"/>
+        <section>
+           <!-- Imagen de fondo con overlay para mejor contraste -->
+            <div class="position-absolute top-0 start-0 w-100 h-50 hero-bg">
+                <div class="overlay-dark"></div>
+                <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80" 
+                     alt="Background" class="w-100 h-100 object-fit-cover">
+            </div>
+            <!-- Hero con animación y colores de marca  -->
+            <div class="position-relative hero-content d-flex align-items-center justify-content-center w-100">
+                <div class="container text-center text-white py-hero">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-10 col-lg-8">
+                            <h1 class="display-2 fw-bold mb-3 fade-in">FITFORGE</h1>
+                            <p class="lead fs-3 mb-4 slide-up">Forjando tu estilo Fitness</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:replace="~{contacto/fragmentos :: contacto}"/>
+        </section>
+        <footer th:replace="~{layout/plantilla :: footer}"/>
     </body>
 </html>
+
+
+            
+  
