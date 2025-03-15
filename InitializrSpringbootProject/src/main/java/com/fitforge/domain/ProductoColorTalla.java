@@ -1,5 +1,8 @@
 package com.fitforge.domain;
-
+/**
+ *
+ * @author bryam
+ */
 import java.io.Serializable;
 
 import jakarta.persistence.Column;
@@ -28,14 +31,20 @@ public class ProductoColorTalla implements Serializable {
     @JoinColumn(name = "id_producto")
     private Producto producto;
     
-    private String color;
-    private String talla;
+    @ManyToOne
+    @JoinColumn(name = "id_color")
+    private Color color;
+    
+    @ManyToOne
+    @JoinColumn(name = "id_talla")
+    private Talla talla;
+    
     private int existencias;
     
     public ProductoColorTalla() {
     }
     
-    public ProductoColorTalla(Producto producto, String color, String talla, int existencias) {
+    public ProductoColorTalla(Producto producto, Color color, Talla talla, int existencias) {
         this.producto = producto;
         this.color = color;
         this.talla = talla;

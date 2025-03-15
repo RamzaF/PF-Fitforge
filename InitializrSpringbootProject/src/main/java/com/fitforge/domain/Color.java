@@ -1,5 +1,8 @@
 package com.fitforge.domain;
-
+/**
+ *
+ * @author bryam
+ */
 import jakarta.persistence.*;
 import lombok.Data;
 import java.io.Serializable;
@@ -14,7 +17,7 @@ public class Color implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_color")
-    private long idColor;
+    private Long idColor;
 
     @Column(name = "nombre_color")
     private String nombreColor;

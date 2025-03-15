@@ -28,51 +28,24 @@ public class ProductoController {
         this.categoriaService = categoriaService;
     }
 
-    @GetMapping("/productos")
+    @GetMapping
     public String listado(Model model) {
-        var lista = productoService.listarProductos(); // Cambiado de getProductos(false)
-        var categoria = categoriaService.getCategoria(false); // Asumiendo que este método existe
+        var lista = productoService.listarProductos(); 
+        var categoria = categoriaService.getCategoria(false); 
         model.addAttribute("productos", lista);
         model.addAttribute("categoria", categoria);
         model.addAttribute("totalProductos", lista.size());
-        return "/productos/productos";
-    }
-/*
-    // Método para mostrar los detalles de un producto
-    @GetMapping("/detalles/{id}")
-    public String detallesProducto(@PathVariable("id") Long id, Model model) {
-        // Buscar el producto por su ID
-        Producto producto = productoService.obtenerProductoPorId(id); // Cambiado de getProductoById(id)
-
-        if (producto != null) {
-            // Agregar el producto al modelo para que esté disponible en la vista
-            model.addAttribute("producto", producto);
-            return "/productos/detalles"; // Nombre de la vista de detalles
-        } else {
-            // Si el producto no existe, redirigir a la lista de productos
-            return "redirect:/productos/productos";
-        }
-    }
-*/
-    
-    @GetMapping("/tienda")
-    public String mostrarTienda(Model model) {
-        var lista = productoService.getProductos(false);
-        var categoria = categoriaService.getCategoria(false);
-        model.addAttribute("productos", lista);
-        model.addAttribute("categoria", categoria);
-        model.addAttribute("totalProductos", lista.size());
-        return "tienda/tienda";
+        return "/productos/productos"; 
     }
 
     @GetMapping("/{id}")
     public String detallesProducto(@PathVariable("id") Long id, Model model) {
         Producto producto = productoService.getProductoById(id);
         if (producto != null) {
-            model.addAttribute("producto", producto);
-            return "productos/productos";
+            model.addAttribute("producto", producto); 
+            return "productos/productos"; 
         } else {
-            return "redirect:/productos/tienda";
+            return "redirect:/tienda/listado"; 
         }
     }
 }

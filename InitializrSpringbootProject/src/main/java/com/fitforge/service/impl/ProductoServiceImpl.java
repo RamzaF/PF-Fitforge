@@ -1,8 +1,5 @@
 package com.fitforge.service.impl;
-/**
- *
- * @author bryam
- */
+
 import com.fitforge.dao.ProductoDao;
 import com.fitforge.domain.Producto;
 import com.fitforge.service.ProductoService;
@@ -23,13 +20,14 @@ public class ProductoServiceImpl implements ProductoService {
     public List<Producto> listarProductos() {
         return productoDao.findAll();
     }
+
     @Override
     @Transactional(readOnly = true)
     public List<Producto> getProductos(boolean activos) {
         var lista = productoDao.findAll();
         if (activos) {
             lista = lista.stream()
-                    .filter(Producto::isActivo) // Cambiado a isActivo
+                    .filter(Producto::isActivo)
                     .collect(Collectors.toList());
         }
         return lista;
@@ -62,6 +60,7 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     @Transactional(readOnly = true)
     public Producto getProductoById(Long id) {
-        return productoDao.findById(id).orElse(null);
+        return productoDao.findById(id)
+                .orElse(null); 
     }
 }

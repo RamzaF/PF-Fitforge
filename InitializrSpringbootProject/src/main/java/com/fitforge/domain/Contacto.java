@@ -1,5 +1,8 @@
 package com.fitforge.domain;
-
+/**
+ *
+ * @author bryam
+ */
 import lombok.Data;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;

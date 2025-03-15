@@ -1,5 +1,8 @@
 package com.fitforge.domain;
-
+/**
+ *
+ * @author bryam
+ */
 import jakarta.persistence.*;
 import lombok.Data;
 import java.io.Serializable;
@@ -14,7 +17,7 @@ public class Talla implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_talla")
-    private long idTalla;
+    private Long idTalla;
     
     @Column(name = "nombre_talla")
     private String nombreTalla;

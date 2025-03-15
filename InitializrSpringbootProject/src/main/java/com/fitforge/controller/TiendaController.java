@@ -30,23 +30,13 @@ public class TiendaController {
         this.categoriaService = categoriaService;
     }
 
-    @GetMapping("/productos")
-    public String listado(Model model) {
+    @GetMapping({"/", "/listado", "/productos"})
+    public String mostrarListado(Model model) {
         List<Producto> lista = tiendaService.getProducto(false);
         List<Categoria> categoria = categoriaService.getCategoria(false);
         model.addAttribute("productos", lista != null ? lista : Collections.emptyList());
         model.addAttribute("categoria", categoria != null ? categoria : Collections.emptyList());
         model.addAttribute("totalProductos", lista != null ? lista.size() : 0);
-        return "tienda/tienda";
-    }
-
-    @GetMapping("/tienda")
-    public String mostrarTienda(Model model) {
-        List<Producto> lista = tiendaService.getProducto(false);
-        List<Categoria> categoria = categoriaService.getCategoria(false);
-        model.addAttribute("productos", lista != null ? lista : Collections.emptyList());
-        model.addAttribute("categoria", categoria != null ? categoria : Collections.emptyList());
-        model.addAttribute("totalProductos", lista != null ? lista.size() : 0);
-        return "tienda/tienda";
+        return "tienda/listado";
     }
 }

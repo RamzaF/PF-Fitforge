@@ -243,22 +243,26 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideUp {
-    from { 
+    from {
         opacity: 0;
         transform: translateY(30px);
     }
-    to { 
+    to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-/* === Personalizacion ee los botones con colores de nuestra marca === */
+/* === Personalizacion de los botones con colores de nuestra marca === */
 .btn-accent {
     background-color: #2ECC71;
     color: #FFFFFF;
@@ -454,3 +458,336 @@ footer .border-secondary {
     }
 }
 
+/* === Estilos para la página de detalles del producto (productos.html) === */
+
+/* Estilos para las imágenes a la izquierda */
+.aside-images .shape.rect {
+    background-color: #B1B2B5; /* Gris claro para imágenes placeholder */
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    width: 80px;
+    height: 100px;
+}
+
+.aside-images .shape.rect:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(30, 30, 30, 0.2); /* Sombra suave con negro de marca */
+}
+
+/* Estilos generales para los elementos de texto */
+.shape.text {
+    font-family: 'Montserrat', sans-serif;
+    color: #1E1E1E;
+}
+
+/* Estilo para el nombre del producto */
+.shape.text.ribbed-mod-b3f6cf956020 .text-node span {
+    font-size: 24px;
+    font-weight: 400;
+}
+
+/* Estilo para el precio */
+.shape.text.c-2000-b3f6e500402a .text-node span {
+    font-size: 24px;
+    font-weight: 400;
+}
+
+/* Estilo para la sección de color */
+.shape.text.color-whi-b3f6f9787855 .text-node span {
+    font-size: 24px;
+    font-weight: 400;
+}
+
+/* Botones de color */
+.shape.rect.rectangle-b3f7fbee2325 {
+    width: 50px;
+    height: 20px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.shape.rect.rectangle-b3f7fbee2325:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(30, 30, 30, 0.2);
+}
+
+/* Estilo para la sección de talla */
+.shape.text.size-s-b3f81046830e .text-node span {
+    font-size: 24px;
+    font-weight: 400;
+}
+
+/* Botones de talla */
+.shape.rect.rectangle-b3f81046830f {
+    width: 50px;
+    height: 20px;
+    background-color: #B1B2B5;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    color: #1E1E1E;
+    font-size: 14px;
+    text-align: center;
+    line-height: 20px;
+}
+
+.shape.rect.rectangle-b3f81046830f:hover {
+    transform: scale(1.05);
+    background-color: #2ECC71; /* Verde de marca al hacer hover */
+    color: #FFFFFF;
+}
+
+/* Estilo para la sección de cantidad */
+.shape.text.quantity-b3f8391c7019 .text-node span {
+    font-size: 24px;
+    font-weight: 400;
+}
+
+/* Botones de cantidad (- y +) */
+.shape.text.b3f8391c701b,
+.shape.text.b3f8391c701f {
+    font-size: 18px;
+    cursor: pointer;
+    padding: 5px 10px;
+    background-color: #B1B2B5;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.shape.text.b3f8391c701b:hover,
+.shape.text.b3f8391c701f:hover {
+    background-color: #2ECC71; /* Verde de marca al hacer hover */
+    color: #FFFFFF;
+}
+
+/* Valor de cantidad */
+.shape.text.c-1-b3f8391c701d {
+    font-size: 14px;
+    width: 30px;
+    text-align: center;
+    background-color: #B1B2B5;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+/* Botón de "Add to cart" */
+.shape.path.rectangle-b3f8391c701c {
+    background-color: #B1B2B5;
+    padding: 10px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.shape.path.rectangle-b3f8391c701c:hover {
+    background-color: #2ECC71; /* Verde de marca al hacer hover */
+}
+
+.shape.text.add-to-car-b3f8b49df76d .text-node span {
+    font-size: 24px;
+    font-weight: 400;
+}
+
+/* Añadir margen entre botones de color y talla */
+.mr-2 {
+    margin-right: 0.5rem !important;
+}
+
+/* Ajuste responsive */
+@media (max-width: 768px) {
+    .aside-images .shape.rect {
+        width: 60px;
+        height: 80px;
+    }
+    .shape.text.ribbed-mod-b3f6cf956020 .text-node span,
+    .shape.text.c-2000-b3f6e500402a .text-node span,
+    .shape.text.color-whi-b3f6f9787855 .text-node span,
+    .shape.text.size-s-b3f81046830e .text-node span,
+    .shape.text.quantity-b3f8391c7019 .text-node span,
+    .shape.text.add-to-car-b3f8b49df76d .text-node span {
+        font-size: 18px;
+    }
+    .shape.rect.rectangle-b3f7fbee2325,
+    .shape.rect.rectangle-b3f81046830f {
+        width: 40px;
+        height: 18px;
+        font-size: 12px;
+        line-height: 18px;
+    }
+}
+
+/* Estilos para la página de detalles del producto */
+.product-details-section .container {
+    max-width: 800px;
+}
+
+.product-details-section h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1E1E1E;
+    margin-bottom: 10px;
+}
+
+.product-price {
+    font-size: 24px;
+    font-weight: 400;
+    color: #1A9AAA;
+    margin-bottom: 20px;
+}
+
+.product-color h2, .product-size h2, .product-quantity h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1E1E1E;
+    margin-bottom: 10px;
+}
+
+.color-options, .size-options {
+    margin-bottom: 20px;
+}
+
+.color-option, .size-option {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    margin-right: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.color-option {
+    background-color: gray; /* Valor por defecto */
+}
+
+.color-option:hover, .size-option:hover {
+    transform: scale(1.1);
+}
+
+.size-option {
+    background-color: #B1B2B5;
+    color: #1E1E1E;
+    font-size: 14px;
+    text-align: center;
+    line-height: 26px;
+    border: none;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.quantity-btn {
+    width: 40px;
+    height: 40px;
+    background-color: #B1B2B5;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.quantity-btn:hover {
+    background-color: #2ECC71;
+    color: #FFFFFF;
+}
+
+.quantity-input {
+    width: 60px;
+    height: 40px;
+    text-align: center;
+    border: 1px solid #B1B2B5;
+    border-radius: 5px;
+    margin: 0 10px;
+    font-size: 16px;
+}
+
+.add-to-cart {
+    background-color: #2ECC71;
+    border: none;
+    padding: 10px 20px;
+    font-size: 18px;
+    color: #FFFFFF;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.add-to-cart:hover {
+    background-color: #1A9AAA;
+}
+
+/* Ajuste responsive */
+@media (max-width: 768px) {
+    .aside-images img {
+        width: 150px;
+        height: 200px;
+    }
+    .product-details-section h1 {
+        font-size: 20px;
+    }
+    .product-price, .product-color h2, .product-size h2, .product-quantity h2 {
+        font-size: 18px;
+    }
+    .color-option, .size-option {
+        width: 25px;
+        height: 25px;
+    }
+    .quantity-btn, .quantity-input {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
+    /* === Estilos para la sección de productos en la página de la tienda === */
+    .product-card-tienda {
+        transition: all 0.3s ease;
+        border-radius: 10px;
+        overflow: hidden;
+        background-color: #FFFFFF; /* Fondo blanco de la marca */
+    }
+
+    .product-card-tienda:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(30, 30, 30, 0.1) !important; /* Sombra con negro de la marca */
+    }
+
+    .product-img-tienda {
+        height: 350px; /* Imagen más grande */
+        object-fit: cover;
+        transition: transform 0.5s ease;
+        width: 100%;
+    }
+
+    .product-card-tienda:hover .product-img-tienda {
+        transform: scale(1.05); /* Efecto de zoom al hacer hover */
+    }
+
+    .product-price-tienda {
+        color: #1A9AAA !important; /* Azul de la marca para el precio */
+    }
+
+    .product-btn-tienda {
+        transition: all 0.3s ease;
+        border-radius: 5px;
+        border-color: #2ECC71; /* Verde de la marca */
+        color: #2ECC71;
+    }
+
+    .product-btn-tienda:hover {
+        color: #FFFFFF;
+        background-color: #2ECC71;
+        border-color: #2ECC71;
+    }
+
+    /* Reducir aún más el espaciado entre las tarjetas */
+    .products-catalog .row.g-1 .col-12,
+    .products-catalog .row.g-1 .col-md-6,
+    .products-catalog .row.g-1 .col-lg-4 {
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+}
