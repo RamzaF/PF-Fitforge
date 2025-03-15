@@ -3,76 +3,81 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head th:replace="~{layout/plantilla :: head}">
-    <title>Fitforge</title>
+    <title>FitForge</title>
 </head>
 <body>
     <div th:fragment="nosotros">
-        <div class="banner mb-4" style="background-image: url('/uploads/nosotros.jpg'); background-size: cover; background-position: center; height: 144px; max-width: 1241px; margin: 0 auto;">
-        <!-- Título "Sobre nosotros" superpuesto -->
-        <div class="d-flex justify-content-center align-items-center h-100">
-            <h1 class="display-5 text-white" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">Sobre Nosotros</h1>
-        </div>
-    </div>
-        
-        <div >
-        <!-- Nosotros somos Excelencia -->
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="text-content-black">Nosotros somos Excelencia</div>
-                    <div class="text-content">
-                        xxxxxxxxxxxxxxxxxxxxxxx<br>
-                        xxxxxx<br>
-                        xxxxxxxxxxxxxxxxxxxxxxx
+        <!-- Sección: Nosotros somos Excelencia -->
+        <section class="py-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 text-center">
+                        <h2 class="fw-bold mb-4 section-title">Nosotros somos Excelencia</h2>
+                        <p class="lead">
+                            En FitForge, nos apasiona el mundo del deporte y el fitness. Nos dedicamos a ofrecer ropa, accesorios y suplementos deportivos de la más alta calidad, diseñados para ayudarte a rendir al máximo y sentirte bien mientras lo haces.
+                        </p>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Formados en 2015 -->
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="text-content-black">Formados en 2015</div>
-                    <div class="text-content">
-                        xxxxxxxxxxxxxxxxxxxxxxx<br>
-                        xxxxxx<br>
-                        xxxxxxxxxxxxxxxxxxxxxxx
+        <!-- Sección: Formados en 2015 -->
+        <section class="py-5 bg-light">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 text-center">
+                        <h2 class="fw-bold mb-4 section-title">Formados en 2015</h2>
+                        <p class="lead">
+                            Desde nuestro inicio en 2015, hemos trabajado incansablemente para convertirnos en un aliado confiable para deportistas de todos los niveles. Nuestra experiencia nos permite combinar estilo, funcionalidad y calidad en cada producto que ofrecemos.
+                        </p>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Nuestra Misión -->
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="text-content-black">Nuestra Misión</div>
-                    <div class="text-content">
-                        xxxxxxxxxxxxxxxxxxxxxxx<br>
-                        xxxxxx<br>
-                        xxxxxxxxxxxxxxxxxxxxxxx
+        <!-- Sección: Nuestra Misión -->
+        <section class="py-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 text-center">
+                        <h2 class="fw-bold mb-4 section-title">Nuestra Misión</h2>
+                        <p class="lead">
+                            Nuestra misión es inspirar y equipar a la comunidad deportiva con productos excepcionales que impulsen el rendimiento y reflejen un estilo de vida activo. Nos esforzamos por ofrecer ropa, accesorios y suplementos que combinen innovación, comodidad y diseño, apoyando a cada persona en su camino hacia sus metas fitness.
+                        </p>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Rectangles -->
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="rectangle" style="width: 288px; height: 256px;"></div>
-                </div>
-                <div class="col-md-4">
-                    <div class="rectangle" style="width: 288px; height: 256px;"></div>
-                </div>
-                <div class="col-md-4">
-                    <div class="rectangle" style="width: 288px; height: 256px;"></div>
+        <!-- Sección: Nuestros Valores (reemplaza los rectángulos) -->
+        <section class="py-5 bg-light">
+            <div class="container">
+                <h2 class="text-center fw-bold mb-5 section-title">Nuestros Valores</h2>
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="mb-4">
+                            <i class="bi bi-star-fill" style="font-size: 2rem; color: #2ECC71;"></i>
+                        </div>
+                        <h4 class="fw-bold">Calidad</h4>
+                        <p>Productos duraderos y confiables para tu día a día.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-4">
+                            <i class="bi bi-heart-fill" style="font-size: 2rem; color: #2ECC71;"></i>
+                        </div>
+                        <h4 class="fw-bold">Pasión</h4>
+                        <p>Vivimos el deporte y lo compartimos contigo.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-4">
+                            <i class="bi bi-rocket-takeoff-fill" style="font-size: 2rem; color: #2ECC71;"></i>
+                        </div>
+                        <h4 class="fw-bold">Rendimiento</h4>
+                        <p>Te ayudamos a superar tus límites.</p>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
-    </div>
-    
 </body>
 </html>

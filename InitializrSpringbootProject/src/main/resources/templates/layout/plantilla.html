@@ -32,7 +32,6 @@
                     </div>
                 </div>
             </div>
-            
             <!-- Barra de navegación principal -->
             <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-2">
                 <div class="container">
@@ -95,6 +94,25 @@
                 </div>
             </nav>
         </header>
+        
+        <div th:fragment="Banner-p" class="position-relative hero-section">
+            <!-- Imagen de fondo con overlay para mejor contraste -->
+            <div class="hero-bg position-absolute top-0 start-0 w-100" style="min-height: 50vh;">
+                <div class="overlay-dark position-absolute top-0 start-0 w-100 h-100"></div>
+                <img th:src="@{/uploads/Banner.PNG}" alt="Background" class="w-100 h-100 object-fit-cover position-absolute top-0 start-0">
+            </div>
+            <!-- Hero con animación y colores de marca -->
+            <div class="position-relative hero-content d-flex align-items-center justify-content-center w-100" style="min-height: 50vh;">
+                <div class="container text-center text-white py-5">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-10 col-lg-8">
+                            <h1 class="display-2 fw-bold mb-3 fade-in">FITFORGE</h1>
+                            <p class="lead fs-3 mb-4 slide-up">Forjando tu estilo Fitness</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         
         <!-- Footer -->
         <footer th:fragment="footer" class="bg-dark text-white pt-5 pb-4">

@@ -2,10 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
     <head th:replace="~{layout/plantilla :: head}">
-        <title>Prueba</title>
+        <title>FitForge - Sobre Nosotros</title>
     </head>
     <body>
         <header th:replace="~{layout/plantilla :: header}"/>
+        <!-- Banner -->
+        <section th:replace="~{layout/plantilla :: Banner-p}"></section>
+        <!-- Contenido de "Nosotros" -->
         <section th:replace="~{nosotros/fragmentos :: nosotros}"></section>
         <footer th:replace="~{layout/plantilla :: footer}"/>       
     </body>

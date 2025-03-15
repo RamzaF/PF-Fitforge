@@ -107,6 +107,12 @@ body {
     padding-bottom: 15px;
     color: #1E1E1E;
 }
+.bg-light {
+    background-color: #f8f9fa;
+}
+.fw-bold {
+    font-weight: 700;
+}
 
 .section-title:after {
     content: "";

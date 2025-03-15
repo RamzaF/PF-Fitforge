@@ -10,22 +10,7 @@
         
         <!-- Hero Section -->
         <section class="position-relative hero-section">
-            <!-- Imagen de fondo con overlay para mejor contraste -->
-            <div class="hero-bg position-absolute top-0 start-0 w-100" style="min-height: 50vh;">
-                <div class="overlay-dark position-absolute top-0 start-0 w-100 h-100"></div>
-                <img th:src="@{/uploads/Banner.PNG}" alt="Background" class="w-100 h-100 object-fit-cover position-absolute top-0 start-0">
-            </div>
-            <!-- Hero con animación y colores de marca -->
-            <div class="position-relative hero-content d-flex align-items-center justify-content-center w-100" style="min-height: 50vh;">
-                <div class="container text-center text-white py-5">
-                    <div class="row justify-content-center">
-                        <div class="col-12 col-md-10 col-lg-8">
-                            <h1 class="display-2 fw-bold mb-3 fade-in">FITFORGE</h1>
-                            <p class="lead fs-3 mb-4 slide-up">Forjando tu estilo Fitness</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div th:replace="~{layout/plantilla :: Banner-p}"/>
         </section>
 
         <!-- Sección de contacto y formulario alineados horizontalmente -->
