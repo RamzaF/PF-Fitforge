@@ -6,19 +6,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.fitforge.model.User; // Importa tu modelo User
-import com.fitforge.service.impl.AuthService;
+import com.fitforge.model.User;
+import com.fitforge.service.AuthService;
 
 @Controller
 public class AuthController {
 
     @Autowired
     private AuthService authService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder; // Inyecta el PasswordEncoder de SecurityConfig
 
     @GetMapping("/login")
     public String login() {
@@ -27,27 +23,33 @@ public class AuthController {
 
     @GetMapping("/register")
     public String registerForm(Model model) {
-        model.addAttribute("user", new User()); // Añade el objeto User al modelo para el formulario
+        model.addAttribute("user", new User());
         return "register";
     }
 
     @PostMapping("/register")
     public String register(@RequestParam String username, 
-                         @RequestParam String email, 
-                         @RequestParam String password, 
-                         @RequestParam String confirmPassword, 
-                         Model model) {
+                          @RequestParam String nombre, 
+                          @RequestParam String correo, 
+                          @RequestParam String password, 
+                          @RequestParam String confirmPassword, 
+                          Model model) {
         if (!password.equals(confirmPassword)) {
             model.addAttribute("error", "Las contraseñas no coinciden");
             return "register";
         }
         User user = new User();
         user.setUsername(username);
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password)); // Codifica la contraseña
-        user.setActive(true); // Activa el usuario por defecto
-        authService.register(user.getEmail(), user.getPassword()); // Usa el método existente del servicio (ajústalo si necesitas pasar el User completo)
-        return "redirect:/login";
+        user.setNombre(nombre);
+        user.setCorreo(correo);
+        user.setPassword(password);
+        try {
+            authService.register(user);
+            return "redirect:/login";
+        } catch (RuntimeException e) {
+            model.addAttribute("error", e.getMessage());
+            return "register";
+        }
     }
 
     @GetMapping("/forgot-password")
@@ -57,21 +59,9 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     public String forgotPassword(@RequestParam String email, Model model) {
-        authService.sendResetEmail(email);
+        //authService.sendResetEmail(email);
         model.addAttribute("message", "Se ha enviado un enlace para restablecer tu contraseña.");
         return "forgot-password";
-    }
-
-    @GetMapping("/reset-password")
-    public String resetPasswordForm(@RequestParam String token, Model model) {
-        model.addAttribute("token", token);
-        return "reset-password";
-    }
-
-    @PostMapping("/reset-password")
-    public String resetPassword(@RequestParam String token, @RequestParam String password) {
-        authService.resetPassword(token, password);
-        return "redirect:/login";
     }
 
     @GetMapping("/home")

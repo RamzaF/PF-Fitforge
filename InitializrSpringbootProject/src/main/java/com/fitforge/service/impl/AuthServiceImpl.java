@@ -1,18 +1,17 @@
 package com.fitforge.service.impl;
 
 import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import com.fitforge.model.User;
 import com.fitforge.repository.UserRepository;
+import com.fitforge.service.AuthService;
 
 @Service
-public class AuthService {
+public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private UserRepository userRepository;
@@ -20,20 +19,34 @@ public class AuthService {
     @Autowired
     private JavaMailSender mailSender;
 
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    public User register(String email, String password) {
-        if (userRepository.findByEmail(email) != null) {
-            throw new RuntimeException("El email ya está registrado.");
+    @Override
+    public void register(String email, String password) {
+        if (userRepository.findByCorreo(email) != null) {
+            throw new RuntimeException("El correo ya está registrado.");
         }
         User user = new User();
-        user.setEmail(email);
+        user.setCorreo(email);
         user.setPassword(passwordEncoder.encode(password));
-        return userRepository.save(user);
+        user.setActivo(true);
+        userRepository.save(user);
     }
 
+    @Override
+    public void register(User user) {
+        if (userRepository.findByCorreo(user.getCorreo()) != null) {
+            throw new RuntimeException("El correo ya está registrado.");
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setActivo(true);
+        userRepository.save(user);
+    }
+
+    @Override
     public void sendResetEmail(String email) {
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByCorreo(email);
         if (user == null) {
             throw new RuntimeException("Usuario no encontrado.");
         }
@@ -49,6 +62,9 @@ public class AuthService {
         mailSender.send(message);
     }
 
+    // Comentamos este método porque no lo necesitas ahora
+    /*
+    @Override
     public void resetPassword(String token, String newPassword) {
         User user = userRepository.findByResetToken(token);
         if (user == null) {
@@ -58,4 +74,5 @@ public class AuthService {
         user.setResetToken(null);
         userRepository.save(user);
     }
+    */
 }
