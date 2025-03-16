@@ -42,10 +42,16 @@ public class ProductoController {
     public String detallesProducto(@PathVariable("id") Long id, Model model) {
         Producto producto = productoService.getProductoById(id);
         if (producto != null) {
-            model.addAttribute("producto", producto); 
-            return "productos/productos"; 
-        } else {
-            return "redirect:/tienda/listado"; 
-        }
+        boolean isTallaUnica = producto.getProductoColorTallas().stream()
+                .anyMatch(pct -> pct.getExistencias() > 0 && pct.getTalla() == null);
+        boolean hasAvailableTallas = producto.getProductoColorTallas().stream()
+                .anyMatch(pct -> pct.getTalla() != null && pct.getExistencias() > 0);
+        model.addAttribute("producto", producto);
+        model.addAttribute("isTallaUnica", isTallaUnica);
+        model.addAttribute("hasAvailableTallas", hasAvailableTallas);
+        return "productos/productos";
+    } else {
+        return "redirect:/tienda/listado";
     }
+}
 }

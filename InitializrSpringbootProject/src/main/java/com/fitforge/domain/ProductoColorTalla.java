@@ -39,7 +39,8 @@ public class ProductoColorTalla implements Serializable {
     @JoinColumn(name = "id_talla")
     private Talla talla;
     
-    private int existencias;
+    @Column(name = "existencias")
+    private Integer existencias;
     
     public ProductoColorTalla() {
     }

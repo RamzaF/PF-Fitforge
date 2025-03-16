@@ -9,7 +9,7 @@
 
 .featured-products .card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 8px 16px rgba(30, 30, 30, 0.2); /* Añadí sombra suave con el negro de la marca #1E1E1E */
+    box-shadow: 0 8px 16px rgba(30, 30, 30, 0.2); /*  sombra suave con el negro de la marca #1E1E1E */
 }
 
 /* Mis estilos para las imágenes de productos */
@@ -810,4 +810,19 @@ footer .border-secondary {
     color: #1E1E1E;
     line-height: 1.6;
     }
+    .badge.bg-info {
+    font-size: 2rem;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+    }
+    .badge-talla-unica {
+    background-color: #2ECC71; /* Verde esmeralda */
+    color: #ffffff; 
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+    border-radius: 0.25rem; 
+}
 }
