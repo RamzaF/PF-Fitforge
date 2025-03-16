@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.hibernate.Hibernate;
 
 @Service
 public class ProductoServiceImpl implements ProductoService {
@@ -61,6 +62,11 @@ public class ProductoServiceImpl implements ProductoService {
     @Transactional(readOnly = true)
     public Producto getProductoById(Long id) {
         return productoDao.findById(id)
-                .orElse(null); 
+                .map(producto -> {
+                    // Forzar la carga de la categoría
+                    Hibernate.initialize(producto.getCategoria());
+                    return producto;
+                })
+                .orElse(null);
     }
 }

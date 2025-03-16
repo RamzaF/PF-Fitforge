@@ -27,32 +27,41 @@
                 <div class="col-md-6">
                     <h1 th:text="${producto.descripcion}">Camiseta Gymshark</h1>
                     <p class="product-price" th:text="'$ ' + ${#numbers.formatDecimal(producto.precio, 0, 'COMMA', 2, 'POINT')}">$25,000.00</p>
-                    
-                    <!-- Colores dinámicos -->
-                    <div class="product-color">
-                        <h2>Colores disponibles:</h2>
-                        <div class="color-options">
-                            <button th:each="pct : ${producto.productoColorTallas}"
-                                    th:class="'color-option ' + ${pct.color != null ? pct.color.nombreColor.toLowerCase() : 'no-color'}"
-                                    th:style="'background-color: ' + ${pct.color != null ? pct.color.nombreColor : 'gray'}"
-                                    th:title="${pct.color != null ? pct.color.nombreColor : 'Sin color'}">
-                            </button>
-                            <!-- Si no hay colores -->
-                            <span th:if="${#lists.isEmpty(producto.productoColorTallas)}" class="text-muted">Sin colores disponibles</span>
+
+                    <!-- Validación para categoría "Suplementos" (idCategoria = 2) -->
+                    <div th:if="${producto.categoria != null and producto.categoria.idCategoria != 2}">
+                        <!-- Colores dinámicos -->
+                        <div class="product-color">
+                            <h2>Colores disponibles:</h2>
+                            <div class="color-options">
+                                <button th:each="pct : ${producto.productoColorTallas}"
+                                        th:class="'color-option ' + ${pct.color != null ? pct.color.nombreColor.toLowerCase() : 'no-color'}"
+                                        th:style="'background-color: ' + ${pct.color != null ? pct.color.nombreColor : 'gray'}"
+                                        th:title="${pct.color != null ? pct.color.nombreColor : 'Sin color'}">
+                                </button>
+                                <!-- Si no hay colores -->
+                                <span th:if="${#lists.isEmpty(producto.productoColorTallas)}" class="text-muted">Sin colores disponibles</span>
+                            </div>
+                        </div>
+
+                        <!-- Tallas dinámicas -->
+                        <div class="product-size">
+                            <h2>Tallas disponibles:</h2>
+                            <div class="size-options">
+                                <button th:each="pct : ${producto.productoColorTallas}"
+                                        th:class="'size-option ' + ${pct.talla != null ? pct.talla.nombreTalla : ''}"
+                                        th:text="${pct.talla != null ? pct.talla.nombreTalla : ''}">
+                                </button>
+                                <!-- Si no hay tallas -->
+                                <span th:if="${#lists.isEmpty(producto.productoColorTallas)}" class="text-muted">Sin tallas disponibles</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Tallas dinámicas -->
-                    <div class="product-size">
-                        <h2>Tallas disponibles:</h2>
-                        <div class="size-options">
-                            <button th:each="pct : ${producto.productoColorTallas}"
-                                    th:class="'size-option ' + ${pct.talla != null ? pct.talla.nombreTalla : ''}"
-                                    th:text="${pct.talla != null ? pct.talla.nombreTalla : ''}">
-                            </button>
-                            <!-- Si no hay tallas -->
-                            <span th:if="${#lists.isEmpty(producto.productoColorTallas)}" class="text-muted">Sin tallas disponibles</span>
-                        </div>
+                    <!-- Mostrar descripción si es categoría "Suplementos" o categoría nula -->
+                    <div th:if="${producto.categoria == null or producto.categoria.idCategoria == 2}" class="product-description">
+                        <h2>Descripción</h2>
+                        <p class="lead" th:text="${producto.detalle}">Descripción del producto...</p>
                     </div>
 
                     <!-- Cantidad -->
