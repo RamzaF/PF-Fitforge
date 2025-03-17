@@ -45,14 +45,14 @@ public class AdminController {
         var productos = productoService.listarProductos();
         model.addAttribute("productos", productos);
         model.addAttribute("totalProductos", productos.size());
-        return "listado";
+        return "admin/productos/listado";
     }
 
     @GetMapping("/nuevo")
     public String nuevoProducto(Model model) {
         model.addAttribute("producto", new Producto());
         model.addAttribute("categorias", categoriaService.getCategoria(true)); // Agregar lista de categorías
-        return "formulario";
+        return "admin/productos/formulario";
     }
 
     @PostMapping("/guardar")
@@ -77,7 +77,7 @@ public class AdminController {
         }
         model.addAttribute("producto", producto);
         model.addAttribute("categorias", categoriaService.getCategoria(true));
-        return "formulario";
+        return "admin/productos/formulario";
     }
 
     @GetMapping("/eliminar/{idProducto}")
