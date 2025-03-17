@@ -1,14 +1,15 @@
 package com.fitforge.service;
 
-import com.fitforge.domain.Categoria;
 import java.util.List;
+
+import com.fitforge.domain.Categoria;
 /**
  *
  * @author bryam
  */
 public interface CategoriaService {
 
-    public List<Categoria> getCategoria(boolean activos);
+    List<Categoria> getCategoria(boolean activos); 
     
     public Categoria getCategoria(Categoria categoria);
 

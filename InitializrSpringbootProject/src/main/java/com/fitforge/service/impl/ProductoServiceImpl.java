@@ -51,6 +51,9 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     @Transactional
     public void guardarProducto(Producto producto) {
+        if (producto.getExistencias() < 0) {
+            producto.setExistencias(0);  
+        }
         productoDao.save(producto);
     }
 

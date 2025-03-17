@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <!--
 Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
 Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
@@ -18,12 +19,15 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
         <a th:href="@{/admin/productos/nuevo}" class="btn btn-primary mb-3">Agregar Nuevo Producto</a>
         <table class="table table-striped">
             <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Descripción</th>
-                    <th>Precio</th>
-                    <th>Existencias</th>
-                    <th>Acciones</th>
+                <tr th:each="producto : ${productos}">
+                    <td th:text="${producto.idProducto}"></td>
+                    <td th:text="${producto.descripcion}"></td>
+                    <td th:text="${producto.precio}"></td>
+                    <td th:text="${producto.existencias}"></td>
+                    <td sec:authorize="hasRole('ADMIN')">
+                        <a th:href="@{/admin/productos/editar/{id}(id=${producto.idProducto})}" class="btn btn-warning btn-sm">Editar</a>
+                        <a th:href="@{/admin/productos/eliminar/{id}(id=${producto.idProducto})}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este producto?')">Eliminar</a>
+                    </td>
                 </tr>
             </thead>
             <tbody>

@@ -34,6 +34,7 @@ public class Producto implements Serializable {
     private String imagen;
     private double precio;
     private boolean activo;
+    private int existencias;
     
     @ManyToOne
     @JoinColumn(name = "id_categoria")

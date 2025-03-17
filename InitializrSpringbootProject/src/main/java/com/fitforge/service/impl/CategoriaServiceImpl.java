@@ -1,12 +1,15 @@
 package com.fitforge.service.impl;
 
-import com.fitforge.dao.CategoriaDao;
-import com.fitforge.domain.Categoria;
-import com.fitforge.service.CategoriaService;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.fitforge.dao.CategoriaDao;
+import com.fitforge.domain.Categoria;
+import com.fitforge.service.CategoriaService;
 
 @Service
 public class CategoriaServiceImpl implements CategoriaService {
@@ -19,7 +22,9 @@ public class CategoriaServiceImpl implements CategoriaService {
     public List<Categoria> getCategoria(boolean activos) {
         var lista = categoriaDao.findAll();
         if (activos) {
-            lista.removeIf(e -> !e.isActivo());
+            return lista.stream()
+                        .filter(Categoria::isActivo)
+                        .collect(Collectors.toList());
         }
         return lista;
     }

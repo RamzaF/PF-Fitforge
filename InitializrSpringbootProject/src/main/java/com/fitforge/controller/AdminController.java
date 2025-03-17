@@ -5,22 +5,30 @@
 
 package com.fitforge.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
 /**
  *
  * @author ktrejos
  */
 
 import com.fitforge.domain.Producto;
-import com.fitforge.service.ProductoService;
+import com.fitforge.service.CategoriaService;
 import com.fitforge.service.LocalStorageService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import com.fitforge.service.ProductoService;
 
 @Controller
 @RequestMapping("/admin/productos")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     @Autowired
@@ -28,6 +36,9 @@ public class AdminController {
 
     @Autowired
     private LocalStorageService localStorageService;
+
+    @Autowired
+    private CategoriaService categoriaService;
 
     @GetMapping
     public String listarProductos(Model model) {
@@ -40,6 +51,7 @@ public class AdminController {
     @GetMapping("/nuevo")
     public String nuevoProducto(Model model) {
         model.addAttribute("producto", new Producto());
+        model.addAttribute("categorias", categoriaService.getCategoria(true)); // Agregar lista de categorías
         return "admin/productos/formulario";
     }
 
@@ -64,6 +76,7 @@ public class AdminController {
             return "redirect:/admin/productos";
         }
         model.addAttribute("producto", producto);
+        model.addAttribute("categorias", categoriaService.getCategoria(true));
         return "admin/productos/formulario";
     }
 
