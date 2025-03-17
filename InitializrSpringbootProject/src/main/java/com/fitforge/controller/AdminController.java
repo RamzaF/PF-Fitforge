@@ -45,14 +45,14 @@ public class AdminController {
         var productos = productoService.listarProductos();
         model.addAttribute("productos", productos);
         model.addAttribute("totalProductos", productos.size());
-        return "admin/productos/listado";
+        return "listado";
     }
 
     @GetMapping("/nuevo")
     public String nuevoProducto(Model model) {
         model.addAttribute("producto", new Producto());
         model.addAttribute("categorias", categoriaService.getCategoria(true)); // Agregar lista de categorías
-        return "admin/productos/formulario";
+        return "formulario";
     }
 
     @PostMapping("/guardar")
@@ -66,7 +66,7 @@ public class AdminController {
             }
         }
         productoService.guardarProducto(producto);
-        return "redirect:/admin/productos";
+        return "redirect:/admin/productos"; //Por que estas rutas? 
     }
 
     @GetMapping("/editar/{idProducto}")
@@ -77,7 +77,7 @@ public class AdminController {
         }
         model.addAttribute("producto", producto);
         model.addAttribute("categorias", categoriaService.getCategoria(true));
-        return "admin/productos/formulario";
+        return "formulario";
     }
 
     @GetMapping("/eliminar/{idProducto}")
