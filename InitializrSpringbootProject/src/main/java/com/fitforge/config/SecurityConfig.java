@@ -15,22 +15,34 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/login", "/register", "/forgot-password").permitAll()
-                .requestMatchers("/css/**", "/js/**", "/img/**", "/webjars/**").permitAll()
-                .anyRequest().permitAll()
-            )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .defaultSuccessUrl("/", true) // Redirige a / (index)
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
-                .permitAll()
-            )
-            .csrf().disable();
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/login", "/register", "/forgot-password").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/img/**", "/webjars/**").permitAll()
+                        .anyRequest().permitAll())
+                // Login        
+                // .formLogin(form -> form
+                //         .loginPage("/login")
+                //         // .defaultSuccessUrl("/", true)  Redirige a / (index)
+                //         .defaultSuccessUrl("/?loginSuccess", true) // Agrega ?loginSuccess
+                //         .permitAll())
+
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .successHandler((request, response, authentication) -> {
+                            response.sendRedirect("/?loginSuccess=true");
+                        })
+                        .permitAll()
+)
+
+
+
+                // Logout        
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        // .logoutSuccessUrl("/")
+                        .logoutSuccessUrl("/login?logout") // Redirige al login
+                        .permitAll())
+                .csrf(csrf -> csrf.disable());
 
         return http.build();
     }

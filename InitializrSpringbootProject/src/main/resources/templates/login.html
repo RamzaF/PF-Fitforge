@@ -7,6 +7,10 @@
     <body>
         <!-- Header -->
         <header th:replace="~{layout/plantilla :: header}"/>
+
+        <div th:if="${param.loginSuccess != null}" class="alert alert-success text-center">
+            ¡Bienvenido, <span sec:authentication="name">Usuario</span>! Has iniciado sesión correctamente.
+        </div>
         
         <!-- Hero Section -->
         <section class="position-relative hero-section">
@@ -35,6 +39,8 @@
                     <div class="col-md-6 col-lg-5">
                         <div class="card shadow-sm p-4 bg-white rounded">
                             <h2 class="text-center fw-bold mb-4">Ingresa tus datos</h2>
+
+
                             <!-- Mensajes de error o logout -->
                             <div th:if="${param.error}" class="alert alert-danger text-center">
                                 Correo o contraseña incorrectos.
