@@ -57,4 +57,6 @@ public class Producto implements Serializable {
     public void setRutaImagen(String rutaImagen) {
         this.imagen = rutaImagen;
     }
+
+    
 }

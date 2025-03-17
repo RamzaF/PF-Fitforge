@@ -1,14 +1,18 @@
 package com.fitforge.service;
 
-import com.fitforge.domain.Producto;
 import java.util.List;
+
+import com.fitforge.domain.Producto;
 
 public interface ProductoService {
     List<Producto> listarProductos();
     List<Producto> getProductos(boolean activos); 
+    List<Producto> obtenerPorCategoria(String nombreCategoria);
     Producto getProducto(Producto producto);
     Producto obtenerProductoPorId(Long id);
     void guardarProducto(Producto producto);
     void eliminarProducto(Long id);
     Producto getProductoById(Long id); 
 }
+
+

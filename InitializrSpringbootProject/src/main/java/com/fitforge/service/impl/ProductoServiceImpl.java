@@ -1,14 +1,16 @@
 package com.fitforge.service.impl;
 
-import com.fitforge.dao.ProductoDao;
-import com.fitforge.domain.Producto;
-import com.fitforge.service.ProductoService;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hibernate.Hibernate;
+
+import com.fitforge.dao.ProductoDao;
+import com.fitforge.domain.Producto;
+import com.fitforge.service.ProductoService;
 
 @Service
 public class ProductoServiceImpl implements ProductoService {
@@ -69,4 +71,13 @@ public class ProductoServiceImpl implements ProductoService {
                 })
                 .orElse(null);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Producto> obtenerPorCategoria(String nombreCategoria) {
+        return productoDao.findByCategoria_Descripcion(nombreCategoria);
+    }
+    
+
+
 }

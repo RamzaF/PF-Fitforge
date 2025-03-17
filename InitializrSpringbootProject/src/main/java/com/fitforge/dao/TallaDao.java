@@ -10,3 +10,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TallaDao extends JpaRepository<Talla, Long> {
 }
+
+
