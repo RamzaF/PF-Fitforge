@@ -34,7 +34,6 @@ public class Producto implements Serializable {
     private String imagen;
     private double precio;
     private boolean activo;
-    private int existencias;
     
     @ManyToOne
     @JoinColumn(name = "id_categoria")
@@ -57,6 +56,18 @@ public class Producto implements Serializable {
     // Método adicional para compatibilidad con AdminController
     public void setRutaImagen(String rutaImagen) {
         this.imagen = rutaImagen;
+    }
+    
+    // Calculate total existencias from productoColorTallas
+    public int getExistencias() {
+        return productoColorTallas.stream()
+                .mapToInt(pct -> pct.getExistencias())
+                .sum();
+    }
+    
+    // No-op setter for compatibility
+    public void setExistencias(int existencias) {
+        // No-op as existencias is calculated from productoColorTallas
     }
 
     
