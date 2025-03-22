@@ -80,7 +80,4 @@ public class ProductoServiceImpl implements ProductoService {
     public List<Producto> obtenerPorCategoria(String nombreCategoria) {
         return productoDao.findByCategoria_Descripcion(nombreCategoria);
     }
-    
-
-
 }

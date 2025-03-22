@@ -28,7 +28,6 @@ public class CategoriaController {
         model.addAttribute("productos", productos);
         model.addAttribute("categoria", nombre);
         
-        return "categoria"; // Cargar la vista categoria.html
+        return "categoria/listado"; // Cargar la vista categoria/listado.html
     }
 }
-
