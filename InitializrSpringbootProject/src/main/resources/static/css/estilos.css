@@ -825,4 +825,78 @@ footer .border-secondary {
     display: inline-block;
     border-radius: 0.25rem; 
 }
+
+/* Estilos para el modal de filtros */
+.filter-modal {
+    background-color: #FFFFFF;
+    border: 1px solid #D9D9D9;
+    box-shadow: 0 10px 20px rgba(30, 30, 30, 0.1);
+    border-radius: 10px;
+}
+
+.filter-modal .modal-header {
+    background-color: #1E1E1E;
+    color: #FFFFFF;
+    border-bottom: none;
+}
+
+.filter-modal .modal-body {
+    padding: 20px;
+}
+
+.filter-modal .form-check {
+    margin-bottom: 10px;
+}
+
+.filter-checkbox {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #2ECC71;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-checkbox:checked {
+    background-color: #2ECC71;
+    border-color: #2ECC71;
+}
+
+.filter-checkbox:checked::after {
+    content: '\2713';
+    color: #FFFFFF;
+    font-size: 14px;
+    position: absolute;
+    top: 2px;
+    left: 5px;
+}
+
+.form-check-label {
+    color: #1E1E1E;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.form-check-label:hover {
+    color: #1A9AAA;
+}
+
+
+.search-bar input {
+    border-radius: 20px;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    transition: all 0.3s;
+}
+
+.search-bar input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.25rem rgba(var(--accent-rgb), 0.25);
+}
+
+.search-bar button {
+    border-radius: 20px;
+    padding: 10px 15px;
+}
 }

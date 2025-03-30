@@ -9,13 +9,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Collections;
 import java.util.List;
 
-/**
- * @author bryam
- */
 @Controller
 @RequestMapping("/tienda")
 public class TiendaController {
@@ -23,20 +21,56 @@ public class TiendaController {
     @Autowired
     private TiendaService tiendaService;
 
-    private final CategoriaService categoriaService;
-
     @Autowired
-    public TiendaController(CategoriaService categoriaService) {
-        this.categoriaService = categoriaService;
-    }
+    private CategoriaService categoriaService;
 
     @GetMapping({"/", "/listado", "/productos"})
     public String mostrarListado(Model model) {
         List<Producto> lista = tiendaService.getProducto(false);
-        List<Categoria> categoria = categoriaService.getCategoria(false);
+        List<Categoria> categorias = categoriaService.getCategoria(false);
         model.addAttribute("productos", lista != null ? lista : Collections.emptyList());
-        model.addAttribute("categoria", categoria != null ? categoria : Collections.emptyList());
+        model.addAttribute("categorias", categorias != null ? categorias : Collections.emptyList());
+        model.addAttribute("colores", tiendaService.getColores());
+        model.addAttribute("tallas", tiendaService.getTallas());
+        model.addAttribute("precioMin", tiendaService.getPrecioMinimo());
+        model.addAttribute("precioMax", tiendaService.getPrecioMaximo());
         model.addAttribute("totalProductos", lista != null ? lista.size() : 0);
         return "tienda/listado";
     }
+
+    @GetMapping("/filtrar")
+    public String filtrarProductos(
+            @RequestParam(value = "categorias", required = false) List<Long> categorias,
+            @RequestParam(value = "colores", required = false) List<Long> colores,
+            @RequestParam(value = "tallas", required = false) List<Long> tallas,
+            @RequestParam(value = "precioMin", required = false) Double precioMin,
+            @RequestParam(value = "precioMax", required = false) Double precioMax,
+            Model model) {
+        List<Producto> lista = tiendaService.getProductosFiltrados(categorias, colores, tallas, precioMin, precioMax);
+        model.addAttribute("productos", lista != null ? lista : Collections.emptyList());
+        model.addAttribute("categorias", categoriaService.getCategoria(false));
+        model.addAttribute("colores", tiendaService.getColores());
+        model.addAttribute("tallas", tiendaService.getTallas());
+        model.addAttribute("precioMin", tiendaService.getPrecioMinimo());
+        model.addAttribute("precioMax", tiendaService.getPrecioMaximo());
+        model.addAttribute("totalProductos", lista != null ? lista.size() : 0);
+        return "tienda/listado";
+    }
+    
+    @GetMapping("/buscar")
+    public String buscarProductos(
+        @RequestParam(value = "termino", required = false) String termino,
+        Model model) {
+        List<Producto> lista = tiendaService.buscarProductos(termino);
+        model.addAttribute("productos", lista != null ? lista : Collections.emptyList());
+        model.addAttribute("categorias", categoriaService.getCategoria(false));
+        model.addAttribute("colores", tiendaService.getColores());
+        model.addAttribute("tallas", tiendaService.getTallas());
+        model.addAttribute("precioMin", tiendaService.getPrecioMinimo());
+        model.addAttribute("precioMax", tiendaService.getPrecioMaximo());
+        model.addAttribute("totalProductos", lista != null ? lista.size() : 0);
+        model.addAttribute("terminoBusqueda", termino);
+        return "tienda/listado";
+    }
+
 }

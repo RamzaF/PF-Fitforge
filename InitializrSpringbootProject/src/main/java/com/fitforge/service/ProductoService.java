@@ -8,6 +8,7 @@ public interface ProductoService {
     List<Producto> listarProductos();
     List<Producto> getProductos(boolean activos); 
     List<Producto> obtenerPorCategoria(String nombreCategoria);
+    List<Producto> buscarProductos(String termino);
     Producto getProducto(Producto producto);
     Producto obtenerProductoPorId(Long id);
     void guardarProducto(Producto producto);

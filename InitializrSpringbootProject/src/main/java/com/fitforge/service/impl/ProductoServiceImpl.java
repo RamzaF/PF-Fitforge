@@ -80,4 +80,14 @@ public class ProductoServiceImpl implements ProductoService {
     public List<Producto> obtenerPorCategoria(String nombreCategoria) {
         return productoDao.findByCategoria_Descripcion(nombreCategoria);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Producto> buscarProductos(String termino) {
+    if (termino == null || termino.trim().isEmpty()) {
+        return productoDao.findAll();
+    }
+     return productoDao.buscarPorTermino(termino);
+    }
+ 
 }

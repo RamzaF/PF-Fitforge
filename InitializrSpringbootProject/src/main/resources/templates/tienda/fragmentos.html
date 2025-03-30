@@ -46,7 +46,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Destacado 2 -->
                 <div class="col-md-4">
                     <div class="card border-0 shadow product-card h-100">
@@ -61,7 +61,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Destacado 3 -->
                 <div class="col-md-4">
                     <div class="card border-0 shadow product-card h-100">
@@ -78,7 +78,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Categorías circulares (de la versión anterior) -->
         <div th:fragment="category-circles" class="py-5">
             <div class="container">
@@ -94,7 +94,7 @@
                             <h5 class="fw-bold category-title">Hombre</h5>
                         </a>
                     </div>
-                    
+
                     <!-- Círculo: Mujer -->
                     <div class="col-6 col-md-4 col-lg-2 text-center category-item">
                         <a href="/categoria/mujer" class="text-decoration-none">
@@ -105,7 +105,7 @@
                             <h5 class="fw-bold category-title">Mujer</h5>
                         </a>
                     </div>
-                    
+
                     <!-- Círculo: Accesorios -->
                     <div class="col-6 col-md-4 col-lg-2 text-center category-item">
                         <a href="/categoria/accesorios" class="text-decoration-none">
@@ -116,7 +116,7 @@
                             <h5 class="fw-bold category-title">Accesorios</h5>
                         </a>
                     </div>
-                    
+
                     <!-- Círculo: Calzado -->
                     <div class="col-6 col-md-4 col-lg-2 text-center category-item">
                         <a href="/categoria/calzado" class="text-decoration-none">
@@ -127,7 +127,7 @@
                             <h5 class="fw-bold category-title">Calzado</h5>
                         </a>
                     </div>
-                    
+
                     <!-- Círculo: Ofertas -->
                     <div class="col-6 col-md-4 col-lg-2 text-center category-item">
                         <a href="/categoria/ofertas" class="text-decoration-none">
@@ -141,7 +141,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Marcas (de la versión anterior) -->
         <div th:fragment="brands-section" class="brands-container">
             <div class="row align-items-center justify-content-center">
@@ -167,7 +167,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Call to Action (de la versión anterior) -->
         <div th:fragment="cta-banner" class="cta-banner py-5 text-center">
             <div class="container py-4">
@@ -179,36 +179,146 @@
 
         <!-- Tienda Productos (de la versión actual) -->
         <section th:fragment="tienda-productos">
-            <!-- Botón de filtro -->
+            <!-- Botón de filtro con activación de modal -->
             <div class="d-flex align-items-center mb-4">
+                <button class="btn btn-outline-secondary d-flex align-items-center" 
+                        data-bs-toggle="modal" data-bs-target="#filtroModal" style="margin-top: 20px">
+                    <i class="bi bi-funnel me-2"></i>
+                    <span>Filtro</span>
+                </button>
+                <!-- Barra de búsqueda -->
+            <div class="search-bar ms-auto" style="width: 300px; margin-top: 20px;">
+                <form th:action="@{/tienda/buscar}" method="get" class="d-flex">
+                    <input type="text" class="form-control" name="termino" 
+                           placeholder="Buscar productos..." th:value="${terminoBusqueda}">
+                        <button type="submit" class="btn btn-accent ms-2">
+                            <i class="bi bi-search"></i>
+                        </button>
+                </form>
+            </div>
+            </div>
+            
+
+            <!-- Modal de filtros -->
+            <div class="modal fade" id="filtroModal" tabindex="-1" aria-labelledby="filtroModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content filter-modal">
+                        <div class="modal-header" style="background-color: #1E1E1E; color: #FFFFFF;">
+                            <h5 class="modal-title" id="filtroModalLabel">Filtrar Productos</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Filtro por Categorías -->
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Categorías</h6>
+                                <div th:each="categoria : ${categorias}">
+                                    <div class="form-check">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" 
+                                               th:value="${categoria.idCategoria}" 
+                                               th:id="'categoria-' + ${categoria.idCategoria}" 
+                                               name="categorias">
+                                            <label class="form-check-label" 
+                                                   th:for="'categoria-' + ${categoria.idCategoria}" 
+                                                   th:text="${categoria.descripcion}"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Filtro por Colores -->
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Colores</h6>
+                                <div th:each="color : ${colores}">
+                                    <div class="form-check">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" 
+                                               th:value="${color.idColor}" 
+                                               th:id="'color-' + ${color.idColor}" 
+                                               name="colores">
+                                            <label class="form-check-label" 
+                                                   th:for="'color-' + ${color.idColor}" 
+                                                   th:text="${color.nombreColor}"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Filtro por Tallas -->
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Tallas</h6>
+                                <div th:each="talla : ${tallas}">
+                                    <div class="form-check">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" 
+                                               th:value="${talla.idTalla}" 
+                                               th:id="'talla-' + ${talla.idTalla}" 
+                                               name="tallas">
+                                            <label class="form-check-label" 
+                                                   th:for="'talla-' + ${talla.idTalla}" 
+                                                   th:text="${talla.nombreTalla}"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Filtro por Precio -->
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Rango de Precio</h6>
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="precioMin" class="form-label">Mínimo</label>
+                                        <input type="number" id="precioMin" name="precioMin" class="form-control" th:value="${precioMin}" placeholder="₡0">
+                                    </div>
+                                    <div class="col">
+                                        <label for="precioMax" class="form-label">Máximo</label>
+                                        <input type="number" id="precioMax" name="precioMax" class="form-control" th:value="${precioMax}" placeholder="₡40000">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-light-accent" data-bs-dismiss="modal">Cerrar</button>
+                                <button type="button" class="btn btn-accent" id="aplicarFiltros">Aplicar Filtros</button>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
+            </div> 
+            </div> 
+            <!--<div class="d-flex align-items-center mb-4">
                 <button class="btn btn-outline-secondary d-flex align-items-center">
                     <i class="bi bi-funnel me-2"></i>
                     <span>Filtro</span>
                 </button>
-            </div>
+            </div> -->
             <!-- Catálogo de productos -->
             <div class="products-catalog py-1">
                 <div class="container">
                     <h2 class="text-center mb-5 fw-bold section-title">Tienda</h2>
-                    <div class="row g-1">
-                        <!-- Tarjeta de producto -->
+                    <!-- Mensaje cuando no hay resultados -->
+                    <div th:if="${productos.isEmpty()}">
+                        <p class="text-center text-muted" style="font-size: 1.2rem;">
+                            No se encontraron resultados con los filtros seleccionados.
+                        </p>
+                    </div>
+                    <!-- Mostrar productos si los hay -->
+                    <div class="row g-1" th:unless="${productos.isEmpty()}">
                         <div class="col-12 col-md-6 col-lg-4 mb-2" th:each="producto : ${productos}">
                             <div class="card h-100 border-0 shadow product-card" style="height: 100%; width: 100%;">
                                 <div class="overflow-hidden">
-                                    <!-- Imagen con efecto hover, tamaño aumentado -->
-                                    <img th:src="@{${producto.imagen}}" class="card-img-top product-img" th:alt="${producto.descripcion}" style="height: 300px; object-fit: cover; width: 100%;">
+                                    <img th:src="@{${producto.imagen}}" class="card-img-top product-img" 
+                                         th:alt="${producto.descripcion}" style="height: 300px; object-fit: cover; width: 100%;">
                                 </div>
                                 <div class="card-body text-center">
-                                    <!-- Descripción del producto con fuente más grande -->
-                                    <h5 class="card-title fw-bold" th:text="${producto.descripcion}" style="font-size: 1.5rem;">Descripción Producto</h5>
-                                    <!-- Detalle con limitación de caracteres -->
-                                    <p class="card-text text-muted" th:text="${producto.detalle}" style="font-size: 1.1rem;">Detalle del producto</p>
+                                    <h5 class="card-title fw-bold" th:text="${producto.descripcion}" style="font-size: 1.5rem;">
+                                        Descripción Producto
+                                    </h5>
+                                    <p class="card-text text-muted" th:text="${producto.detalle}" style="font-size: 1.1rem;">
+                                        Detalle del producto
+                                    </p>
                                 </div>
                                 <div class="card-footer bg-white border-0 text-center">
-                                    <!-- Precio con estilo destacado -->
-                                    <p class="h4 text-primary fw-bold mb-3" th:text="'₡ ' + ${producto.precio}" style="font-size: 1.8rem;">₡ Precio</p>
-                                    <!-- Botón con efecto hover -->
-                                    <a th:href="@{'/productos/' + ${producto.idProducto}}" class="btn btn-outline-primary w-100 product-btn" style="font-size: 1.2rem;">Ver detalles</a>
+                                    <p class="h4 text-primary fw-bold mb-3" th:text="'₡ ' + ${producto.precio}" style="font-size: 1.8rem;">
+                                        ₡ Precio
+                                    </p>
+                                    <a th:href="@{'/productos/' + ${producto.idProducto}}" 
+                                       class="btn btn-outline-primary w-100 product-btn" style="font-size: 1.2rem;">
+                                        Ver detalles
+                                    </a>
                                 </div>
                             </div>
                         </div>
