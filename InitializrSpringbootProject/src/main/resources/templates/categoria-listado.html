@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head th:replace="~{layout/plantilla :: head}">
+        <title th:text="${categoria} + ' - Admin - FitForge'">Categoría - Admin - FitForge</title>
+        <style>
+            body { background-color: #f8f9fa; font-family: 'Montserrat', sans-serif; }
+            .admin-container { padding: 20px; }
+            .admin-card { width: 100%; max-width: 800px; margin: 0 auto; }
+        </style>
+    </head>
+    <body sec:authorize="hasRole('ROLE_ADMIN')">
+        <div class="admin-container">
+            <div class="admin-card card shadow-sm p-4 bg-white rounded">
+                <h2 class="text-center fw-bold mb-4" th:text="${categoria}">Categoría</h2>
+                <p class="text-center text-muted mb-4">Gestiona los productos de esta categoría</p>
+                <div th:if="${productos != null and
+
+ !productos.isEmpty()}">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="producto : ${productos}">
+                                <td th:text="${producto.idProducto}"></td>
+                                <td th:text="${producto.nombre}"></td>
+                                <td th:text="${producto.precio}"></td>
+                                <td>
+                                    <a th:href="@{/admin/productos/editar/{id}(id=${producto.idProducto})}" class="btn btn-sm btn-primary">Editar</a>
+                                    <a th:href="@{/admin/productos/eliminar/{id}(id=${producto.idProducto})}" class="btn btn-sm btn-danger">Eliminar</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:if="${productos == null or productos.isEmpty()}">
+                    <p class="text-center">No hay productos en esta categoría.</p>
+                </div>
+                <p class="text-center mt-4">
+                    <a href="/admin" class="btn btn-secondary me-2">Volver</a>
+                    <a href="/admin/productos/nuevo" class="btn btn-primary me-2">Agregar Producto</a>
+                    <a href="/logout" class="btn btn-danger">Cerrar Sesión</a>
+                </p>
+            </div>
+        </div>
+    </body>
+</html>
