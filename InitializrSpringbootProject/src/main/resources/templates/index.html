@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <head th:replace="~{layout/plantilla :: head}">
         <title>FitForge - Forjando tu estilo</title>
         <meta name="description" content="La mejor tienda de ropa deportiva para tus entrenamientos">
@@ -20,25 +21,18 @@
             <div class="container">
                 <h2 class="text-center mb-5 fw-bold section-title">Nuestra Colección</h2>
                 <div class="row g-4">
-                    <!-- Tarjeta de producto-->
+                    <!-- Tarjeta de producto -->
                     <div class="col-md-4 mb-4" th:each="producto : ${productos}">
                         <div class="card h-100 border-0 shadow product-card">
                             <div class="overflow-hidden">
-                                <!-- Imagen con efecto hover -->
                                 <img th:src="@{${producto.imagen}}" class="card-img-top product-img" th:alt="${producto.descripcion}">
                             </div>
-                            
                             <div class="card-body text-center">
-                                <!-- Descripción del producto -->
                                 <h5 class="card-title fw-bold" th:text="${producto.descripcion}">Descripción Producto</h5>
-                                <!-- Detalle con limitación de caracteres -->
                                 <p class="card-text text-muted" th:text="${producto.detalle}">Detalle del producto</p>
                             </div>
-                            
                             <div class="card-footer bg-white border-0 text-center">
-                                <!-- Precio con estilo destacado -->
                                 <p class="h4 text-primary fw-bold mb-3" th:text="'₡ ' + ${producto.precio}">₡ Precio</p>
-                                <!-- Botón con efecto hover -->
                                 <a th:href="@{'/productos/' + ${producto.idProducto}}" class="btn btn-outline-primary w-100 product-btn">Ver detalles</a>
                             </div>
                         </div>
@@ -50,15 +44,7 @@
         <!-- Call to Action Banner -->
         <div th:replace="~{Home/fragmentos :: cta-banner}"></div>
         
-        <!-- Productos destacados -->
-        <!-- <section class="featured-products py-5">
-            <div class="container">
-                <h2 class="text-center mb-5 fw-bold section-title">Productos destacados</h2>
-                <div th:replace="~{Home/fragmentos :: image-section}"></div>
-            </div>
-        </section> -->
-        
-        <!-- Sección de marcas  -->
+        <!-- Sección de marcas -->
         <section class="brands-section py-5">
             <div class="container">
                 <h2 class="text-center mb-5 fw-bold section-title">Nuestras Marcas</h2>
@@ -71,7 +57,21 @@
             <div class="container py-4">
                 <h2 class="display-5 fw-bold mb-3">OBTÉN 20% DE DESCUENTO</h2>
                 <p class="lead fs-4 mb-4">En tu primera compra al registrarte en nuestra tienda</p>
-                <a href="/login" class="btn btn-light btn-lg px-4 py-2 shadow-sm fw-bold">REGÍSTRATE AHORA</a>
+                <!-- Para usuarios anónimos -->
+                <div sec:authorize="isAnonymous()">
+                    <a href="/register" class="btn btn-light btn-lg px-4 py-2 shadow-sm fw-bold">REGÍSTRATE AHORA</a>
+                </div>
+                <!-- Para usuarios autenticados no admin -->
+                <div sec:authorize="isAuthenticated() and !hasRole('ADMIN')">
+                    <p class="lead">¡Bienvenido de nuevo!</p>
+                    <a href="/logout" class="btn btn-light btn-lg px-4 py-2 shadow-sm fw-bold">Cerrar Sesión</a>
+                </div>
+                <!-- Para administradores -->
+                <div sec:authorize="hasRole('ADMIN')">
+                    <p class="lead">¡Bienvenido, Administrador!</p>
+                    <a href="/admin" class="btn btn-light btn-lg px-4 py-2 shadow-sm fw-bold">Ir al Panel de Administración</a>
+                    <a href="/logout" class="btn btn-danger btn-lg px-4 py-2 shadow-sm fw-bold">Cerrar Sesión</a>
+                </div>
             </div>
         </section>
         

@@ -1,6 +1,7 @@
 package com.fitforge.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,13 +60,21 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     public String forgotPassword(@RequestParam String email, Model model) {
-        //authService.sendResetEmail(email);
-        model.addAttribute("message", "Se ha enviado un enlace para restablecer tu contraseña.");
+        model.addAttribute("message", "Ve a tu correo a restablecer la contraseña.");
         return "forgot-password";
     }
 
     @GetMapping("/home")
     public String home() {
         return "home";
+    }
+
+    @GetMapping("/admin")
+    public String adminPanel(Authentication authentication) {
+        if (authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            return "admin"; // Vista admin para ROLE_ADMIN
+        }
+        return "redirect:/"; // Si no es admin, va al index
     }
 }
