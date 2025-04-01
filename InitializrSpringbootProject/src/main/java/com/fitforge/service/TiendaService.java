@@ -4,7 +4,10 @@ import com.fitforge.domain.Producto;
 import com.fitforge.domain.Color;
 import com.fitforge.domain.Talla;
 import java.util.List;
-
+/**
+  *
+  * @author bryam
+  */
 public interface TiendaService {
     List<Producto> getProducto(boolean activos);
     Producto getProducto(Producto producto);

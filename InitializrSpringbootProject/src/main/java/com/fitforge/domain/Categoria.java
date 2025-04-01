@@ -1,8 +1,5 @@
 package com.fitforge.domain;
-/**
- *
- * @author bryam
- */
+
 import java.io.Serializable;
 import java.util.List;
 

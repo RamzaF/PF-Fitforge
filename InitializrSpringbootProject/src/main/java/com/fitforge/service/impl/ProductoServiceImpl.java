@@ -11,7 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fitforge.dao.ProductoDao;
 import com.fitforge.domain.Producto;
 import com.fitforge.service.ProductoService;
-
+/**
+  *
+  * @author bryam
+  */
 @Service
 public class ProductoServiceImpl implements ProductoService {
 
