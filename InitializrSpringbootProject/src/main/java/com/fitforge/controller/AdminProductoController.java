@@ -4,6 +4,7 @@ import com.fitforge.domain.Producto;
 import com.fitforge.service.CategoriaService;
 import com.fitforge.service.LocalStorageService;
 import com.fitforge.service.ProductoService;
+import com.fitforge.service.ProductoColorTallaService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
@@ -35,9 +36,12 @@ public class AdminProductoController {
     @Autowired
     private CategoriaService categoriaService;
     
+    
     @Autowired
     private LocalStorageService localStorageService;
     
+    @Autowired
+    private ProductoColorTallaService productoColorTallaService;
     /**
      * Muestra la lista de todos los productos para administración.
      * 
@@ -135,43 +139,60 @@ public class AdminProductoController {
     @PostMapping("/guardar-producto")
     public String guardarProducto(
             @ModelAttribute Producto producto,
-            @RequestParam(value = "archivo", required = false) MultipartFile archivo,
+            @RequestParam(value = "imagenFile", required = false) MultipartFile archivo,
             RedirectAttributes redirectAttributes) {
         
         try {
-            boolean esNuevo = (producto.getIdProducto() == null || producto.getIdProducto() == 0);
+            boolean esNuevo = (producto.getIdProducto() == null);
+            logger.info("Guardando producto: {} (esNuevo: {})", producto.getDescripcion(), esNuevo);
             
-            // Si es un producto nuevo, guardarlo primero para obtener el ID
+            // Para productos nuevos, asegurarse que el ID sea null
             if (esNuevo) {
-                productoService.guardarProducto(producto);
+                producto.setIdProducto(null);
             }
             
-            // Procesar imagen si se ha subido una nueva
+            // Si hay archivo de imagen, procesarlo
             if (archivo != null && !archivo.isEmpty()) {
                 try {
+                    // Para productos nuevos, necesitamos guardar primero para obtener el ID
+                    if (esNuevo) {
+                        productoService.guardarProducto(producto);
+                    }
+                    
+                    // Guardar la imagen y actualizar la ruta
                     String rutaImagen = localStorageService.guardarImagen(archivo, producto.getIdProducto());
                     producto.setRutaImagen(rutaImagen);
+                    logger.info("Imagen guardada para producto ID: {}, ruta: {}", producto.getIdProducto(), rutaImagen);
                 } catch (IOException e) {
                     logger.error("Error al guardar imagen: {}", e.getMessage());
-                    redirectAttributes.addFlashAttribute("mensaje", "El producto se guardó pero hubo un problema con la imagen: " + e.getMessage());
+                    redirectAttributes.addFlashAttribute("mensaje", "Error al procesar la imagen: " + e.getMessage());
                     redirectAttributes.addFlashAttribute("tipo", "warning");
                 }
             }
             
-            // Guardar el producto con la imagen actualizada si corresponde
-            productoService.guardarProducto(producto);
+            // Guardar o actualizar el producto
+            if (!esNuevo || archivo == null || archivo.isEmpty()) {
+                productoService.guardarProducto(producto);
+            }
+            
+            // Crear entrada de inventario inicial para productos nuevos
+            if (esNuevo) {
+                ProductoColorTalla inventarioInicial = new ProductoColorTalla();
+                inventarioInicial.setProducto(producto);
+                inventarioInicial.setExistencias(0);
+                productoColorTallaService.guardar(inventarioInicial);
+                logger.info("Creada entrada de inventario inicial para producto ID: {}", producto.getIdProducto());
+            }
+            
+            logger.info("Producto guardado correctamente, ID: {}", producto.getIdProducto());
             
             // Mensaje de éxito
             String mensaje = esNuevo ? "Producto creado correctamente" : "Producto actualizado correctamente";
             redirectAttributes.addFlashAttribute("mensaje", mensaje);
             redirectAttributes.addFlashAttribute("tipo", "success");
             
-            // Redirección dependiendo de si es nuevo o edición
-            if (esNuevo) {
-                return "redirect:/admin/productos/listado";
-            } else {
-                return "redirect:/admin/productos/editar/" + producto.getIdProducto();
-            }
+            // Siempre redirigir al listado después de guardar
+            return "redirect:/admin/productos/listado";
             
         } catch (Exception e) {
             logger.error("Error al guardar producto: {}", e.getMessage());
