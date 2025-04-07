@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head th:replace="layout/plantilla :: head">
+        <title>Admin - Gestión de Productos</title>
+    </head>
+    <body sec:authorize="hasRole('ROLE_ADMIN')">
+        <header th:replace="layout/plantilla :: header"></header>
+        
+        <div class="container py-5">
+            <div class="row mb-4">
+                <div class="col">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a th:href="@{/admin}">Administración</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Productos</li>
+                        </ol>
+                    </nav>
+                    <h1 class="mb-3">Gestión de Productos</h1>
+                    <p class="text-muted">Administre su catálogo de productos: añada, edite, active/desactive artículos y gestione su inventario.</p>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col">
+                    <!-- Barra de búsqueda y filtros -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <form th:action="@{/admin/productos/buscar}" method="get" class="d-flex">
+                                        <input type="text" name="termino" class="form-control" placeholder="Buscar productos..." th:value="${param.termino}">
+                                        <button type="submit" class="btn btn-primary ms-2">
+                                            <i class="bi bi-search"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <!-- Botón para agregar nuevo producto -->
+                                    <div th:replace="admin/productos/fragmentos :: botonAgregar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Listado de productos -->
+                    <div th:replace="admin/productos/fragmentos :: listadoProductos"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal para agregar nuevo producto -->
+        <div th:replace="admin/productos/fragmentos :: modalNuevoProducto"></div>
+        
+        <!-- Footer -->
+        <footer th:replace="layout/plantilla :: footer"></footer>
+        
+        <!-- Scripts específicos para esta página -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Inicialización de elementos interactivos
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl)
+                });
+                
+                // Mostrar mensajes de error o éxito si existen
+                const urlParams = new URLSearchParams(window.location.search);
+                const mensaje = urlParams.get('mensaje');
+                const tipo = urlParams.get('tipo');
+                
+                if (mensaje) {
+                    // Crear alerta
+                    const alerta = document.createElement('div');
+                    alerta.className = `alert alert-${tipo || 'info'} alert-dismissible fade show`;
+                    alerta.role = 'alert';
+                    alerta.innerHTML = mensaje + 
+                        '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+                    
+                    // Insertar alerta al inicio del contenedor
+                    const container = document.querySelector('.container');
+                    container.insertBefore(alerta, container.firstChild);
+                    
+                    // Auto cerrar después de 5 segundos
+                    setTimeout(() => {
+                        const bsAlert = new bootstrap.Alert(alerta);
+                        bsAlert.close();
+                    }, 5000);
+                }
+            });
+        </script>
+    </body>
+</html>
+

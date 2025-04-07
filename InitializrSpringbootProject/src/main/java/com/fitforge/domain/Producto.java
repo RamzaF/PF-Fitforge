@@ -31,7 +31,10 @@ public class Producto implements Serializable {
     
     private String descripcion;
     private String detalle;
-    private String imagen;
+    
+    @Column(name = "imagen")
+    private String rutaImagen;
+    
     private double precio;
     private boolean activo;
     
@@ -45,17 +48,30 @@ public class Producto implements Serializable {
     public Producto() {
     }
 
-    public Producto(String descripcion, String detalle, String imagen, double precio, boolean activo) {
+    public Producto(String descripcion, String detalle, String rutaImagen, double precio, boolean activo) {
         this.descripcion = descripcion;
         this.detalle = detalle;
-        this.imagen = imagen;
+        this.rutaImagen = rutaImagen;
         this.precio = precio;
         this.activo = activo;
     }
     
-    // Método adicional para compatibilidad con AdminController
-    public void setRutaImagen(String rutaImagen) {
-        this.imagen = rutaImagen;
+    // Métodos para compatibilidad con código existente
+    
+    /**
+     * Método setter alternativo para mantener compatibilidad con código antiguo
+     * @param imagen ruta de la imagen del producto
+     */
+    public void setImagen(String imagen) {
+        this.rutaImagen = imagen;
+    }
+    
+    /**
+     * Método getter alternativo para mantener compatibilidad con código antiguo
+     * @return ruta de la imagen del producto
+     */
+    public String getImagen() {
+        return this.rutaImagen;
     }
     
     // Calculate total existencias from productoColorTallas
