@@ -47,59 +47,13 @@ public class AdminController {
     private ProductoService productoService;
 
     /**
-     * Método para mostrar la página principal de administración de productos.
+     * Método para redirigir al listado de productos.
      * 
-     * @param model Modelo para la vista
-     * @return Vista de listado de productos
+     * @return Redirección al listado de productos en AdminProductoController
      */
     @GetMapping("/productos")
-    public String listarProductos(Model model) {
-        var productos = productoService.listarProductos();
-        model.addAttribute("productos", productos);
-        // Redirigimos a la vista gestionada por AdminProductoController
+    public String redirigirProductos() {
         return "redirect:/admin/productos/listado";
-    }
-
-    /**
-     * Método para mostrar el formulario de creación de un nuevo producto.
-     * 
-     * @param model Modelo para la vista
-     * @return Vista de formulario de producto
-     */
-    @GetMapping("/productos/nuevo")
-    public String nuevoProducto(Model model) {
-        // Redirigimos a la ruta gestionada por AdminProductoController
-        return "redirect:/admin/productos/nuevo";
-    }
-
-
-    /**
-     * Método para mostrar el formulario de edición de un producto existente.
-     * 
-     * @param id ID del producto a editar
-     * @param model Modelo para la vista
-     * @param redirectAttributes Atributos para mensajes de retroalimentación
-     * @return Vista de formulario de producto o redirección si no existe
-     */
-    @GetMapping("/productos/editar/{idProducto}")
-    public String editarProducto(@PathVariable("idProducto") Long id, 
-                                RedirectAttributes redirectAttributes) {
-        // Redirigimos a la ruta gestionada por AdminProductoController
-        return "redirect:/admin/productos/editar/" + id;
-    }
-
-    /**
-     * Método para eliminar un producto.
-     * 
-     * @param id ID del producto a eliminar
-     * @param redirectAttributes Atributos para mensajes de retroalimentación
-     * @return Redirección a la lista de productos
-     */
-    @GetMapping("/productos/eliminar/{idProducto}")
-    public String eliminarProducto(@PathVariable("idProducto") Long id,
-                                  RedirectAttributes redirectAttributes) {
-        // Redirigimos a la ruta gestionada por AdminProductoController
-        return "redirect:/admin/productos/eliminar?idProducto=" + id;
     }
     
     /**

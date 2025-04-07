@@ -68,22 +68,35 @@ public class AdminProductoController {
      * @param model Modelo de la vista
      * @return Vista de edición de producto
      */
+    /**
+     * Método para mostrar el formulario de edición de un producto existente.
+     * 
+     * @param id ID del producto a editar
+     * @param model Modelo para la vista
+     * @param redirectAttributes Atributos para mensajes de redirección
+     * @return Vista de formulario de producto o redirección si no existe
+     */
     @GetMapping("/editar/{id}")
-    public String editarProducto(@PathVariable Long id, Model model) {
+    public String editarProducto(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         try {
             var producto = productoService.getProductoById(id);
             
             if (producto == null) {
-                return "redirect:/admin/productos/listado?mensaje=Producto+no+encontrado&tipo=danger";
+                redirectAttributes.addFlashAttribute("mensaje", "Producto no encontrado");
+                redirectAttributes.addFlashAttribute("tipo", "danger");
+                return "redirect:/admin/productos/listado";
             }
             
             var categorias = categoriaService.getCategoria(true);
             model.addAttribute("producto", producto);
             model.addAttribute("categorias", categorias);
-            return "admin/productos/modifica";
+            model.addAttribute("titulo", "Editar Producto");
+            return "admin/productos/formulario";
         } catch (Exception e) {
             logger.error("Error al cargar producto para edición: {}", e.getMessage());
-            return "redirect:/admin/productos/listado?mensaje=Error+al+cargar+el+producto&tipo=danger";
+            redirectAttributes.addFlashAttribute("mensaje", "Error al cargar el producto: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("tipo", "danger");
+            return "redirect:/admin/productos/listado";
         }
     }
     
@@ -122,7 +135,7 @@ public class AdminProductoController {
     @PostMapping("/guardar-producto")
     public String guardarProducto(
             @ModelAttribute Producto producto,
-            @RequestParam(value = "imagenFile", required = false) MultipartFile imagenFile,
+            @RequestParam(value = "archivo", required = false) MultipartFile archivo,
             RedirectAttributes redirectAttributes) {
         
         try {
@@ -134,10 +147,10 @@ public class AdminProductoController {
             }
             
             // Procesar imagen si se ha subido una nueva
-            if (imagenFile != null && !imagenFile.isEmpty()) {
+            if (archivo != null && !archivo.isEmpty()) {
                 try {
-                    String rutaImagen = localStorageService.guardarImagen(imagenFile, producto.getIdProducto());
-                    producto.setImagen(rutaImagen);
+                    String rutaImagen = localStorageService.guardarImagen(archivo, producto.getIdProducto());
+                    producto.setRutaImagen(rutaImagen);
                 } catch (IOException e) {
                     logger.error("Error al guardar imagen: {}", e.getMessage());
                     redirectAttributes.addFlashAttribute("mensaje", "El producto se guardó pero hubo un problema con la imagen: " + e.getMessage());
