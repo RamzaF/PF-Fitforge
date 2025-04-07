@@ -5,6 +5,8 @@ import com.fitforge.service.CategoriaService;
 import com.fitforge.service.LocalStorageService;
 import com.fitforge.service.ProductoService;
 import com.fitforge.service.ProductoColorTallaService;
+import com.fitforge.domain.ProductoColorTalla;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
