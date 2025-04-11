@@ -102,7 +102,13 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     @Transactional
     public void eliminarProducto(Long id) {
-        productoDao.deleteById(id);
+        // Implementar soft delete en lugar de borrado físico
+        var producto = productoDao.findById(id);
+        if (producto.isPresent()) {
+            Producto productoEntity = producto.get();
+            productoEntity.setActivo(false);
+            productoDao.save(productoEntity);
+        }
     }
     
     @Override
