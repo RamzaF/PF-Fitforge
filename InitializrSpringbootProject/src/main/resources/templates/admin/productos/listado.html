@@ -54,11 +54,14 @@
         <div th:replace="admin/productos/fragmentos :: modalNuevoProducto"></div>
         
         <!-- Footer -->
+        <!-- Footer -->
         <footer th:replace="layout/plantilla :: footer"></footer>
+        
+        <!-- Incluir scripts de la plantilla -->
+        <th:block th:replace="~{layout/plantilla :: scripts}"/>
         
         <!-- Scripts específicos para esta página -->
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
                 // Inicialización de elementos interactivos
                 var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
                 var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -88,7 +91,6 @@
                         bsAlert.close();
                     }, 5000);
                 }
-            });
         </script>
     </body>
 </html>
