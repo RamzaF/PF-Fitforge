@@ -170,11 +170,11 @@ public class AdminProductoController {
                     redirectAttributes.addFlashAttribute("mensaje", "Error al procesar la imagen: " + e.getMessage());
                     redirectAttributes.addFlashAttribute("tipo", "warning");
                 }
-            }
             
             // Guardar o actualizar el producto
-            if (!esNuevo || archivo == null || archivo.isEmpty()) {
-                productoService.guardarProducto(producto);
+            // Siempre guardar el producto después de procesar la imagen
+            // para asegurar que la ruta de la imagen se persista correctamente
+            productoService.guardarProducto(producto);
             }
             
             // Crear entrada de inventario inicial para productos nuevos
