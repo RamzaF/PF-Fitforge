@@ -1,45 +1,99 @@
-package com.fitforge.config;
+package com.fitforge.app.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Bean
     public UserDetailsService userDetailsService() {
-        var admin = User.builder()
-            .username("admin@fitforge.com")
-            .password(passwordEncoder().encode("admin123"))
-            .roles("ADMIN")
-            .build();
+        // Usuarios en memoria
+        UserDetails admin = User.builder()
+                .username("admin@fitforge.com")
+                .password(passwordEncoder().encode("admin123"))
+                .roles("ADMIN")
+                .build();
 
-        var user = User.builder()
-            .username("user@fitforge.com")
-            .password(passwordEncoder().encode("user123"))
-            .roles("USER")
-            .build();
+        UserDetails user = User.builder()
+                .username("user@fitforge.com")
+                .password(passwordEncoder().encode("user123"))
+                .roles("USER")
+                .build();
 
-        return new InMemoryUserDetailsManager(admin, user);
+        InMemoryUserDetailsManager inMemoryManager = new InMemoryUserDetailsManager(admin, user);
+
+        // Servicio personalizado que combina memoria y base de datos
+        return username -> {
+            // Primero intenta autenticar con usuarios en memoria
+            try {
+                UserDetails inMemoryUser = inMemoryManager.loadUserByUsername(username);
+                if (inMemoryUser != null) {
+                    return inMemoryUser;
+                }
+            } catch (UsernameNotFoundException e) {
+                // Si no está en memoria, busca en la base de datos
+                String sql = "SELECT u.correo, u.password, u.activo, r.nombre " +
+                             "FROM usuario u LEFT JOIN rol r ON u.id_usuario = r.id_usuario " +
+                             "WHERE u.correo = ?";
+                List<UserDetails> dbUsers = jdbcTemplate.query(sql, new Object[]{username}, (rs, rowNum) -> {
+                    String correo = rs.getString("correo");
+                    String password = rs.getString("password");
+                    boolean activo = rs.getBoolean("activo");
+                    String role = rs.getString("nombre");
+
+                    if (role == null) {
+                        throw new UsernameNotFoundException("Usuario sin roles: " + correo);
+                    }
+
+                    return new User(
+                            correo,
+                            password,
+                            activo,
+                            true, true, true,
+                            Arrays.asList(new SimpleGrantedAuthority(role))
+                    );
+                });
+
+                if (!dbUsers.isEmpty()) {
+                    return dbUsers.get(0);
+                }
+            }
+
+            throw new UsernameNotFoundException("Usuario no encontrado: " + username);
+        };
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/login", "/register", "/forgot-password").permitAll()
-                .requestMatchers("/css/**", "/js/**", "/img/**", "/webjars/**").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().permitAll()
+                .requestMatchers("/admin/**", "/usuario/**").hasRole("ADMIN")
+                .requestMatchers("/carrito/**", "/pedidos/**").hasRole("USER")
+                .requestMatchers("/", "/login", "/tienda/**", "/categoria/**", "/nosotros", "/contacto", 
+                                "/css/**", "/js/**", "/img/**", "/webjars/**", "/Uploads/**").permitAll()
+                .anyRequest().permitAll() // Permitir todo lo demás sin autenticación
             )
             .formLogin(form -> form
                 .loginPage("/login")
@@ -51,9 +105,15 @@ public class SecurityConfig {
                 .logoutSuccessUrl("/")
                 .permitAll()
             )
-            .csrf().disable();
+            .csrf().disable(); // Mantengo CSRF deshabilitado como en tu código
 
         return http.build();
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        // Ignorar filtros de seguridad para recursos estáticos
+        return (web) -> web.ignoring().requestMatchers("/css/**", "/js/**", "/img/**", "/webjars/**", "/Uploads/**");
     }
 
     @Bean

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head th:replace="~{layout/plantilla :: head}">
+        <title>Agregar Administrador - FitForge</title>
+        <style>
+            body {
+                background-color: #f8f9fa;
+                font-family: 'Montserrat', sans-serif;
+            }
+            .form-container {
+                max-width: 400px;
+                margin: 50px auto;
+            }
+            .error {
+                color: red;
+                font-size: 0.9em;
+            }
+        </style>
+    </head>
+    <body sec:authorize="hasRole('ROLE_ADMIN')">
+        <div class="form-container">
+            <div class="card shadow-sm p-4 bg-white rounded">
+                <h2 class="text-center fw-bold mb-4">Nuevo Administrador</h2>
+                <form th:action="@{/usuario/guardar}" method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Usuario</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                        <span class="error" th:if="${errorUsername}" th:text="${errorUsername}"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="correo" class="form-label">Correo</label>
+                        <input type="email" class="form-control" id="correo" name="correo" required>
+                        <span class="error" th:if="${errorCorreo}" th:text="${errorCorreo}"></span>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+                <p class="text-center mt-3">
+                    <a href="/admin" class="btn btn-secondary">Volver</a>
+                </p>
+            </div>
+        </div>
+        <div th:replace="~{layout/plantilla :: scripts}"></div>
+    </body>
+</html>
