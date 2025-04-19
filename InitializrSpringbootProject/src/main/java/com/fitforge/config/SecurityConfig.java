@@ -90,10 +90,11 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/admin/**", "/usuario/**").hasRole("ADMIN")
-                .requestMatchers("/carrito/**", "/pedidos/**").hasRole("USER")
-                .requestMatchers("/", "/login", "/tienda/**", "/categoria/**", "/nosotros", "/contacto", 
-                                "/css/**", "/js/**", "/img/**", "/webjars/**", "/Uploads/**").permitAll()
-                .anyRequest().permitAll() // Permitir todo lo demás sin autenticación
+                .requestMatchers("/carrito/**", "/pedidos/**", "/perfil").hasRole("USER")
+                .requestMatchers("/", "/login", "/register", "/forgot-password", "/tienda/**", "/categoria/**", 
+                                "/nosotros", "/contacto", "/css/**", "/js/**", "/img/**", "/webjars/**", 
+                                "/Uploads/**").permitAll()
+                .anyRequest().permitAll()
             )
             .formLogin(form -> form
                 .loginPage("/login")
@@ -105,14 +106,13 @@ public class SecurityConfig {
                 .logoutSuccessUrl("/")
                 .permitAll()
             )
-            .csrf().disable(); // Mantengo CSRF deshabilitado como en tu código
+            .csrf().disable();
 
         return http.build();
     }
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        // Ignorar filtros de seguridad para recursos estáticos
         return (web) -> web.ignoring().requestMatchers("/css/**", "/js/**", "/img/**", "/webjars/**", "/Uploads/**");
     }
 
