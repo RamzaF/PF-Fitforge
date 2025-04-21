@@ -178,26 +178,30 @@
         </div>
 
         <!-- Tienda Productos (de la versión actual) -->
-        <section th:fragment="tienda-productos">
-            <!-- Botón de filtro con activación de modal -->
-            <div class="d-flex align-items-center mb-4">
-                <button class="btn btn-outline-secondary d-flex align-items-center" 
-                        data-bs-toggle="modal" data-bs-target="#filtroModal" style="margin-top: 20px">
-                    <i class="bi bi-funnel me-2"></i>
-                    <span>Filtro</span>
-                </button>
-                <!-- Barra de búsqueda -->
-            <div class="search-bar ms-auto" style="width: 300px; margin-top: 20px;">
-                <form th:action="@{/tienda/buscar}" method="get" class="d-flex">
-                    <input type="text" class="form-control" name="termino" 
-                           placeholder="Buscar productos..." th:value="${terminoBusqueda}">
-                        <button type="submit" class="btn btn-accent ms-2">
-                            <i class="bi bi-search"></i>
+        <section th:fragment="tienda-productos" class="pb-5">
+            <!-- Botón de filtro con activación de modal y barra de búsqueda -->
+            <div class="container mt-4 mb-4">
+                <div class="row justify-content-center align-items-center">
+                    <div class="col-md-4 text-center">
+                        <button class="btn btn-outline-secondary d-flex align-items-center mx-auto" 
+                                data-bs-toggle="modal" data-bs-target="#filtroModal">
+                            <i class="bi bi-funnel me-2"></i>
+                            <span>Filtros</span>
                         </button>
-                </form>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="search-bar">
+                            <form th:action="@{/tienda/buscar}" method="get" class="d-flex">
+                                <input type="text" class="form-control" name="termino" 
+                                       placeholder="Buscar productos..." th:value="${terminoBusqueda}">
+                                <button type="submit" class="btn btn-accent ms-2">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-            </div>
-            
 
             <!-- Modal de filtros -->
             <div class="modal fade" id="filtroModal" tabindex="-1" aria-labelledby="filtroModalLabel" aria-hidden="true">
@@ -279,15 +283,9 @@
                 </div>
             </div> 
             </div> 
-            <!--<div class="d-flex align-items-center mb-4">
-                <button class="btn btn-outline-secondary d-flex align-items-center">
-                    <i class="bi bi-funnel me-2"></i>
-                    <span>Filtro</span>
-                </button>
-            </div> -->
             <!-- Catálogo de productos -->
             <div class="products-catalog py-1">
-                <div class="container">
+                <div class="container pb-5">
                     <h2 class="text-center mb-5 fw-bold section-title">Tienda</h2>
                     <!-- Mensaje cuando no hay resultados -->
                     <div th:if="${productos.isEmpty()}">
