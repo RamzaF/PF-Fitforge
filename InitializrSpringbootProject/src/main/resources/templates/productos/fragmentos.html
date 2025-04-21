@@ -88,7 +88,10 @@
                             </div>
                         </div>
 
-                        <button class="btn btn-primary add-to-cart">Agregar al carrito</button>
+                        <a th:href="@{'/carrito/agregar/' + ${producto.productoColorTallas[0].idProductoColorTalla}}"
+                           class="btn btn-primary add-to-cart">
+                            Agregar al carrito
+                        </a>
                     </div>
                 </div>
             </div>
