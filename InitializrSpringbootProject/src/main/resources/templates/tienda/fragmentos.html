@@ -169,7 +169,7 @@
         </div>
 
         <!-- Call to Action (de la versión anterior) -->
-        <div th:fragment="cta-banner" class="cta-banner py-5 text-center">
+        <div th:fragment="cta-banner" class="cta-banner py-5 text-center" sec:authorize="!hasRole('ROLE_ADMIN')">
             <div class="container py-4">
                 <h2 class="display-6 fw-bold mb-3 text-white">ENTRENA CON ESTILO</h2>
                 <p class="lead mb-4 text-white">Descubre nuestra nueva colección diseñada para maximizar tu rendimiento</p>

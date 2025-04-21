@@ -52,8 +52,8 @@
             </div>
         </section>
         
-        <!-- Banner promocional -->
-        <section class="promo-banner py-5 text-white text-center">
+        <!-- Banner promocional - oculto para administradores -->
+        <section class="promo-banner py-5 text-white text-center" sec:authorize="!hasRole('ROLE_ADMIN')">
             <div class="container py-4">
                 <h2 class="display-5 fw-bold mb-3">OBTÉN 20% DE DESCUENTO</h2>
                 <p class="lead fs-4 mb-4">En tu primera compra al registrarte en nuestra tienda</p>
@@ -65,12 +65,6 @@
                 <div sec:authorize="isAuthenticated() and !hasRole('ADMIN')">
                     <p class="lead">¡Bienvenido de nuevo!</p>
                     <a href="/logout" class="btn btn-light btn-lg px-4 py-2 shadow-sm fw-bold">Cerrar Sesión</a>
-                </div>
-                <!-- Para administradores -->
-                <div sec:authorize="hasRole('ADMIN')">
-                    <p class="lead">¡Bienvenido, Administrador!</p>
-                    <a href="/admin" class="btn btn-light btn-lg px-4 py-2 shadow-sm fw-bold">Ir al Panel de Administración</a>
-                    <a href="/logout" class="btn btn-danger btn-lg px-4 py-2 shadow-sm fw-bold">Cerrar Sesión</a>
                 </div>
             </div>
         </section>
