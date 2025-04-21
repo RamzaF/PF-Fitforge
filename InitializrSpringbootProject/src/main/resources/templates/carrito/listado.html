@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head}">
+    <title>Carrito</title>
+</head>
+<body>
+<header th:replace="~{layout/plantilla :: header}"/>
+
+<div class="container py-5">
+    <h2>Carrito de Compras</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Producto</th>
+            <th>Color/Talla</th>
+            <th>Cantidad</th>
+            <th>Subtotal</th>
+            <th>Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${items}">
+            <td th:text="${item.productoColorTalla.producto.descripcion}"></td>
+            <td>
+                <span th:text="${item.productoColorTalla.color.nombre}"></span> /
+                <span th:text="${item.productoColorTalla.talla.nombre}"></span>
+            </td>
+            <td>
+                <form th:action="@{/carrito/actualizar}" method="post">
+                    <input type="hidden" name="id" th:value="${item.productoColorTalla.idProductoColorTalla}"/>
+                    <input type="number" name="cantidad" th:value="${item.cantidad}" min="1"
+                           th:max="${item.productoColorTalla.existencias}"/>
+                    <button type="submit" class="btn btn-sm btn-primary">Actualizar</button>
+                </form>
+            </td>
+            <td th:text="${item.subtotal}"></td>
+            <td>
+                <a th:href="@{/carrito/eliminar/{id}(id=${item.productoColorTalla.idProductoColorTalla})}"
+                   class="btn btn-sm btn-danger">Eliminar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h4>Total: ₡<span th:text="${total}"></span></h4>
+</div>
+
+<footer th:replace="~{layout/plantilla :: footer}"/>
+</body>
+</html>
