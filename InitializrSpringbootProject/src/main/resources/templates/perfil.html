@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{layout/plantilla :: head}">
+        <title>Mi Cuenta - FitForge</title>
+    </head>
+    <body>
+        <!-- Header -->
+        <header th:replace="~{layout/plantilla :: header}"/>
+        
+        <!-- Sección de perfiil -->
+        <section class="py-5" style="background-color: #D9D9D9; min-height: 100%;">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-6 col-lg-5">
+                        <div class="card shadow-sm p-4 bg-white rounded">
+                            <h2 class="text-center fw-bold mb-4">Mi Cuenta</h2>
+                            <form th:action="@{/perfil}" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Nombre de usuario</label>
+                                    <input type="text" class="form-control" name="username" th:value="${usuario.username}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Nombre</label>
+                                    <input type="text" class="form-control" name="nombre" th:value="${usuario.nombre}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Correo</label>
+                                    <input type="email" class="form-control" name="correo" th:value="${usuario.correo}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Nueva contraseña (opcional)</label>
+                                    <input type="password" class="form-control" name="password" placeholder="Dejar en blanco para no cambiar">
+                                </div>
+                                <div th:if="${error}" class="alert alert-danger">
+                                    <span th:text="${error}"></span>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                    <a href="/" class="btn btn-secondary">Volver</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section> 
+
+        <!-- Footer -->
+        <footer th:replace="~{layout/plantilla :: footer}"/>
+        
+        <div th:replace="~{layout/plantilla :: scripts}"/>
+    </body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head th:replace="~{layout/plantilla :: head}">
+        <title>Formulario de Producto</title>
+        <meta charset="UTF-8"/>
+    </head>
+    <body>
+        <header th:replace="~{layout/plantilla :: header}"></header>
+        
+        <div class="container mt-4 mb-5">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a th:href="@{/}">Inicio</a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/admin/productos}">Productos</a></li>
+                            <li class="breadcrumb-item active" aria-current="page" th:text="${producto.idProducto == null ? 'Nuevo Producto' : 'Editar Producto'}">Formulario</li>
+                        </ol>
+                    </nav>
+                    
+                    <!-- Mensajes de retroalimentación -->
+                    <div th:if="${mensaje != null}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle"></i> <span th:text="${mensaje}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <div th:if="${error != null}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0" th:text="${producto.idProducto == null ? 'Nuevo Producto' : 'Editar Producto'}">Formulario de Producto</h4>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/admin/productos/guardar-producto}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                                <!-- Campo oculto para ID del producto (edición) -->
+                                <input type="hidden" name="idProducto" th:value="${producto.idProducto}" />
+                                
+                                <div class="row">
+                                    <!-- Columna izquierda: Datos del producto -->
+                                    <div class="col-md-8">
+                                        <!-- Nombre del producto -->
+                                        <div class="mb-3">
+                                            <label for="nombre" class="form-label">Nombre del Producto</label>
+                                            <input type="text" class="form-control" id="nombre" name="descripcion" 
+                                                   th:value="${producto.descripcion}" required 
+                                                   minlength="3" maxlength="100">
+                                            <div class="invalid-feedback">
+                                                El nombre del producto es obligatorio (mínimo 3 caracteres).
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Descripción detallada -->
+                                        <div class="mb-3">
+                                            <label for="detalle" class="form-label">Descripción Detallada</label>
+                                            <textarea class="form-control" id="detalle" name="detalle" rows="4" 
+                                                      th:text="${producto.detalle}" required></textarea>
+                                            <div class="invalid-feedback">
+                                                La descripción detallada es obligatoria.
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <!-- Categoría -->
+                                            <div class="col-md-6 mb-3">
+                                                <label for="categoria" class="form-label">Categoría</label>
+                                                <select class="form-select" id="categoria" name="categoria.idCategoria" required>
+                                                    <option value="">Seleccione una categoría</option>
+                                                    <option th:each="cat : ${categorias}" 
+                                                            th:value="${cat.idCategoria}" 
+                                                            th:text="${cat.descripcion}"
+                                                            th:selected="${producto.categoria != null && producto.categoria.idCategoria == cat.idCategoria}">
+                                                        Categoría
+                                                    </option>
+                                                </select>
+                                                <div class="invalid-feedback">
+                                                    Debe seleccionar una categoría.
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Precio -->
+                                            <div class="col-md-6 mb-3">
+                                                <label for="precio" class="form-label">Precio</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    <input type="number" class="form-control" id="precio" name="precio" 
+                                                           th:value="${producto.precio}" required min="0" step="0.01">
+                                                    <div class="invalid-feedback">
+                                                        El precio debe ser mayor a 0.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Estado del producto -->
+                                        <div class="mb-3 form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                                                   th:checked="${producto.activo}">
+                                            <label class="form-check-label" for="activo">Producto Activo</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Columna derecha: Imagen del producto -->
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="archivo" class="form-label">Imagen del Producto</label>
+                                            <input class="form-control" type="file" id="archivo" name="archivo" accept="image/*" 
+                                                  th:required="${producto.idProducto == null && producto.rutaImagen == null}">
+                                            <div class="form-text">Formatos recomendados: JPG, PNG. Máximo 2MB.</div>
+                                            <div class="invalid-feedback">
+                                                Debe seleccionar una imagen para el producto.
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Previsualización de imagen -->
+                                        <div class="text-center mb-3">
+                                            <div id="previewContainer" class="mt-3 mb-3">
+                                                <img th:if="${producto.rutaImagen != null}" th:src="@{${producto.rutaImagen}}" 
+                                                     id="previewImage" class="img-thumbnail" alt="Vista previa"
+                                                     style="max-height: 200px; max-width: 100%;">
+                                                <img th:if="${producto.rutaImagen == null}" src="" 
+                                                     id="previewNewImage" class="img-thumbnail d-none" alt="Vista previa"
+                                                     style="max-height: 200px; max-width: 100%;">
+                                            </div>
+                                            <div th:if="${producto.rutaImagen == null}" class="alert alert-info" id="noImageMessage">
+                                                <i class="fas fa-info-circle"></i> Sin imagen seleccionada
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Botones de acción -->
+                                <div class="d-flex justify-content-between mt-4">
+                                    <a th:href="@{/admin/productos}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Volver
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Guardar Producto
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
+        
+        <!-- Scripts específicos para este formulario -->
+        <script>
+            // Validación del formulario
+            (function () {
+                'use strict'
+                
+                // Fetch all forms we want to apply validation to
+                var forms = document.querySelectorAll('.needs-validation')
+                
+                // Loop over them and prevent submission
+                Array.prototype.slice.call(forms)
+                    .forEach(function (form) {
+                        form.addEventListener('submit', function (event) {
+                            if (!form.checkValidity()) {
+                                event.preventDefault()
+                                event.stopPropagation()
+                            }
+                            
+                            form.classList.add('was-validated')
+                        }, false)
+                    })
+            })()
+            
+            // Previsualización de imagen
+            document.getElementById('archivo').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    const previewNewImage = document.getElementById('previewNewImage');
+                    const previewImage = document.getElementById('previewImage');
+                    const noImageMessage = document.getElementById('noImageMessage');
+                    
+                    reader.onload = function(e) {
+                        // Si hay una imagen existente
+                        if (previewImage) {
+                            previewImage.src = e.target.result;
+                        }
+                        
+                        // Para nueva imagen
+                        previewNewImage.src = e.target.result;
+                        previewNewImage.classList.remove('d-none');
+                        
+                        // Ocultar mensaje de no imagen
+                        if (noImageMessage) {
+                            noImageMessage.classList.add('d-none');
+                        }
+                    }
+                    
+                    reader.readAsDataURL(file);
+                }
+            });
+        </script>
+    </body>
+</html>
+

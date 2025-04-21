@@ -3,7 +3,10 @@ package com.fitforge.service;
 import java.util.List;
 
 import com.fitforge.domain.Producto;
-
+/**
+  *
+  * @author bryam
+  */
 public interface ProductoService {
     List<Producto> listarProductos();
     List<Producto> getProductos(boolean activos); 

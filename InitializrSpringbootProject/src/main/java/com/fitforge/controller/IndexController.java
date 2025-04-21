@@ -17,7 +17,7 @@ public class IndexController {
     public String index(Model model) {
 
         // Obtengo la lista completa de productos desde la base de datos
-        var productos = productoService.listarProductos();
+        var productos = productoService.getProductos(true);
 
         // Envio la lista de productos a la vista para mostrar productos destacados
         model.addAttribute("productos", productos);

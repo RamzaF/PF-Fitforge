@@ -8,8 +8,15 @@
         <!-- Header -->
         <header th:replace="~{layout/plantilla :: header}"/>
 
-        <div th:if="${param.loginSuccess != null}" class="alert alert-success text-center">
-            ¡Bienvenido, <span sec:authentication="name">Usuario</span>! Has iniciado sesión correctamente.
+        <!-- Mensajes -->
+        <div th:if="${param.registerSuccess}" class="alert alert-success text-center">
+            ¡Registro exitoso! Por favor, inicia sesión.
+        </div>
+        <div th:if="${param.error}" class="alert alert-danger text-center">
+            Correo o contraseña incorrectos.
+        </div>
+        <div th:if="${param.logout}" class="alert alert-info text-center">
+            Has cerrado sesión correctamente.
         </div>
         
         <!-- Hero Section -->
@@ -17,7 +24,7 @@
             <!-- Imagen de fondo con overlay para mejor contraste -->
             <div class="hero-bg position-absolute top-0 start-0 w-100" style="min-height: 50vh;">
                 <div class="overlay-dark position-absolute top-0 start-0 w-100 h-100"></div>
-                <img th:src="@{/uploads/Banner.PNG}" alt="Background" class="w-100 h-100 object-fit-cover position-absolute top-0 start-0">
+                <img th:src="@{/Uploads/Banner.PNG}" alt="Background" class="w-100 h-100 object-fit-cover position-absolute top-0 start-0">
             </div>
             <!-- Hero con animación y colores de marca -->
             <div class="position-relative hero-content d-flex align-items-center justify-content-center w-100" style="min-height: 50vh;">
@@ -39,15 +46,6 @@
                     <div class="col-md-6 col-lg-5">
                         <div class="card shadow-sm p-4 bg-white rounded">
                             <h2 class="text-center fw-bold mb-4">Ingresa tus datos</h2>
-
-
-                            <!-- Mensajes de error o logout -->
-                            <div th:if="${param.error}" class="alert alert-danger text-center">
-                                Correo o contraseña incorrectos.
-                            </div>
-                            <div th:if="${param.logout}" class="alert alert-info text-center">
-                                Has cerrado sesión correctamente.
-                            </div>
                             <form th:action="@{/login}" method="post">
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Correo Electrónico</label>

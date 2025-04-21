@@ -13,7 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Collections;
 import java.util.List;
-
+/**
+  *
+  * @author bryam
+  */
 @Controller
 @RequestMapping("/tienda")
 public class TiendaController {

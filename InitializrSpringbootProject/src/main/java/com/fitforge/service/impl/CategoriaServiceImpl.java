@@ -10,7 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fitforge.dao.CategoriaDao;
 import com.fitforge.domain.Categoria;
 import com.fitforge.service.CategoriaService;
-
+/**
+  *
+  * @author bryam
+  */
 @Service
 public class CategoriaServiceImpl implements CategoriaService {
 
