@@ -1,24 +1,28 @@
 package com.fitforge.controller;
 
-import com.fitforge.domain.Producto;
-import com.fitforge.service.CategoriaService;
-import com.fitforge.service.LocalStorageService;
-import com.fitforge.service.ProductoService;
-import com.fitforge.service.ProductoColorTallaService;
-import com.fitforge.domain.ProductoColorTalla;
+import java.io.IOException;
 
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fitforge.domain.Producto;
+import com.fitforge.domain.ProductoColorTalla;
+import com.fitforge.service.CategoriaService;
+import com.fitforge.service.LocalStorageService;
+import com.fitforge.service.ProductoColorTallaService;
+import com.fitforge.service.ProductoService;
 
 /**
  * Controlador para la administración de productos.
@@ -141,16 +145,28 @@ public class AdminProductoController {
     @PostMapping("/guardar-producto")
     public String guardarProducto(
             @ModelAttribute Producto producto,
-            @RequestParam(value = "imagenFile", required = false) MultipartFile archivo,
+            @RequestParam(value = "archivo", required = false) MultipartFile archivo,
             RedirectAttributes redirectAttributes) {
         
         try {
-            boolean esNuevo = (producto.getIdProducto() == null);
-            logger.info("Guardando producto: {} (esNuevo: {})", producto.getDescripcion(), esNuevo);
+            boolean esNuevo = (producto.getIdProducto() == null || producto.getIdProducto() == 0);
+            logger.info("Guardando producto: {} (esNuevo: {}, activo: {})", producto.getDescripcion(), esNuevo, producto.isActivo());
             
-            // Para productos nuevos, asegurarse que el ID sea null
+            // Para productos nuevos, asegurarse que el ID sea null para auto-generar
             if (esNuevo) {
                 producto.setIdProducto(null);
+            } else {
+                // Para productos existentes, obtener el producto actual para asegurar que mantengamos todos los datos
+                Producto productoActual = productoService.obtenerProductoPorId(producto.getIdProducto());
+                if (productoActual != null) {
+                    // Conservar la imagen si no se está subiendo una nueva
+                    if ((archivo == null || archivo.isEmpty()) && productoActual.getRutaImagen() != null) {
+                        producto.setRutaImagen(productoActual.getRutaImagen());
+                    }
+                    
+                    // Mantener la colección de ProductoColorTalla
+                    producto.setProductoColorTallas(productoActual.getProductoColorTallas());
+                }
             }
             
             // Si hay archivo de imagen, procesarlo
@@ -170,12 +186,11 @@ public class AdminProductoController {
                     redirectAttributes.addFlashAttribute("mensaje", "Error al procesar la imagen: " + e.getMessage());
                     redirectAttributes.addFlashAttribute("tipo", "warning");
                 }
-            
-            // Guardar o actualizar el producto
-            // Siempre guardar el producto después de procesar la imagen
-            // para asegurar que la ruta de la imagen se persista correctamente
-            productoService.guardarProducto(producto);
             }
+            
+            // Guardar producto con forzamiento de estado activo
+            logger.info("Estado del producto antes de guardar: activo={}", producto.isActivo());
+            productoService.guardarProducto(producto);
             
             // Crear entrada de inventario inicial para productos nuevos
             if (esNuevo) {
@@ -186,7 +201,10 @@ public class AdminProductoController {
                 logger.info("Creada entrada de inventario inicial para producto ID: {}", producto.getIdProducto());
             }
             
-            logger.info("Producto guardado correctamente, ID: {}", producto.getIdProducto());
+            // Forzar refrescar el producto desde la base de datos para confirmar que el estado es correcto
+            Producto productoGuardado = productoService.obtenerProductoPorId(producto.getIdProducto());
+            logger.info("Producto guardado correctamente, ID: {}, estado activo: {}", 
+                      productoGuardado.getIdProducto(), productoGuardado.isActivo());
             
             // Mensaje de éxito
             String mensaje = esNuevo ? "Producto creado correctamente" : "Producto actualizado correctamente";

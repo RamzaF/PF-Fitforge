@@ -1,9 +1,8 @@
 package com.fitforge.controller;
 
-import com.fitforge.domain.Producto;
-import com.fitforge.domain.Categoria;
-import com.fitforge.service.TiendaService;
-import com.fitforge.service.CategoriaService;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,8 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Collections;
-import java.util.List;
+import com.fitforge.domain.Categoria;
+import com.fitforge.domain.Producto;
+import com.fitforge.service.CategoriaService;
+import com.fitforge.service.TiendaService;
 /**
   *
   * @author bryam
@@ -29,7 +30,7 @@ public class TiendaController {
 
     @GetMapping({"/", "/listado", "/productos"})
     public String mostrarListado(Model model) {
-        List<Producto> lista = tiendaService.getProducto(false);
+        List<Producto> lista = tiendaService.getProducto(true);
         List<Categoria> categorias = categoriaService.getCategoria(false);
         model.addAttribute("productos", lista != null ? lista : Collections.emptyList());
         model.addAttribute("categorias", categorias != null ? categorias : Collections.emptyList());

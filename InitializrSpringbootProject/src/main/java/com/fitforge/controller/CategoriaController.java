@@ -5,6 +5,7 @@ package com.fitforge.controller;
   * @author bryam
   */
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -27,6 +28,11 @@ public class CategoriaController {
     public String verCategoria(@PathVariable String nombre, Model model) {
         // Obtener productos de la categoría
         List<Producto> productos = productoService.obtenerPorCategoria(nombre);
+        
+        // Filtrar para mostrar solo productos activos
+        productos = productos.stream()
+                .filter(Producto::isActivo)
+                .collect(Collectors.toList());
         
         // Agregar datos a la vista
         model.addAttribute("productos", productos);

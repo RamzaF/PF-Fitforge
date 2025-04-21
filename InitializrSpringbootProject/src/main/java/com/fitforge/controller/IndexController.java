@@ -16,7 +16,7 @@ public class IndexController {
     @GetMapping("/")
     public String index(Model model) {
 
-        // Obtengo la lista completa de productos desde la base de datos
+        // Obtengo la lista de productos activos desde la base de datos
         var productos = productoService.getProductos(true);
 
         // Envio la lista de productos a la vista para mostrar productos destacados

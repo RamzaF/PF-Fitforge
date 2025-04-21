@@ -126,7 +126,11 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     @Transactional(readOnly = true)
     public List<Producto> obtenerPorCategoria(String nombreCategoria) {
-        return productoDao.findByCategoria_Descripcion(nombreCategoria);
+        // Obtener productos por categoría y luego filtrar solo los activos
+        List<Producto> productos = productoDao.findByCategoria_Descripcion(nombreCategoria);
+        
+        // No necesitamos filtrar aquí ya que ahora filtramos en el controlador
+        return productos;
     }
 
     @Override

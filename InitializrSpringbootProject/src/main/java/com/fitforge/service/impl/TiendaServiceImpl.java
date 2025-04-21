@@ -1,18 +1,19 @@
 package com.fitforge.service.impl;
 
-import com.fitforge.dao.ProductoDao;
-import com.fitforge.dao.ColorDao;
-import com.fitforge.dao.TallaDao;
-import com.fitforge.domain.Producto;
-import com.fitforge.domain.Color;
-import com.fitforge.domain.Talla;
-import com.fitforge.service.TiendaService;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.fitforge.dao.ColorDao;
+import com.fitforge.dao.ProductoDao;
+import com.fitforge.dao.TallaDao;
+import com.fitforge.domain.Color;
+import com.fitforge.domain.Producto;
+import com.fitforge.domain.Talla;
+import com.fitforge.service.TiendaService;
 /**
   *
   * @author bryam
@@ -92,7 +93,11 @@ public class TiendaServiceImpl implements TiendaService {
     @Override
     @Transactional(readOnly = true)
     public List<Producto> getProductosFiltrados(List<Long> categorias, List<Long> colores, List<Long> tallas, Double precioMin, Double precioMax) {
-        List<Producto> lista = productoDao.findAll();
+        // Comenzamos con la lista de productos activos solamente
+        List<Producto> lista = productoDao.findAll().stream()
+                .filter(Producto::isActivo)
+                .collect(Collectors.toList());
+                
         if (categorias != null && !categorias.isEmpty()) {
             lista = lista.stream()
                     .filter(p -> categorias.contains(p.getCategoria().getIdCategoria()))
@@ -122,10 +127,20 @@ public class TiendaServiceImpl implements TiendaService {
     @Override
     @Transactional(readOnly = true)
     public List<Producto> buscarProductos(String termino) {
+        List<Producto> resultados;
+        
         if (termino == null || termino.trim().isEmpty()) {
-        return productoDao.findAll();
-    }
-        return productoDao.buscarPorTermino(termino.toLowerCase());
+            // Si no hay término de búsqueda, obtener todos los productos
+            resultados = productoDao.findAll();
+        } else {
+            // Buscar productos por término
+            resultados = productoDao.buscarPorTermino(termino.toLowerCase());
+        }
+        
+        // Filtrar para mostrar solo productos activos
+        return resultados.stream()
+                .filter(Producto::isActivo)
+                .collect(Collectors.toList());
     }
 
 }
