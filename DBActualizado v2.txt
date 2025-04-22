@@ -1,0 +1,244 @@
+-- Eliminar la base de datos si ya existe
+DROP DATABASE IF EXISTS fitforge_db;
+
+-- Crear la base de datos
+CREATE DATABASE fitforge_db;
+
+-- Usar la base de datos
+USE fitforge_db;
+
+-- Eliminar el usuario si ya existe
+DROP USER IF EXISTS 'fitforge_user'@'localhost';
+
+-- Crear el usuario para la base de datos
+CREATE USER 'fitforge_user'@'localhost' IDENTIFIED BY 'FitforgeClave123';
+GRANT ALL PRIVILEGES ON fitforge_db.* TO 'fitforge_user'@'localhost';
+FLUSH PRIVILEGES;
+
+-- ==========================
+-- 📌 TABLA DE CATEGORÍAS
+-- ==========================
+CREATE TABLE categoria (
+  id_categoria INT NOT NULL AUTO_INCREMENT,
+  descripcion VARCHAR(50) NOT NULL,
+  activo BOOLEAN DEFAULT TRUE,
+  PRIMARY KEY (id_categoria)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================
+-- 📌 TABLA DE PRODUCTOS
+-- ==========================
+CREATE TABLE producto (
+  id_producto INT NOT NULL AUTO_INCREMENT,
+  id_categoria INT NOT NULL,
+  descripcion VARCHAR(100) NOT NULL,
+  detalle TEXT NOT NULL,
+  precio DOUBLE NOT NULL,
+  imagen VARCHAR(255), -- Nueva columna para almacenar la ruta de la imagen
+  activo BOOLEAN DEFAULT TRUE,
+  PRIMARY KEY (id_producto),
+  FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================
+-- 📌 TABLA DE COLORES
+-- ==========================
+CREATE TABLE color (
+  id_color INT NOT NULL AUTO_INCREMENT,
+  nombre_color VARCHAR(50) NOT NULL,
+  PRIMARY KEY (id_color)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================
+-- 📌 TABLA DE TALLAS
+-- ==========================
+CREATE TABLE talla (
+  id_talla INT NOT NULL AUTO_INCREMENT,
+  nombre_talla VARCHAR(50) NOT NULL,
+  PRIMARY KEY (id_talla)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================
+-- 📌 TABLA DE PRODUCTO_COLOR_TALLA
+-- ==========================
+CREATE TABLE producto_color_talla (
+  id_producto_color_talla INT NOT NULL AUTO_INCREMENT,
+  id_producto INT NOT NULL,
+  id_color INT NULL, -- Permite NULL
+  id_talla INT NULL, -- Permite NULL
+  existencias INT NOT NULL,
+  PRIMARY KEY (id_producto_color_talla),
+  FOREIGN KEY (id_producto) REFERENCES producto(id_producto),
+  FOREIGN KEY (id_color) REFERENCES color(id_color),
+  FOREIGN KEY (id_talla) REFERENCES talla(id_talla)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================
+-- 📌 TABLA DE USUARIOS
+-- ==========================
+CREATE TABLE usuario (
+  id_usuario INT NOT NULL AUTO_INCREMENT,
+  username VARCHAR(20) NOT NULL,
+  password VARCHAR(512) NOT NULL,
+  nombre VARCHAR(50) NOT NULL,
+  correo VARCHAR(100) NOT NULL,
+  telefono VARCHAR(15),
+  avatar VARCHAR(255), -- Nueva columna para almacenar la imagen de perfil
+  activo BOOLEAN DEFAULT TRUE,
+  PRIMARY KEY (id_usuario)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================
+-- 📌 TABLA DE FACTURAS
+-- ==========================
+CREATE TABLE factura (
+  id_factura INT NOT NULL AUTO_INCREMENT,
+  id_usuario INT NOT NULL,
+  fecha DATE NOT NULL,
+  total DOUBLE NOT NULL,
+  estado ENUM('Pendiente', 'Pagada', 'Cancelada') DEFAULT 'Pendiente',
+  PRIMARY KEY (id_factura),
+  FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================
+-- 📌 TABLA DE VENTAS
+-- ==========================
+CREATE TABLE venta (
+  id_venta INT NOT NULL AUTO_INCREMENT,
+  id_factura INT NOT NULL,
+  id_producto INT NOT NULL,
+  precio DOUBLE NOT NULL,
+  cantidad INT NOT NULL,
+  PRIMARY KEY (id_venta),
+  FOREIGN KEY (id_factura) REFERENCES factura(id_factura),
+  FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================
+-- 📌 TABLA DE ROLES
+-- ==========================
+CREATE TABLE rol (
+  id_rol INT NOT NULL AUTO_INCREMENT,
+  nombre VARCHAR(20) NOT NULL,
+  id_usuario INT NOT NULL,
+  PRIMARY KEY (id_rol),
+  FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================
+-- 📌 TABLA DE PERMISOS (SECURITY)
+-- ==========================
+CREATE TABLE request_matcher (
+  id_request_matcher INT AUTO_INCREMENT NOT NULL,
+  pattern VARCHAR(255) NOT NULL,
+  role_name VARCHAR(50) NOT NULL,
+  PRIMARY KEY (id_request_matcher)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================
+-- 📌 TABLA DE CONTACTO
+-- ==========================
+CREATE TABLE contacto (
+  id_contacto INT NOT NULL AUTO_INCREMENT,
+  nombre VARCHAR(50) NOT NULL,
+  apellido VARCHAR(50) NOT NULL,
+  correo VARCHAR(100) NOT NULL,
+  mensaje VARCHAR(255),
+  activo BOOLEAN DEFAULT TRUE,
+  PRIMARY KEY (id_contacto)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================
+-- 📌 INSERTS INICIALES
+-- ==========================
+
+-- 📌 Insertar Categorías
+INSERT INTO categoria (descripcion, activo) VALUES
+('Ropa Deportiva', TRUE),
+('Suplementos', TRUE),
+('Accesorios', TRUE);
+
+-- 📌 Insertar Productos de FitForge
+INSERT INTO producto (id_categoria, descripcion, detalle, precio, imagen, activo) VALUES
+(1, 'Camiseta Gymshark', 'Camiseta ajustada para entrenamiento', 25000, '/uploads/gymshark_camisa.png', TRUE),
+(1, 'Pantaloneta YoungLA', 'Short cómodo para entrenamiento', 27000, '/uploads/youngla_short.png', TRUE),
+(2, 'Proteína Whey 2LB', 'Proteína de suero 2LB sabor vainilla', 40000, '/uploads/proteina_whey.png', TRUE),
+(2, 'Creatina Monohidratada', 'Creatina 300g para mayor rendimiento', 22000, '/uploads/creatina.png', TRUE),
+(3, 'Guantes de Entrenamiento', 'Guantes de agarre para pesas', 18000, '/uploads/guantes_gym.png', TRUE);
+
+-- 📌 Insertar Colores
+INSERT INTO color (nombre_color) VALUES
+('red'),
+('blue'),
+('green'),
+('black'),
+('white');
+
+-- 📌 Insertar Tallas
+INSERT INTO talla (nombre_talla) VALUES
+('S'),
+('M'),
+('L'),
+('XL'),
+('XXL');
+
+-- 📌 Insertar Existencias por Producto, Color y Talla
+-- Camiseta Gymshark (id_producto = 1)
+INSERT INTO producto_color_talla (id_producto, id_color, id_talla, existencias) VALUES
+(1, 1, 3, 5), -- 5 unidades de Camiseta Gymshark Roja Talla L
+(1, 2, 2, 3), -- 3 unidades de Camiseta Gymshark Azul Talla M
+(1, 3, 1, 2); -- 2 unidades de Camiseta Gymshark Verde Talla S
+
+-- Pantaloneta YoungLA (id_producto = 2)
+INSERT INTO producto_color_talla (id_producto, id_color, id_talla, existencias) VALUES
+(2, 4, 1, 7), -- 7 unidades de Pantaloneta YoungLA Negra Talla S
+(2, 5, 2, 4); -- 4 unidades de Pantaloneta YoungLA Blanca Talla M
+
+-- Proteína Whey 2LB (id_producto = 3)
+INSERT INTO producto_color_talla (id_producto, id_color, id_talla, existencias) VALUES
+(3, NULL, NULL, 8); -- 8 unidades de Proteína Whey 2LB (sin color ni talla)
+
+-- Creatina Monohidratada (id_producto = 4)
+INSERT INTO producto_color_talla (id_producto, id_color, id_talla, existencias) VALUES
+(4, NULL, NULL, 12); -- 12 unidades de Creatina Monohidratada (sin color ni talla)
+
+-- Guantes de Entrenamiento (id_producto = 5)
+INSERT INTO producto_color_talla (id_producto, id_color, id_talla, existencias) VALUES
+(5, 4, NULL, 10), -- 10 unidades de Guantes Negros (sin talla específica)
+(5, 5, NULL, 10); -- 10 unidades de Guantes Blancos (sin talla específica)
+
+-- 📌 Insertar Usuarios
+INSERT INTO usuario (username, password, nombre, correo, telefono, avatar, activo) VALUES
+('admin', '$2a$10$P1.w58XvnaYQUQgZUCk4aO/RTRl8EValluCqB3S2VMLTbRt.tlre.', 'Eduin M', 'admin@fitforge.com', '12345678', '/uploads/avatar_admin.png', TRUE),
+('cliente1', '$2a$10$GkEj.ZzmQa/aEfDmtLIh3udIH5fMphx/35d0EYeqZL5uzgCJ0lQRi', 'Jubelky G', 'jubelky@fitforge.com', '87654321', '/uploads/avatar_cliente1.png', TRUE);
+
+-- 📌 Insertar Roles
+INSERT INTO rol (nombre, id_usuario) VALUES
+('ROLE_ADMIN', 1),
+('ROLE_USER', 2);
+
+-- 📌 Insertar Permisos
+INSERT INTO request_matcher (pattern, role_name) VALUES
+('/producto/nuevo', 'ADMIN'),
+('/producto/guardar', 'ADMIN'),
+('/producto/modificar/**', 'ADMIN'),
+('/producto/eliminar/**', 'ADMIN'),
+('/categoria/nuevo', 'ADMIN'),
+('/categoria/guardar', 'ADMIN'),
+('/categoria/modificar/**', 'ADMIN'),
+('/categoria/eliminar/**', 'ADMIN'),
+('/usuario/nuevo', 'ADMIN'),
+('/usuario/guardar', 'ADMIN'),
+('/usuario/modificar/**', 'ADMIN'),
+('/usuario/eliminar/**', 'ADMIN'),
+('/facturar/carrito', 'USER');
+
+-- 📌 Insertar Contacto
+INSERT INTO contacto (nombre, apellido, correo, mensaje, activo) VALUES
+('Bryan', 'Moya Marenco', 'bmoya50254@ufide.ac.cr', 'Informacion sobre suplementos', TRUE),
+('Carlos', 'Martinez Castro', 'carlosmc@gmai;.com', 'Informacion sobre camisetas', TRUE);
+
+_-- 📌 Token Password users 
+ALTER TABLE usuario
+ADD COLUMN reset_token VARCHAR(255)NULL;
