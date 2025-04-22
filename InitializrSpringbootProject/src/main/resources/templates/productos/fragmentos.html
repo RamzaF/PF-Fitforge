@@ -9,12 +9,7 @@
             <div class="mb-3">
                 <img th:src="@{${producto.imagen}}" alt="Imagen 1" class="img-fluid rounded-4" style="width: 230px; height: 300px; object-fit: cover;">
             </div>
-            <div class="mb-3">
-                <img th:src="@{${producto.imagen}}" alt="Imagen 2" class="img-fluid rounded-4" style="width: 230px; height: 300px; object-fit: cover;">
-            </div>
-            <div>
-                <img th:src="@{${producto.imagen}}" alt="Imagen 3" class="img-fluid rounded-4" style="width: 230px; height: 300px; object-fit: cover;">
-            </div>
+
         </aside>
 
         <!-- Fragmento de detalles del producto -->
@@ -36,46 +31,55 @@
                         </div>
                         <!-- Si no es admin, mostrar tallas, colores, cantidad y botón agregar al carrito -->
                         <div th:if="${!esAdmin}">
-                            <!-- Colores dinámicos -->
-                            <div class="product-color">
-                                <h2>Colores disponibles:</h2>
-                                <div class="color-options">
-                                    <button th:each="pct : ${producto.productoColorTallas}"
-                                            th:class="'color-option ' + ${pct.color != null ? pct.color.nombreColor.toLowerCase() : 'no-color'}"
-                                            th:style="'background-color: ' + ${pct.color != null ? pct.color.nombreColor : 'gray'}"
-                                            th:title="${pct.color != null ? pct.color.nombreColor : 'Sin color'}">
-                                    </button>
-                                    <span th:if="${#lists.isEmpty(producto.productoColorTallas)}" class="text-muted">Sin colores disponibles</span>
-                                </div>
-                            </div>
-                            <!-- Tallas dinámicas -->
-                            <div class="product-size">
-                                <h2>Tallas disponibles:</h2>
-                                <div class="size-options">
-                                    <span th:if="${isTallaUnica}" class="badge-talla-unica">
-                                        Artículo talla única
-                                    </span>
-                                    <span th:unless="${isTallaUnica}">
+                            <!-- Validación para categoría "Suplementos" (idCategoria = 2) -->
+                            <div th:if="${producto.categoria != null and producto.categoria.idCategoria != 2}">
+                                <!-- Colores dinámicos -->
+                                <div class="product-color">
+                                    <h2>Colores disponibles:</h2>
+                                    <div class="color-options">
                                         <button th:each="pct : ${producto.productoColorTallas}"
-                                                th:if="${pct.talla != null and pct.existencias > 0}"
-                                                th:class="'size-option ' + ${pct.talla != null ? pct.talla.nombreTalla : ''}"
-                                                th:text="${pct.talla != null ? pct.talla.nombreTalla : ''}">
+                                                th:class="'color-option ' + ${pct.color != null ? pct.color.nombreColor.toLowerCase() : 'no-color'}"
+                                                th:style="'background-color: ' + ${pct.color != null ? pct.color.nombreColor : 'gray'}"
+                                                th:title="${pct.color != null ? pct.color.nombreColor : 'Sin color'}">
                                         </button>
-                                        <span th:if="${#lists.isEmpty(producto.productoColorTallas) or not hasAvailableTallas}"
-                                              class="text-muted">
-                                            Sin tallas disponibles
-                                        </span>
-                                    </span>
+                                        <span th:if="${#lists.isEmpty(producto.productoColorTallas)}" class="text-muted">Sin colores disponibles</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <!-- Cantidad y botón agregar al carrito -->
-                            <div class="product-quantity"></div>
+                                </div>
+                                <!-- Tallas dinámicas -->
+                                <div class="product-size">
+                                    <h2>Tallas disponibles:</h2>
+                                    <div class="size-options">
+                                        <span th:if="${isTallaUnica}" class="badge-talla-unica">
+                                            Artículo talla única
+                                        </span>
+                                        <span th:unless="${isTallaUnica}">
+                                            <button th:each="pct : ${producto.productoColorTallas}"
+                                                    th:if="${pct.talla != null and pct.existencias > 0}"
+                                                    th:class="'size-option ' + ${pct.talla != null ? pct.talla.nombreTalla : ''}"
+                                                    th:text="${pct.talla != null ? pct.talla.nombreTalla : ''}">
+                                            </button>
+                                            <span th:if="${#lists.isEmpty(producto.productoColorTallas) or not hasAvailableTallas}"
+                                                  class="text-muted">
+                                                Sin tallas disponibles
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <!-- Mostrar descripción si es categoría "Suplementos" o categoría nula -->
+                                <div th:if="${producto.categoria == null or producto.categoria.idCategoria == 2}" class="product-description">
+                                    <h2>Descripción</h2>
+                                    <p class="lead" th:text="${producto.detalle}">Descripción del producto...</p>
+                                </div>
+
+                                <!-- Cantidad y botón agregar al carrito -->
+                                <div class="product-quantity"></div>
                                 <h2>Cantidad</h2>
                                 <div class="quantity-control">
                                     <button class="quantity-btn minus">-</button>
                                     <input type="text" class="quantity-input" value="1" readonly>
-                                    <button class="quantity-btn plus">+</button>
-                                    <span th:attr="data-stock=${producto.productoColorTallas[0].existencias != null ? producto.productoColorTallas[0].existencias : 0}" style="display:none;"></span>
+                                        <button class="quantity-btn plus">+</button>
+                                        <span th:attr="data-stock=${producto.productoColorTallas[0].existencias != null ? producto.productoColorTallas[0].existencias : 0}" style="display:none;"></span>
                                 </div>
                             </div>
                             <a th:if="${!#lists.isEmpty(producto.productoColorTallas) and producto.productoColorTallas[0].idProductoColorTalla != null}"
@@ -86,6 +90,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         </section>
     </body>

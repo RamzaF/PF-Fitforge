@@ -1,21 +1,17 @@
-/* --- Mis ajustes para los productos destacados del Home FitForge --- */
-
-/* Personalicé las tarjetas de productos con estas características */
 .featured-products .card {
     transition: transform 0.3s, box-shadow 0.3s;
-    border-radius: 12px; /* Agregué bordes suaves */
-    overflow: hidden; /* Evito que las imágenes sobresalgan */
+    border-radius: 12px; 
+    overflow: hidden; 
 }
 
 .featured-products .card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 8px 16px rgba(30, 30, 30, 0.2); /*  sombra suave con el negro de la marca #1E1E1E */
+    box-shadow: 0 8px 16px rgba(30, 30, 30, 0.2); 
 }
 
-/* Mis estilos para las imágenes de productos */
 .featured-products .card-img-top {
     height: 250px;
-    object-fit: cover; /* Hago que las imágenes cubran todo el espacio sin deformarse */
+    object-fit: cover; 
 }
 
 /*  colores principales de FitForge en botones */
@@ -338,7 +334,7 @@ body {
 .brand-logo img {
     max-height: 100%;
     max-width: 100%;
-    object-fit: contain; /*  proporción correcta */
+    object-fit: contain; 
 }
 
 .brands-container {
@@ -347,7 +343,6 @@ body {
 
 /* === Mis estilos para la plantilla principal === */
 
-/* Definí estilos generales */
 body {
     font-family: 'Montserrat', sans-serif;
     color: #1E1E1E;
@@ -398,8 +393,6 @@ body {
 .dropdown-item:active {
     background-color: #2ECC71;
 }
-
-/* Personalicé el footer */
 footer {
     background-color: #1E1E1E !important;
 }
@@ -1052,4 +1045,5 @@ footer .border-secondary {
     .team-img-container {
         height: 180px;
     }
+}
 }
