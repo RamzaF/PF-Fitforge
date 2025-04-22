@@ -80,7 +80,12 @@
                                     <!-- Precio con estilo destacado -->
                                     <p class="h4 text-primary fw-bold mb-3 product-price-tienda" th:text="'₡ ' + ${producto.precio}" style="font-size: 1.8rem;">₡ Precio</p>
                                     <!-- Botón con efecto hover -->
-                                    <a th:href="@{'/productos/' + ${producto.idProducto}}" class="btn btn-outline-primary w-100 product-btn-tienda" style="font-size: 1.2rem;">Ver detalles</a>
+                                    <a th:if="${esAdmin}" th:href="@{'/admin/productos/editar/' + ${producto.idProducto}}" class="btn btn-warning w-100">
+                                        Editar
+                                    </a>
+                                    <a th:if="${!esAdmin}" th:href="@{'/productos/' + ${producto.idProducto}}" class="btn btn-outline-primary w-100 product-btn-tienda" style="font-size: 1.2rem;">
+                                        Ver detalles
+                                    </a>
                                 </div>
                             </div>
                         </div>

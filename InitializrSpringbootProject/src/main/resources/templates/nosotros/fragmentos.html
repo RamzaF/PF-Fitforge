@@ -7,73 +7,207 @@
 </head>
 <body>
     <div th:fragment="nosotros">
-        <!-- Sección: Nosotros somos Excelencia -->
+        <!-- Hero Section con efecto parallax -->
+        <section class="py-5 position-relative" style="background: url('/uploads/gym-equipment-dark.jpg') no-repeat center center; background-size: cover; background-attachment: fixed;">
+            <div class="overlay-dark"></div>
+            <div class="container py-5 position-relative" style="z-index: 2;">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 text-center text-white">
+                        <h1 class="display-4 fw-bold mb-4 fade-in">CONOCE FITFORGE</h1>
+                        <p class="lead fs-4 slide-up">Tu aliado en el mundo del fitness desde 2015</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección: Nosotros somos Excelencia con imagen -->
         <section class="py-5">
             <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-8 text-center">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 mb-4 mb-lg-0">
+                        <img src="/uploads/FitForge.png" alt="Logo FitForge" class="img-fluid rounded shadow-lg">
+                    </div>
+                    <div class="col-lg-6">
                         <h2 class="fw-bold mb-4 section-title">Nosotros somos Excelencia</h2>
                         <p class="lead">
                             En FitForge, nos apasiona el mundo del deporte y el fitness. Nos dedicamos a ofrecer ropa, accesorios y suplementos deportivos de la más alta calidad, diseñados para ayudarte a rendir al máximo y sentirte bien mientras lo haces.
                         </p>
+                        <div class="d-flex align-items-center mt-4">
+                            <div class="me-4">
+                                <span class="display-6 fw-bold text-primary">100+</span>
+                                <p class="mb-0">Productos</p>
+                            </div>
+                            <div class="me-4">
+                                <span class="display-6 fw-bold text-primary">10+</span>
+                                <p class="mb-0">Marcas</p>
+                            </div>
+                            <div>
+                                <span class="display-6 fw-bold text-primary">1000+</span>
+                                <p class="mb-0">Clientes felices</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Sección: Formados en 2015 -->
+        <!-- Historia de la marca con línea temporal -->
         <section class="py-5 bg-light">
             <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-8 text-center">
-                        <h2 class="fw-bold mb-4 section-title">Formados en 2015</h2>
-                        <p class="lead">
-                            Desde nuestro inicio en 2015, hemos trabajado incansablemente para convertirnos en un aliado confiable para deportistas de todos los niveles. Nuestra experiencia nos permite combinar estilo, funcionalidad y calidad en cada producto que ofrecemos.
-                        </p>
+                <h2 class="text-center fw-bold mb-5 section-title">Nuestra Historia</h2>
+                <div class="timeline position-relative">
+                    <!-- 2015 -->
+                    <div class="row mb-5">
+                        <div class="col-lg-6 text-end pe-lg-5">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-body">
+                                    <h4 class="fw-bold text-primary">2015</h4>
+                                    <h5>El comienzo</h5>
+                                    <p>Fundamos FitForge con una simple misión: ofrecer equipamiento deportivo de calidad a precios accesibles.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6"></div>
                     </div>
+                    <!-- 2018 -->
+                    <div class="row mb-5">
+                        <div class="col-lg-6"></div>
+                        <div class="col-lg-6 text-start ps-lg-5">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-body">
+                                    <h4 class="fw-bold text-primary">2018</h4>
+                                    <h5>Expansión</h5>
+                                    <p>Incorporamos nuevas marcas premium y ampliamos nuestra oferta de productos para diferentes disciplinas deportivas.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 2020 -->
+                    <div class="row mb-5">
+                        <div class="col-lg-6 text-end pe-lg-5">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-body">
+                                    <h4 class="fw-bold text-primary">2020</h4>
+                                    <h5>Tienda Online</h5>
+                                    <p>Lanzamos nuestra plataforma de comercio electrónico para llevar nuestros productos a todo el país.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6"></div>
+                    </div>
+                    <!-- 2023 -->
+                    <div class="row">
+                        <div class="col-lg-6"></div>
+                        <div class="col-lg-6 text-start ps-lg-5">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-body">
+                                    <h4 class="fw-bold text-primary">2023</h4>
+                                    <h5>Presente y Futuro</h5>
+                                    <p>Seguimos innovando y expandiéndonos para ofrecer la mejor experiencia a nuestros clientes.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Línea vertical -->
+                    <div class="timeline-line"></div>
                 </div>
             </div>
         </section>
 
-        <!-- Sección: Nuestra Misión -->
+        <!-- Sección: Nuestra Misión, Visión y Valores en cards -->
         <section class="py-5">
             <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-8 text-center">
-                        <h2 class="fw-bold mb-4 section-title">Nuestra Misión</h2>
-                        <p class="lead">
-                            Nuestra misión es inspirar y equipar a la comunidad deportiva con productos excepcionales que impulsen el rendimiento y reflejen un estilo de vida activo. Nos esforzamos por ofrecer ropa, accesorios y suplementos que combinen innovación, comodidad y diseño, apoyando a cada persona en su camino hacia sus metas fitness.
-                        </p>
+                <div class="row g-4">
+                    <!-- Misión -->
+                    <div class="col-lg-4">
+                        <div class="card h-100 border-0 shadow-sm hover-card">
+                            <div class="card-body text-center p-4">
+                                <div class="icon-box mb-4 mx-auto">
+                                    <i class="bi bi-bullseye fs-1 text-primary"></i>
+                                </div>
+                                <h3 class="fw-bold mb-3">Nuestra Misión</h3>
+                                <p>
+                                    Inspirar y equipar a la comunidad deportiva con productos excepcionales que impulsen el rendimiento y reflejen un estilo de vida activo.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Visión -->
+                    <div class="col-lg-4">
+                        <div class="card h-100 border-0 shadow-sm hover-card">
+                            <div class="card-body text-center p-4">
+                                <div class="icon-box mb-4 mx-auto">
+                                    <i class="bi bi-eye fs-1 text-primary"></i>
+                                </div>
+                                <h3 class="fw-bold mb-3">Nuestra Visión</h3>
+                                <p>
+                                    Ser reconocidos como la tienda deportiva líder, brindando productos innovadores que transformen la vida de las personas a través del deporte.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Propósito -->
+                    <div class="col-lg-4">
+                        <div class="card h-100 border-0 shadow-sm hover-card">
+                            <div class="card-body text-center p-4">
+                                <div class="icon-box mb-4 mx-auto">
+                                    <i class="bi bi-heart fs-1 text-primary"></i>
+                                </div>
+                                <h3 class="fw-bold mb-3">Nuestro Propósito</h3>
+                                <p>
+                                    Transformar vidas a través del deporte, haciendo que la actividad física sea accesible y gratificante para todos.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Sección: Nuestros Valores (reemplaza los rectángulos) -->
+        <!-- Sección: Nuestros Valores con iconos y animaciones -->
         <section class="py-5 bg-light">
             <div class="container">
                 <h2 class="text-center fw-bold mb-5 section-title">Nuestros Valores</h2>
-                <div class="row text-center">
-                    <div class="col-md-4">
-                        <div class="mb-4">
-                            <i class="bi bi-star-fill" style="font-size: 2rem; color: #2ECC71;"></i>
+                <div class="row g-4 text-center">
+                    <div class="col-md-4 mb-4">
+                        <div class="value-card p-4 rounded-circle mx-auto d-flex align-items-center justify-content-center mb-4">
+                            <i class="bi bi-star-fill fs-1 text-primary"></i>
                         </div>
                         <h4 class="fw-bold">Calidad</h4>
-                        <p>Productos duraderos y confiables para tu día a día.</p>
+                        <p>Nos comprometemos a ofrecer productos duraderos y confiables para que tu rendimiento no se vea limitado.</p>
                     </div>
-                    <div class="col-md-4">
-                        <div class="mb-4">
-                            <i class="bi bi-heart-fill" style="font-size: 2rem; color: #2ECC71;"></i>
+                    <div class="col-md-4 mb-4">
+                        <div class="value-card p-4 rounded-circle mx-auto d-flex align-items-center justify-content-center mb-4">
+                            <i class="bi bi-heart-fill fs-1 text-primary"></i>
                         </div>
                         <h4 class="fw-bold">Pasión</h4>
-                        <p>Vivimos el deporte y lo compartimos contigo.</p>
+                        <p>Vivimos y respiramos el deporte, compartiendo esa pasión en cada producto que ofrecemos.</p>
                     </div>
-                    <div class="col-md-4">
-                        <div class="mb-4">
-                            <i class="bi bi-rocket-takeoff-fill" style="font-size: 2rem; color: #2ECC71;"></i>
+                    <div class="col-md-4 mb-4">
+                        <div class="value-card p-4 rounded-circle mx-auto d-flex align-items-center justify-content-center mb-4">
+                            <i class="bi bi-rocket-takeoff-fill fs-1 text-primary"></i>
                         </div>
                         <h4 class="fw-bold">Rendimiento</h4>
-                        <p>Te ayudamos a superar tus límites.</p>
+                        <p>Te ayudamos a superar tus límites con productos diseñados para maximizar tu potencial.</p>
+                    </div>
+                </div>
+
+        </section>
+
+
+
+        <!-- CTA - Unirse a la comunidad -->
+        <section class="py-5 cta-section" style="background: linear-gradient(135deg, #1A9AAA, #2ECC71);">
+            <div class="container py-4">
+                <div class="row align-items-center">
+                    <div class="col-lg-8 text-white">
+                        <h2 class="fw-bold mb-3">Únete a la comunidad FitForge</h2>
+                        <p class="lead mb-0">Sé parte de nuestra comunidad activa y recibe ofertas exclusivas, consejos y más.</p>
+                    </div>
+                    <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                        <a href="http://localhost:8080/register" class="btn btn-light-accent btn-lg px-4 py-2">Registrarse ahora</a>
                     </div>
                 </div>
             </div>

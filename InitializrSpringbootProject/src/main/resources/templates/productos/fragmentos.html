@@ -28,8 +28,14 @@
                         <h1 th:text="${producto.descripcion}">Camiseta Gymshark</h1>
                         <p class="product-price" th:text="'$ ' + ${#numbers.formatDecimal(producto.precio, 0, 'COMMA', 2, 'POINT')}">$25,000.00</p>
 
-                        <!-- Validación para categoría "Suplementos" (idCategoria = 2) -->
-                        <div th:if="${producto.categoria != null and producto.categoria.idCategoria != 2}">
+                        <!-- Si es admin, mostrar solo botón de editar -->
+                        <div th:if="${esAdmin}">
+                            <a th:href="@{'/admin/productos/modifica/' + ${producto.idProducto}}" class="btn btn-warning">
+                                Editar producto
+                            </a>
+                        </div>
+                        <!-- Si no es admin, mostrar tallas, colores, cantidad y botón agregar al carrito -->
+                        <div th:if="${!esAdmin}">
                             <!-- Colores dinámicos -->
                             <div class="product-color">
                                 <h2>Colores disponibles:</h2>
@@ -39,28 +45,22 @@
                                             th:style="'background-color: ' + ${pct.color != null ? pct.color.nombreColor : 'gray'}"
                                             th:title="${pct.color != null ? pct.color.nombreColor : 'Sin color'}">
                                     </button>
-                                    <!-- Si no hay colores -->
                                     <span th:if="${#lists.isEmpty(producto.productoColorTallas)}" class="text-muted">Sin colores disponibles</span>
                                 </div>
                             </div>
-
                             <!-- Tallas dinámicas -->
                             <div class="product-size">
                                 <h2>Tallas disponibles:</h2>
                                 <div class="size-options">
-                                    <!-- Verificar si es talla única -->
                                     <span th:if="${isTallaUnica}" class="badge-talla-unica">
                                         Artículo talla única
                                     </span>
-                                    <!-- Si no es talla única, mostrar las tallas disponibles -->
                                     <span th:unless="${isTallaUnica}">
-                                        <!-- Mostrar tallas dinámicas -->
                                         <button th:each="pct : ${producto.productoColorTallas}"
                                                 th:if="${pct.talla != null and pct.existencias > 0}"
                                                 th:class="'size-option ' + ${pct.talla != null ? pct.talla.nombreTalla : ''}"
                                                 th:text="${pct.talla != null ? pct.talla.nombreTalla : ''}">
                                         </button>
-                                        <!-- Si no hay tallas disponibles -->
                                         <span th:if="${#lists.isEmpty(producto.productoColorTallas) or not hasAvailableTallas}"
                                               class="text-muted">
                                             Sin tallas disponibles
@@ -68,38 +68,22 @@
                                     </span>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Mostrar descripción si es categoría "Suplementos" o categoría nula -->
-                        <div th:if="${producto.categoria == null or producto.categoria.idCategoria == 2}" class="product-description">
-                            <h2>Descripción</h2>
-                            <p class="lead" th:text="${producto.detalle}">Descripción del producto...</p>
-                        </div>
-
-                        <!-- Cantidad -->
-                        <div class="product-quantity">
-                            <h2>Cantidad</h2>
-                            <div class="quantity-control">
-                                <button class="quantity-btn minus">-</button>
-                                <input type="text" class="quantity-input" value="1" readonly>
+                            <!-- Cantidad y botón agregar al carrito -->
+                            <div class="product-quantity"></div>
+                                <h2>Cantidad</h2>
+                                <div class="quantity-control">
+                                    <button class="quantity-btn minus">-</button>
+                                    <input type="text" class="quantity-input" value="1" readonly>
                                     <button class="quantity-btn plus">+</button>
-                                    <!-- Almacenar el stock máximo como un atributo de datos -->
                                     <span th:attr="data-stock=${producto.productoColorTallas[0].existencias != null ? producto.productoColorTallas[0].existencias : 0}" style="display:none;"></span>
+                                </div>
                             </div>
+                            <a th:if="${!#lists.isEmpty(producto.productoColorTallas) and producto.productoColorTallas[0].idProductoColorTalla != null}"
+                               th:href="@{'/carrito/agregar/' + ${producto.productoColorTallas[0].idProductoColorTalla}}"
+                               class="btn btn-primary add-to-cart">
+                                Agregar al carrito
+                            </a>
                         </div>
-
-                        <a th:if="${!#lists.isEmpty(producto.productoColorTallas) and producto.productoColorTallas[0].idProductoColorTalla != null}"
-                        th:href="@{'/carrito/agregar/' + ${producto.productoColorTallas[0].idProductoColorTalla}}"
-                        class="btn btn-primary add-to-cart">
-                        Agregar al carrito
-                     </a>
-                     
-                     <!-- Si no hay combinaciones válidas -->
-                     <span th:if="${#lists.isEmpty(producto.productoColorTallas) or producto.productoColorTallas[0].idProductoColorTalla == null}"
-                           class="text-muted">
-                        No disponible para agregar al carrito
-                     </span>
-                     
                     </div>
                 </div>
             </div>

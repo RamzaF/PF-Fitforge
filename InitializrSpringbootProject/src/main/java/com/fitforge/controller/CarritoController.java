@@ -1,6 +1,9 @@
 package com.fitforge.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +27,19 @@ public class CarritoController {
     @Autowired
     private ProductoColorTallaService productoColorTallaService;
 
+    private boolean esUsuarioNormal() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            return false;
+        }
+        for (GrantedAuthority authority : auth.getAuthorities()) {
+            if (authority.getAuthority().equals("ROLE_ADMIN")) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @GetMapping("")
     public String redirigirCarrito() {
         return "redirect:/carrito/ver";
@@ -31,15 +47,22 @@ public class CarritoController {
 
     @GetMapping("/ver")
     public String verCarrito(Model model) {
+        if (!esUsuarioNormal()) {
+            return "redirect:/";
+        }
         var items = itemService.getItems();
         System.out.println("🛒 Carrito contiene: " + items.size() + " ítems");
         items.forEach(i -> System.out.println(i)); // Imprime usando el toString() 
+        model.addAttribute("items", items); // Agrega la lista de items al modelo
         model.addAttribute("total", itemService.getTotal());
         return "carrito/listado";
     }
 
     @GetMapping("/agregar/{id}")
     public String agregar(@PathVariable("id") Long id) {
+        if (!esUsuarioNormal()) {
+            return "redirect:/";
+        }
         ProductoColorTalla pct = productoColorTallaService.getProductoColorTalla(id);
 
         if (pct == null || pct.getIdProductoColorTalla() == null) {
@@ -59,6 +82,9 @@ public class CarritoController {
 
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable("id") Long id) {
+        if (!esUsuarioNormal()) {
+            return "redirect:/";
+        }
         itemService.delete(id);
         return "redirect:/carrito/ver";
     }
@@ -66,6 +92,9 @@ public class CarritoController {
     @PostMapping("/actualizar")
     public String actualizar(@RequestParam("id") Long id,
                              @RequestParam("cantidad") int cantidad) {
+        if (!esUsuarioNormal()) {
+            return "redirect:/";
+        }
         itemService.updateCantidad(id, cantidad);
         return "redirect:/carrito/ver";
     }
