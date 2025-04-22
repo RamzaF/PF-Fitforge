@@ -31,7 +31,9 @@ public class CarritoController {
 
     @GetMapping("/ver")
     public String verCarrito(Model model) {
-        model.addAttribute("items", itemService.getItems());
+        var items = itemService.getItems();
+        System.out.println("🛒 Carrito contiene: " + items.size() + " ítems");
+        items.forEach(i -> System.out.println(i)); // Imprime usando el toString() 
         model.addAttribute("total", itemService.getTotal());
         return "carrito/listado";
     }
@@ -39,9 +41,19 @@ public class CarritoController {
     @GetMapping("/agregar/{id}")
     public String agregar(@PathVariable("id") Long id) {
         ProductoColorTalla pct = productoColorTallaService.getProductoColorTalla(id);
-        if (pct != null && pct.getExistencias() > 0) {
-            itemService.save(new Item(pct));
+
+        if (pct == null || pct.getIdProductoColorTalla() == null) {
+            System.out.println("❌ ProductoColorTalla no encontrado o ID nulo: " + id);
+            return "redirect:/carrito/ver";
         }
+
+        if (pct.getExistencias() != null && pct.getExistencias() > 0) {
+            itemService.save(new Item(pct));
+            System.out.println("✅ Producto agregado al carrito: " + pct.getIdProductoColorTalla());
+        } else {
+            System.out.println("⚠️ Producto sin existencias: " + id);
+        }
+
         return "redirect:/carrito/ver";
     }
 

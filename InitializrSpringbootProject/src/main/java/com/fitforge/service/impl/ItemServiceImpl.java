@@ -1,31 +1,43 @@
 package com.fitforge.service.impl;
 
-import com.fitforge.domain.Item;
-import com.fitforge.domain.ProductoColorTalla;
-import com.fitforge.service.ItemService;
-import com.fitforge.service.ProductoColorTallaService;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fitforge.domain.Item;
+import com.fitforge.service.ItemService;
+import com.fitforge.service.ProductoColorTallaService;
+
+import jakarta.servlet.http.HttpSession;
 
 @Service
 public class ItemServiceImpl implements ItemService {
 
-    private final List<Item> items = new ArrayList<>();
-
     @Autowired
     private ProductoColorTallaService productoColorTallaService;
 
-    @Override
-    public List<Item> getItems() {
+    @Autowired
+    private HttpSession session;
+
+    private List<Item> getSessionItems() {
+        List<Item> items = (List<Item>) session.getAttribute("carrito");
+        if (items == null) {
+            items = new ArrayList<>();
+            session.setAttribute("carrito", items);
+        }
         return items;
     }
 
     @Override
+    public List<Item> getItems() {
+        return getSessionItems();
+    }
+
+    @Override
     public Item getItem(Long idProductoColorTalla) {
-        return items.stream()
+        return getSessionItems().stream()
                 .filter(i -> i.getProductoColorTalla().getIdProductoColorTalla().equals(idProductoColorTalla))
                 .findFirst()
                 .orElse(null);
@@ -33,41 +45,51 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void save(Item item) {
-        var existente = getItem(item.getProductoColorTalla().getIdProductoColorTalla());
+        List<Item> items = getSessionItems();
+        Item existente = getItem(item.getProductoColorTalla().getIdProductoColorTalla());
         if (existente == null) {
             items.add(item);
         } else {
-            if (existente.getCantidad() < item.getProductoColorTalla().getExistencias()) {
-                existente.setCantidad(existente.getCantidad() + item.getCantidad());
+            int nuevaCantidad = existente.getCantidad() + item.getCantidad();
+            if (nuevaCantidad <= item.getProductoColorTalla().getExistencias()) {
+                existente.setCantidad(nuevaCantidad);
             }
         }
+        session.setAttribute("carrito", items);
     }
 
     @Override
     public void delete(Long idProductoColorTalla) {
+        List<Item> items = getSessionItems();
         items.removeIf(i -> i.getProductoColorTalla().getIdProductoColorTalla().equals(idProductoColorTalla));
+        session.setAttribute("carrito", items);
     }
 
     @Override
     public void updateCantidad(Long idProductoColorTalla, int cantidad) {
-        var existente = getItem(idProductoColorTalla);
-        if (existente != null) {
+        Item existente = getItem(idProductoColorTalla);
+        if (existente != null && cantidad > 0 && cantidad <= existente.getProductoColorTalla().getExistencias()) {
             existente.setCantidad(cantidad);
         }
     }
 
     @Override
     public void clear() {
-        items.clear();
+        session.removeAttribute("carrito");
     }
 
     @Override
     public double getTotal() {
-        return items.stream().mapToDouble(Item::getSubtotal).sum();
+        return getSessionItems().stream()
+                .mapToDouble(Item::getSubtotal)
+                .sum();
     }
 
     @Override
     public int getCantidadTotal() {
-        return items.stream().mapToInt(Item::getCantidad).sum();
+        return getSessionItems().stream()
+                .mapToInt(Item::getCantidad)
+                .sum();
     }
 }
+

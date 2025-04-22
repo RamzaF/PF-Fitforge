@@ -88,10 +88,18 @@
                             </div>
                         </div>
 
-                        <a th:href="@{'/carrito/agregar/' + ${producto.productoColorTallas[0].idProductoColorTalla}}"
-                           class="btn btn-primary add-to-cart">
-                            Agregar al carrito
-                        </a>
+                        <a th:if="${!#lists.isEmpty(producto.productoColorTallas) and producto.productoColorTallas[0].idProductoColorTalla != null}"
+                        th:href="@{'/carrito/agregar/' + ${producto.productoColorTallas[0].idProductoColorTalla}}"
+                        class="btn btn-primary add-to-cart">
+                        Agregar al carrito
+                     </a>
+                     
+                     <!-- Si no hay combinaciones válidas -->
+                     <span th:if="${#lists.isEmpty(producto.productoColorTallas) or producto.productoColorTallas[0].idProductoColorTalla == null}"
+                           class="text-muted">
+                        No disponible para agregar al carrito
+                     </span>
+                     
                     </div>
                 </div>
             </div>

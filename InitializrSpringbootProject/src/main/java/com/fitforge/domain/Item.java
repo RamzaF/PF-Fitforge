@@ -25,6 +25,16 @@ public class Item {
     }
 
     public double getSubtotal() {
-        return this.productoColorTalla.getProducto().getPrecio() * this.cantidad;
+        if (productoColorTalla == null || productoColorTalla.getProducto() == null) {
+            return 0;
+        }
+        return productoColorTalla.getProducto().getPrecio() * cantidad;
+    }
+
+    @Override
+    public String toString() {
+        return "Item{productoColorTallaId=" +
+               (productoColorTalla != null ? productoColorTalla.getIdProductoColorTalla() : "null") +
+               ", cantidad=" + cantidad + '}';
     }
 }

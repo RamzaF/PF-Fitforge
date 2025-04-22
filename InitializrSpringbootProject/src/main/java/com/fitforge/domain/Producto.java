@@ -117,4 +117,6 @@ public class Producto implements Serializable {
             productoColorTallas.forEach(this::addProductoColorTalla);
         }
     }
+
+    
 }
