@@ -291,21 +291,5 @@ public class AdminProductoController {
      * @param model Modelo de la vista
      * @return Vista de gestión de inventario
      */
-    @GetMapping("/inventario/{id}")
-    public String gestionarInventario(@PathVariable Long id, Model model) {
-        try {
-            var producto = productoService.getProductoById(id);
-            
-            if (producto == null) {
-                return "redirect:/admin/productos/listado?mensaje=Producto+no+encontrado&tipo=danger";
-            }
-            
-            model.addAttribute("producto", producto);
-            return "admin/productos/inventario";
-        } catch (Exception e) {
-            logger.error("Error al cargar gestión de inventario: {}", e.getMessage());
-            return "redirect:/admin/productos/listado?mensaje=Error+al+cargar+el+inventario&tipo=danger";
-        }
-    }
 }
 
