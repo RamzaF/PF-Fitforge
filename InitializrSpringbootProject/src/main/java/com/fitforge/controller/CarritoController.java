@@ -66,15 +66,16 @@ public class CarritoController {
         ProductoColorTalla pct = productoColorTallaService.getProductoColorTalla(id);
 
         if (pct == null || pct.getIdProductoColorTalla() == null) {
-            System.out.println("❌ ProductoColorTalla no encontrado o ID nulo: " + id);
+            // System.out.println("❌ ProductoColorTalla no encontrado o ID nulo: " + id);
             return "redirect:/carrito/ver";
         }
 
         if (pct.getExistencias() != null && pct.getExistencias() > 0) {
             itemService.save(new Item(pct));
-            System.out.println("✅ Producto agregado al carrito: " + pct.getIdProductoColorTalla());
+            // System.out.println("✅ Producto agregado al carrito: " + pct.getIdProductoColorTalla());
         } else {
-            System.out.println("⚠️ Producto sin existencias: " + id);
+            // System.out.println("⚠️ Producto sin existencias: " + id);
+            // System.out.println("⚠️ Producto sin existencias: " + pct.getExistencias());
         }
 
         return "redirect:/carrito/ver";
