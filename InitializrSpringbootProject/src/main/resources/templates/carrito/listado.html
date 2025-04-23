@@ -50,8 +50,36 @@
 
     <div th:unless="${items == null or items.isEmpty()}">
         <h4>Total: ₡ <span th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 2, 'POINT')}"></span></h4>
+        <!-- Boton ara realizar pedido -->
+        <button type="button" class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#modalConfirmarPedido">
+            Realizar pedido
+        </button>
+    </div>
+
+    <!-- Modal de confirmacion e pedido -->
+    <div class="modal fade" id="modalConfirmarPedido" tabindex="-1" aria-labelledby="modalConfirmarPedidoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="modalConfirmarPedidoLabel">Confirmar pedido</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Deseas confirmar tu pedido por un total de <strong>₡ <span th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 2, 'POINT')}"></span></strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form th:action="@{/carrito/confirmar-pedido}" method="post">
+                        <button type="submit" class="btn btn-success">Confirmar pedido</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Incluir scripts de Bootstrap para que funcionen los modales -->
+<th:block th:replace="~{layout/plantilla :: scripts}"/>
 
 <footer th:replace="~{layout/plantilla :: footer}"/>
 </body>

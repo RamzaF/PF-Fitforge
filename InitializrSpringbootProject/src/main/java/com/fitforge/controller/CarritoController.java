@@ -11,11 +11,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.fitforge.domain.Factura;
 import com.fitforge.domain.Item;
 import com.fitforge.domain.ProductoColorTalla;
+import com.fitforge.domain.Venta;
+import com.fitforge.service.FacturaService;
 import com.fitforge.service.ItemService;
 import com.fitforge.service.ProductoColorTallaService;
+import com.fitforge.service.VentaService;
 
 @Controller
 @RequestMapping("/carrito")
@@ -26,6 +31,12 @@ public class CarritoController {
 
     @Autowired
     private ProductoColorTallaService productoColorTallaService;
+
+    @Autowired
+    private FacturaService facturaService;
+
+    @Autowired
+    private VentaService ventaService;
 
     private boolean esUsuarioNormal() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -98,5 +109,47 @@ public class CarritoController {
         }
         itemService.updateCantidad(id, cantidad);
         return "redirect:/carrito/ver";
+    }
+
+    @PostMapping("/confirmar-pedido")
+    public String confirmarPedido(RedirectAttributes redirectAttributes, Authentication authentication) {
+        try {
+            // Obtener usuario autenticado
+            String username = authentication.getName();
+            // Obtener items del carrito
+            var items = itemService.getItems();
+            if (items == null || items.isEmpty()) {
+                redirectAttributes.addFlashAttribute("mensaje", "El carrito está vacío.");
+                redirectAttributes.addFlashAttribute("tipo", "warning");
+                return "redirect:/carrito/ver";
+            }
+            // Calcular total
+            double total = itemService.getTotal();
+            // Crear factura
+            Factura factura = new Factura();
+            factura.setUsuario(username);
+            factura.setFecha(new java.sql.Date(System.currentTimeMillis()));
+            factura.setTotal(total);
+            factura.setEstado("Pendiente");
+            facturaService.guardar(factura);
+            // Crear ventas (detalle)
+            for (Item item : items) {
+                Venta venta = new Venta();
+                venta.setFactura(factura);
+                venta.setProductoColorTalla(item.getProductoColorTalla());
+                venta.setPrecio(item.getProductoColorTalla().getProducto().getPrecio());
+                venta.setCantidad(item.getCantidad());
+                ventaService.guardar(venta);
+            }
+            // Limpiar carrito
+            itemService.clear();
+            redirectAttributes.addFlashAttribute("mensaje", "¡Pedido realizado con éxito!");
+            redirectAttributes.addFlashAttribute("tipo", "success");
+            return "redirect:/carrito/ver";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensaje", "Error al procesar el pedido: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("tipo", "danger");
+            return "redirect:/carrito/ver";
+        }
     }
 }
