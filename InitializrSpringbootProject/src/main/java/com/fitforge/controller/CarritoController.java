@@ -61,9 +61,9 @@ public class CarritoController {
             return "redirect:/";
         }
         var items = itemService.getItems();
-        System.out.println("🛒 Carrito contiene: " + items.size() + " ítems");
-        items.forEach(i -> System.out.println(i)); // Imprime usando el toString() 
-        model.addAttribute("items", items); // Agrega la lista de items al modelo
+        System.out.println("Carrito contiene: " + items.size() + " ítems");
+        items.forEach(i -> System.out.println(i)); // Imprime mi prueba
+        model.addAttribute("items", items); // Agrega la lista 
         model.addAttribute("total", itemService.getTotal());
         return "carrito/listado";
     }
@@ -76,16 +76,15 @@ public class CarritoController {
         ProductoColorTalla pct = productoColorTallaService.getProductoColorTalla(id);
 
         if (pct == null || pct.getIdProductoColorTalla() == null) {
-            // System.out.println("❌ ProductoColorTalla no encontrado o ID nulo: " + id);
+           
             return "redirect:/carrito/ver";
         }
 
         if (pct.getExistencias() != null && pct.getExistencias() > 0) {
             itemService.save(new Item(pct));
-            // System.out.println("✅ Producto agregado al carrito: " + pct.getIdProductoColorTalla());
+            
         } else {
-            // System.out.println("⚠️ Producto sin existencias: " + id);
-            // System.out.println("⚠️ Producto sin existencias: " + pct.getExistencias());
+       
         }
 
         return "redirect:/carrito/ver";
