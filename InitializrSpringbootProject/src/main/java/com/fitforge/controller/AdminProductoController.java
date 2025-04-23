@@ -59,9 +59,12 @@ public class AdminProductoController {
         try {
             var productos = productoService.listarProductos();
             var categorias = categoriaService.getCategoria(true);
-            
+            var colores = productoColorTallaService.listarColores();
+            var tallas = productoColorTallaService.listarTallas();
             model.addAttribute("productos", productos);
             model.addAttribute("categorias", categorias);
+            model.addAttribute("colores", colores);
+            model.addAttribute("tallas", tallas);
             model.addAttribute("totalProductos", productos.size());
             return "admin/productos/listado";
         } catch (Exception e) {
@@ -146,6 +149,9 @@ public class AdminProductoController {
     public String guardarProducto(
             @ModelAttribute Producto producto,
             @RequestParam(value = "archivo", required = false) MultipartFile archivo,
+            @RequestParam(value = "color.idColor", required = false) Long idColor,
+            @RequestParam(value = "talla.idTalla", required = false) Long idTalla,
+            @RequestParam(value = "existencias", required = false) Integer existencias,
             RedirectAttributes redirectAttributes) {
         
         try {
@@ -193,12 +199,17 @@ public class AdminProductoController {
             productoService.guardarProducto(producto);
             
             // Crear entrada de inventario inicial para productos nuevos
-            if (esNuevo) {
-                ProductoColorTalla inventarioInicial = new ProductoColorTalla();
-                inventarioInicial.setProducto(producto);
-                inventarioInicial.setExistencias(0);
-                productoColorTallaService.guardar(inventarioInicial);
-                logger.info("Creada entrada de inventario inicial para producto ID: {}", producto.getIdProducto());
+            if (esNuevo && idColor != null && idTalla != null && existencias != null) {
+                var color = productoColorTallaService.listarColores().stream().filter(c -> c.getIdColor().equals(idColor)).findFirst().orElse(null);
+                var talla = productoColorTallaService.listarTallas().stream().filter(t -> t.getIdTalla().equals(idTalla)).findFirst().orElse(null);
+                if (color != null && talla != null) {
+                    ProductoColorTalla inventarioInicial = new ProductoColorTalla();
+                    inventarioInicial.setProducto(producto);
+                    inventarioInicial.setColor(color);
+                    inventarioInicial.setTalla(talla);
+                    inventarioInicial.setExistencias(existencias);
+                    productoColorTallaService.guardar(inventarioInicial);
+                }
             }
             
             // Forzar refrescar el producto desde la base de datos para confirmar que el estado es correcto

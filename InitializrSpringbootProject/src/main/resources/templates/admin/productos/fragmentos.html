@@ -93,9 +93,37 @@
                             </label>
                         </div>
                         
+                        <!-- Inventario inicial al crear producto -->
                         <div class="mb-3">
                             <h5>Inventario por Color y Talla</h5>
-                            <p class="text-muted small">El inventario se puede configurar después de crear el producto básico.</p>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="colorNuevo" class="form-label">Color <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="colorNuevo" name="color.idColor" required>
+                                        <option value="" selected disabled>Seleccionar color</option>
+                                        <option th:each="color : ${colores}"
+                                                th:value="${color.idColor}"
+                                                th:text="${color.nombreColor}"></option>
+                                    </select>
+                                    <div class="invalid-feedback">Selecciona un color.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="tallaNueva" class="form-label">Talla <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="tallaNueva" name="talla.idTalla" required>
+                                        <option value="" selected disabled>Seleccionar talla</option>
+                                        <option th:each="talla : ${tallas}"
+                                                th:value="${talla.idTalla}"
+                                                th:text="${talla.nombreTalla}"></option>
+                                    </select>
+                                    <div class="invalid-feedback">Selecciona una talla.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="existenciasNueva" class="form-label">Existencias <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="existenciasNueva" name="existencias" min="0" value="0" required>
+                                    <div class="invalid-feedback">Ingresa una cantidad válida.</div>
+                                </div>
+                            </div>
+                            <div class="form-text">Agrega color, talla y existencias.</div>
                         </div>
                         
                         <div class="d-flex justify-content-end">
