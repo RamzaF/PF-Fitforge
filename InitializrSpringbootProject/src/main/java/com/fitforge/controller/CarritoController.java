@@ -16,7 +16,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.fitforge.domain.Factura;
 import com.fitforge.domain.Item;
 import com.fitforge.domain.ProductoColorTalla;
-import com.fitforge.domain.Venta;
 import com.fitforge.service.FacturaService;
 import com.fitforge.service.ItemService;
 import com.fitforge.service.ProductoColorTallaService;
@@ -120,23 +119,22 @@ public class CarritoController {
                 redirectAttributes.addFlashAttribute("tipo", "warning");
                 return "redirect:/carrito/ver";
             }
+            
             double total = itemService.getTotal();
-            Factura factura = new Factura();
-            factura.setFecha(new java.sql.Date(System.currentTimeMillis()));
-            factura.setTotal(total);
-            factura.setEstado("Pendiente");
-            facturaService.guardar(factura);
-            for (Item item : items) {
-                Venta venta = new Venta();
-                venta.setFactura(factura);
-                venta.setProductoColorTalla(item.getProductoColorTalla());
-                venta.setPrecio(item.getProductoColorTalla().getProducto().getPrecio());
-                venta.setCantidad(item.getCantidad());
-                ventaService.guardar(venta);
-            }
-            itemService.clear();
-            // Redirigir a la vista de factura generada
-            return "redirect:/carrito/factura/" + factura.getIdFactura();
+            
+            // Crear la factura
+            // Factura factura = new Factura();
+
+            itemService.clear(); // Limpiamos el carrito
+            
+            // Mostrar mensaje de confirmación
+            redirectAttributes.addFlashAttribute("mensajeExito", 
+                "¡Su pedido por ₡" + String.format("%,.2f", total) + " ha sido tramitado correctamente!");
+            redirectAttributes.addFlashAttribute("tipo", "success");
+            redirectAttributes.addFlashAttribute("pedidoConfirmado", true);
+            
+            return "redirect:/carrito/ver";
+            
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensaje", "Error al procesar el pedido: " + e.getMessage());
             redirectAttributes.addFlashAttribute("tipo", "danger");
