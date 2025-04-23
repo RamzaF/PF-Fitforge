@@ -112,27 +112,20 @@ public class CarritoController {
     }
 
     @PostMapping("/confirmar-pedido")
-    public String confirmarPedido(RedirectAttributes redirectAttributes, Authentication authentication) {
+    public String confirmarPedido(RedirectAttributes redirectAttributes) {
         try {
-            // Obtener usuario autenticado
-            String username = authentication.getName();
-            // Obtener items del carrito
             var items = itemService.getItems();
             if (items == null || items.isEmpty()) {
                 redirectAttributes.addFlashAttribute("mensaje", "El carrito está vacío.");
                 redirectAttributes.addFlashAttribute("tipo", "warning");
                 return "redirect:/carrito/ver";
             }
-            // Calcular total
             double total = itemService.getTotal();
-            // Crear factura
             Factura factura = new Factura();
-            factura.setUsuario(username);
             factura.setFecha(new java.sql.Date(System.currentTimeMillis()));
             factura.setTotal(total);
             factura.setEstado("Pendiente");
             facturaService.guardar(factura);
-            // Crear ventas (detalle)
             for (Item item : items) {
                 Venta venta = new Venta();
                 venta.setFactura(factura);
@@ -141,15 +134,29 @@ public class CarritoController {
                 venta.setCantidad(item.getCantidad());
                 ventaService.guardar(venta);
             }
-            // Limpiar carrito
             itemService.clear();
-            redirectAttributes.addFlashAttribute("mensaje", "¡Pedido realizado con éxito!");
-            redirectAttributes.addFlashAttribute("tipo", "success");
-            return "redirect:/carrito/ver";
+            // Redirigir a la vista de factura generada
+            return "redirect:/carrito/factura/" + factura.getIdFactura();
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensaje", "Error al procesar el pedido: " + e.getMessage());
             redirectAttributes.addFlashAttribute("tipo", "danger");
             return "redirect:/carrito/ver";
         }
+    }
+
+    @GetMapping("/factura/{id}")
+    public String verFactura(@PathVariable("id") Long id, Model model) {
+        Factura factura = facturaService.buscarPorId(id);
+        if (factura == null) {
+            model.addAttribute("mensaje", "Factura no encontrada");
+            model.addAttribute("tipo", "danger");
+            return "carrito/listado";
+        }
+        var ventas = ventaService.listar().stream()
+            .filter(v -> v.getFactura().getIdFactura().equals(id))
+            .toList();
+        model.addAttribute("factura", factura);
+        model.addAttribute("ventas", ventas);
+        return "carrito/factura";
     }
 }

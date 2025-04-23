@@ -20,9 +20,6 @@ public class Factura implements Serializable {
     @Column(name = "id_factura")
     private Long idFactura;
 
-    @Column(name = "usuario")
-    private String usuario;
-
     @Column(name = "fecha")
     private Date fecha;
 
