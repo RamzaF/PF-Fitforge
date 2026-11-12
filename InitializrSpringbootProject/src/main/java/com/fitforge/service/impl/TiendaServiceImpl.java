@@ -21,8 +21,8 @@ import com.fitforge.service.TiendaService;
 @Service
 public class TiendaServiceImpl implements TiendaService {
 
-    @Autowired
-    private ProductoDao productoDao;
+    @Autowired private ProductoDao productoDao;
+    @Autowired private com.fitforge.service.ProductoService productos;
 
     @Autowired
     private ColorDao colorDao;
@@ -49,13 +49,13 @@ public class TiendaServiceImpl implements TiendaService {
     @Override
     @Transactional
     public void save(Producto producto) {
-        productoDao.save(producto);
+        productos.guardarProducto(producto);
     }
 
     @Override
     @Transactional
     public void delete(Producto producto) {
-        productoDao.delete(producto);
+        productos.eliminarProducto(producto.getIdProducto());
     }
 
     /*@Override

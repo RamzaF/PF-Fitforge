@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.fitforge.domain.Item;
 import com.fitforge.domain.ProductoColorTalla;
 import com.fitforge.service.ItemService;
+import com.fitforge.service.CarritoSesion;
 import com.fitforge.service.ProductoColorTallaService;
 import jakarta.servlet.http.HttpSession;
 
@@ -48,29 +49,34 @@ public class ItemServiceImpl implements ItemService {
 
     // Return current server prices and defensive items, never the writable session list.
     @Override public List<Item> getItems() {
-        return getSessionItems().stream().map(stored -> {
-            Long id = stored.getProductoColorTalla().getIdProductoColorTalla();
-            var variant = productoColorTallaService.getProductoColorTalla(id);
-            // Keep unavailable lines removable without trusting their stale session price.
-            if (variant == null) {
-                variant = new ProductoColorTalla();
-                variant.setIdProductoColorTalla(id);
-            }
-            var item = new Item(variant);
-            item.setCantidad(stored.getCantidad());
-            return item;
-        }).toList();
+        synchronized (CarritoSesion.mutex()) {
+            return getSessionItems().stream().map(stored -> {
+                Long id = stored.getProductoColorTalla().getIdProductoColorTalla();
+                var variant = productoColorTallaService.getProductoColorTalla(id);
+                // Keep unavailable lines removable without trusting their stale session price.
+                if (variant == null) {
+                    variant = new ProductoColorTalla();
+                    variant.setIdProductoColorTalla(id);
+                }
+                var item = new Item(variant);
+                item.setCantidad(stored.getCantidad());
+                return item;
+            }).toList();
+        }
     }
 
     @Override public Item getItem(Long id) {
-        return getItems().stream()
-            .filter(i -> i.getProductoColorTalla().getIdProductoColorTalla().equals(id))
-            .findFirst().orElse(null);
+        synchronized (CarritoSesion.mutex()) {
+            return getItems().stream()
+                .filter(i -> i.getProductoColorTalla().getIdProductoColorTalla().equals(id))
+                .findFirst().orElse(null);
+        }
     }
 
     @Override public void save(Item submitted) {
-        if (submitted == null || submitted.getProductoColorTalla() == null) {
-            throw new IllegalArgumentException("Seleccioná una variante válida.");
+        synchronized (CarritoSesion.mutex()) {
+            if (submitted == null || submitted.getProductoColorTalla() == null) {
+                throw new IllegalArgumentException("Seleccioná una variante válida.");
         }
         var variant = serverVariant(submitted.getProductoColorTalla().getIdProductoColorTalla());
         validateQuantity(variant, submitted.getCantidad());
@@ -84,27 +90,52 @@ public class ItemServiceImpl implements ItemService {
         if (existing == null) items.add(replacement);
         else items.set(items.indexOf(existing), replacement);
         session.setAttribute("carrito", items);
+
+        CarritoSesion.modificado();
+
+        }
     }
 
     @Override public void updateCantidad(Long id, int quantity) {
-        var variant = serverVariant(id);
-        validateQuantity(variant, quantity);
-        var existing = sessionItem(id);
-        if (existing == null) throw new IllegalArgumentException("La variante no está en el carrito.");
-        var replacement = new Item(variant);
-        replacement.setCantidad(quantity);
-        var items = getSessionItems();
-        items.set(items.indexOf(existing), replacement);
-        session.setAttribute("carrito", items);
+        synchronized (CarritoSesion.mutex()) {
+            var variant = serverVariant(id);
+            validateQuantity(variant, quantity);
+            var existing = sessionItem(id);
+            if (existing == null) throw new IllegalArgumentException("La variante no está en el carrito.");
+            var replacement = new Item(variant);
+            replacement.setCantidad(quantity);
+            var items = getSessionItems();
+            items.set(items.indexOf(existing), replacement);
+            session.setAttribute("carrito", items);
+
+            CarritoSesion.modificado();
+        }
     }
 
     @Override public void delete(Long id) {
-        var items = getSessionItems();
-        items.removeIf(i -> i.getProductoColorTalla().getIdProductoColorTalla().equals(id));
-        session.setAttribute("carrito", items);
+        synchronized (CarritoSesion.mutex()) {
+            var items = getSessionItems();
+            items.removeIf(i -> i.getProductoColorTalla().getIdProductoColorTalla().equals(id));
+            session.setAttribute("carrito", items);
+
+            CarritoSesion.modificado();
+        }
     }
 
-    @Override public void clear() { session.removeAttribute("carrito"); }
-    @Override public double getTotal() { return getItems().stream().mapToDouble(Item::getSubtotal).sum(); }
-    @Override public int getCantidadTotal() { return getSessionItems().stream().mapToInt(Item::getCantidad).sum(); }
+    @Override public void clear() {
+        synchronized (CarritoSesion.mutex()) {
+            session.removeAttribute("carrito");
+            CarritoSesion.modificado();
+        }
+    }
+    @Override public double getTotal() {
+        synchronized (CarritoSesion.mutex()) {
+            return getItems().stream().mapToDouble(Item::getSubtotal).sum();
+        }
+    }
+    @Override public int getCantidadTotal() {
+        synchronized (CarritoSesion.mutex()) {
+            return getSessionItems().stream().mapToInt(Item::getCantidad).sum();
+        }
+    }
 }

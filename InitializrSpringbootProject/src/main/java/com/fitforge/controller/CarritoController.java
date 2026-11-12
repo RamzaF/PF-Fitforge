@@ -13,13 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.fitforge.domain.Factura;
 import com.fitforge.domain.Item;
 import com.fitforge.domain.ProductoColorTalla;
-import com.fitforge.service.FacturaService;
 import com.fitforge.service.ItemService;
-import com.fitforge.service.ProductoColorTallaService;
-import com.fitforge.service.VentaService;
 
 @Controller
 @RequestMapping("/carrito")
@@ -28,14 +24,8 @@ public class CarritoController {
     @Autowired
     private ItemService itemService;
 
-    @Autowired
-    private ProductoColorTallaService productoColorTallaService;
-
-    @Autowired
-    private FacturaService facturaService;
-
-    @Autowired
-    private VentaService ventaService;
+    @Autowired private com.fitforge.service.PedidoService pedidos;
+    @Autowired private com.fitforge.service.ConfirmacionCarritoService confirmaciones;
 
     private boolean esUsuarioNormal() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -60,9 +50,13 @@ public class CarritoController {
         if (!esUsuarioNormal()) {
             return "redirect:/";
         }
-        var items = itemService.getItems();
-        model.addAttribute("items", items); // Agrega la lista 
-        model.addAttribute("total", itemService.getTotal());
+        synchronized(com.fitforge.service.CarritoSesion.mutex()) {
+            var items = itemService.getItems();
+            model.addAttribute("items", items);
+            model.addAttribute("total", items.stream().mapToDouble(Item::getSubtotal).sum());
+            model.addAttribute("claveConfirmacion", confirmaciones.preparar(items));
+            model.addAttribute("requiereConsulta", confirmaciones.requiereConsulta());
+        }
         return "carrito/listado";
     }
 
@@ -108,50 +102,25 @@ public class CarritoController {
     }
 
     @PostMapping("/confirmar-pedido")
-    public String confirmarPedido(RedirectAttributes redirectAttributes) {
-        try {
-            var items = itemService.getItems();
-            if (items == null || items.isEmpty()) {
-                redirectAttributes.addFlashAttribute("mensaje", "El carrito está vacío.");
-                redirectAttributes.addFlashAttribute("tipo", "warning");
-                return "redirect:/carrito/ver";
-            }
-            
-            double total = itemService.getTotal();
-            
-            // Crear la factura
-            // Factura factura = new Factura();
-
-            itemService.clear(); // Limpiamos el carrito
-            
-            // Mostrar mensaje de confirmación
-            redirectAttributes.addFlashAttribute("mensajeExito", 
-                "¡Su pedido por ₡" + String.format("%,.2f", total) + " ha sido tramitado correctamente!");
-            redirectAttributes.addFlashAttribute("tipo", "success");
-            redirectAttributes.addFlashAttribute("pedidoConfirmado", true);
-            
-            return "redirect:/carrito/ver";
-            
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensaje", "Error al procesar el pedido: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("tipo", "danger");
-            return "redirect:/carrito/ver";
+    public Object confirmarPedido(@RequestParam("clave") String clave,
+            RedirectAttributes redirectAttributes) {
+        String target;
+        try { target="/carrito/factura/"+confirmaciones.confirmar(clave).idFactura(); }
+        catch(com.fitforge.service.PedidoException e) {
+            redirectAttributes.addFlashAttribute("error",e.getMessage()); target="/carrito/ver";
+        } catch(org.springframework.dao.DataAccessException | org.springframework.transaction.TransactionException | jakarta.persistence.PersistenceException e) {
+            return new org.springframework.web.servlet.ModelAndView("carrito/error", java.util.Map.of(),
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE);
         }
+        var redirect=new org.springframework.web.servlet.view.RedirectView(target);
+        redirect.setStatusCode(org.springframework.http.HttpStatus.SEE_OTHER); return redirect;
     }
 
     @GetMapping("/factura/{id}")
     public String verFactura(@PathVariable("id") Long id, Model model) {
-        Factura factura = facturaService.buscarPorId(id);
-        if (factura == null) {
-            model.addAttribute("mensaje", "Factura no encontrada");
-            model.addAttribute("tipo", "danger");
-            return "carrito/listado";
-        }
-        var ventas = ventaService.listar().stream()
-            .filter(v -> v.getFactura().getIdFactura().equals(id))
-            .toList();
-        model.addAttribute("factura", factura);
-        model.addAttribute("ventas", ventas);
+        var receipt=pedidos.obtenerPropio(id);
+        model.addAttribute("factura",receipt);
+        model.addAttribute("ventas",receipt.lineas());
         return "carrito/factura";
     }
 }

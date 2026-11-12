@@ -170,8 +170,7 @@ public class AdminProductoController {
                         producto.setRutaImagen(productoActual.getRutaImagen());
                     }
                     
-                    // Mantener la colección de ProductoColorTalla
-                    producto.setProductoColorTallas(productoActual.getProductoColorTallas());
+                    // Inventory is updated separately under its own product/variant locks.
                 }
             }
             
@@ -256,8 +255,7 @@ public class AdminProductoController {
             }
             
             // Marcar como inactivo en lugar de eliminar físicamente
-            producto.setActivo(false);
-            productoService.guardarProducto(producto);
+            productoService.eliminarProducto(producto.getIdProducto());
             
             redirectAttributes.addFlashAttribute("mensaje", "Producto desactivado correctamente");
             redirectAttributes.addFlashAttribute("tipo", "success");

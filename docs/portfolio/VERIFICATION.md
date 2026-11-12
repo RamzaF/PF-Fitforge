@@ -93,3 +93,32 @@ Pendientes: Tareas3–5, almacenamiento de subidas en runtime readonly, favicon 
 Evidencia durable de Entrega2:
 `/Users/eduin/.hermes/documentation/portfolio-github/evidence/fitforge-access-cart/`.
 Revisión independiente pendiente de Hermes/Yimena; entrega detenida para revisión después del commit local.
+
+
+## Entrega 3 — pedidos persistentes (2026-11-12)
+
+Rama `portfolio/fitforge-orders` desde `d90e510416a08d478113900dcb7548e5f4bba238`. La evidencia de las secciones anteriores permanece histórica. Contrato, comandos y límites actuales: [ORDERS.md](../local/ORDERS.md).
+
+Evidencia externa: `/Users/eduin/.hermes/documentation/portfolio-github/evidence/fitforge-orders/`. Incluye RED HTTP (7 fallos, 0 errores), intentos fallidos intermedios, pruebas MySQL con commits independientes, rollback JDBC/JPA por trigger real, concurrencia, timeout/deadlock, control de dueño/CSRF/métodos y pruebas de entrega de resultado después del commit. Los resultados finales de suite/package/navegador y recursos se registran al cerrar la entrega en RETURN.md; no reutilizar cifras de Entrega 2 para certificar pedidos.
+
+No push, merge, PR ni publicación. Revisión independiente reservada a Hermes/Yimena. Commit incierto por pérdida física de conexión durante commit: NO EJECUTADO; la pérdida posterior de entrega del resultado es una prueba diferente y se identifica así.
+
+### Resultado final de Entrega 3
+
+| Verificación ejecutada | Resultado |
+| --- | --- |
+| `python3 scripts/docker-build.py --tag orders-20261112` | exit 0; contexto allowlist, imágenes separadas de `local` |
+| Docker runner `mvn -o -B -ntp package` | exit 0; 70 pruebas, 0 fallos, 0 errores, 0 omitidas |
+| Imagen final, Compose tests nuevo, `mvn -o -B -ntp package` | exit 0; 70 pruebas, 0 fallos, 0 errores, 0 omitidas |
+| MySQL real | 8.4.4; aislamiento READ COMMITTED observado durante espera del pedido |
+| Concurrencia | misma clave entre conexiones, dos POST misma sesión, última unidad dos dueños, orden inverso, edición de catálogo/inventario |
+| Fallos reales | trigger de detalle tras descuentos: rollback; timeout y deadlock InnoDB 1213: rollback y reintento misma clave |
+| Entrega de resultado perdida tras commit real | inyección de test, replay conserva clave aun con cambio de precio |
+| Tomcat HTTP real | comprobante ajeno/ausente 404, admin 403, anónimo login; ERROR dispatch sin detalle filtrado |
+| Navegador Orca | total viejo 65 rechazado tras cambio 25→30; cero pedidos hasta reconfirmar 75; pedido #1 dueño 2, dos detalles; recarga y nueva sesión recuperan comprobante |
+| BD demo después de navegador | cabecera 1 / detalles 2 / stocks 3,0,2; total 75 |
+| BD de pruebas al cerrar | cabeceras 0 / detalles 0 / triggers 0 / stocks 5,0,3 |
+
+Java build/test 21.0.7, Maven 3.9.9, Spring Boot 3.4.2, Hibernate 6.6.5.Final; runtime fijado Temurin 21.0.6_7. Sin instalaciones/actualizaciones host. La prueba del decorador no simula una pérdida física de conexión en commit, que permanece NO EJECUTADA. Los logs conservan avisos preexistentes de API deprecated, OSIV y carga dinámica de Mockito/ByteBuddy del soporte de pruebas; no hay mocks de persistencia.
+
+Demo conservada: `fitforge-orders-demo-20261112`, <http://127.0.0.1:18084/carrito/factura/1>. Datos exclusivamente ficticios. Entornos previos conservados; ninguna prueba ejecutada sobre ellos. No se avanzó a Tareas 4–5 ni se integró/publicó.

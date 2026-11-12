@@ -20,6 +20,17 @@ public class Factura implements Serializable {
     @Column(name = "id_factura")
     private Long idFactura;
 
+    @Column(name = "id_usuario", nullable = false)
+    private Integer idUsuario;
+
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.CHAR)
+    @Column(name = "clave_confirmacion", nullable = false, length = 36)
+    private String claveConfirmacion;
+
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.CHAR)
+    @Column(name = "huella_carrito", nullable = false, length = 64)
+    private String huellaCarrito;
+
     @Column(name = "fecha")
     private Date fecha;
 

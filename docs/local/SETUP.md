@@ -1,6 +1,8 @@
 # FitForge local: solo Docker
 
-Entorno Docker de Tarea 1 y accesos/carrito de Tarea 2. Aplicación académica existente; no usar como tienda real.
+**Estado actual: Entrega 3.** Seguir primero [ORDERS.md](ORDERS.md) para build, pruebas y arranque en proyectos y volúmenes nuevos. URL de revisión: <http://127.0.0.1:18084/tienda/listado>. No usar las imágenes nuevas con los volúmenes anteriores: no se migran.
+
+Las instrucciones de Entregas 1–2 que siguen son históricas y corresponden a sus ramas/imágenes. Entorno Docker de Tarea 1 y accesos/carrito de Tarea 2. Aplicación académica existente; no usar como tienda real.
 Requisitos del host: Docker Engine/Desktop, Compose y Python 3 estándar para transmitir el contexto. No requiere Java, Maven ni MySQL instalados en macOS. No instala paquetes en el host.
 
 ## Versiones

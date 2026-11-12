@@ -10,7 +10,7 @@
     <h2>Carrito de Compras</h2>
     
     <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
-    <p class="alert alert-info">Los pedidos todavía no están habilitados. Podés revisar y ajustar tu carrito.</p>
+    <p class="alert alert-info">Pedido interno, sin pago ni envío. Revisá las cantidades y el total antes de confirmar.</p>
 
     <div th:if="${items == null or items.isEmpty()}">
         <p>El carrito está vacío.</p>
@@ -66,7 +66,13 @@
 
     <div th:unless="${items == null or items.isEmpty()}">
         <h4>Total de productos disponibles: ₡ <span th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 2, 'POINT')}"></span></h4>
-        <button type="button" class="btn btn-success mt-3" disabled>Pedidos no disponibles</button>
+        <form th:if="${claveConfirmacion != null}" th:action="@{/carrito/confirmar-pedido}" method="post">
+            <input type="hidden" name="clave" th:value="${claveConfirmacion}"/>
+            <p th:if="${requiereConsulta}" role="alert">Hay una confirmación anterior por verificar. Reintentá antes de modificar el carrito; se consultará el resultado con los importes que aceptaste.</p>
+            <button th:if="${requiereConsulta}" type="submit" class="btn btn-success mt-3">Reintentar confirmación anterior</button>
+            <button th:unless="${requiereConsulta}" type="submit" class="btn btn-success mt-3">Confirmar pedido por ₡ <span th:text="${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}"></span></button>
+        </form>
+        <p th:unless="${claveConfirmacion != null}" class="text-danger">Revisá o eliminá las líneas no disponibles antes de confirmar.</p>
     </div>
 </div>
 

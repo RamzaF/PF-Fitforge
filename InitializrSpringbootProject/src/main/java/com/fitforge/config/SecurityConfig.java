@@ -66,7 +66,8 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(authorize -> authorize
                 .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ERROR).permitAll()
-                // Order persistence and invoice ownership are not implemented yet.
+                .requestMatchers(HttpMethod.POST, "/carrito/confirmar-pedido").hasRole("USER")
+                .requestMatchers(HttpMethod.GET, "/carrito/factura/*").hasRole("USER")
                 .requestMatchers("/carrito/confirmar-pedido", "/carrito/factura/**", "/pedidos/**").denyAll()
                 .requestMatchers("/admin/**", "/usuario/**", "/api/imagenes/**").hasRole("ADMIN")
                 .requestMatchers("/carrito/**").hasRole("USER")

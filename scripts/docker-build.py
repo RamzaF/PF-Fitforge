@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """Stream a reviewed build allowlist; never transfer macOS xattrs or AppleDouble."""
+import argparse
 import io
 from pathlib import Path
 import subprocess
 import tarfile
 import tempfile
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--tag", default="local", help="Isolated image tag; leaves earlier demo images intact")
+args = parser.parse_args()
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / 'InitializrSpringbootProject'
 files = [ROOT / 'Dockerfile', ROOT / '.dockerignore', APP / 'pom.xml']
@@ -29,7 +33,7 @@ with tempfile.TemporaryFile() as context:
             info.mtime = 1704067200  # Positive, fixed epoch: Maven skips resource copies at mtime=0.
             archive.addfile(info, io.BytesIO(data))
     print(f'Build context: {len(files)} allowlisted files, no xattrs, .git, dumps, logs or AppleDouble.', flush=True)
-    for target, image in [('runtime', 'fitforge-demo-app:local'), ('test', 'fitforge-demo-test:local')]:
+    for target, image in [('runtime', f'fitforge-demo-app:{args.tag}'), ('test', f'fitforge-demo-test:{args.tag}')]:
         context.seek(0)
         subprocess.run(['docker', 'build', '--progress=plain', '--target', target, '-t', image, '-'],
                        stdin=context, cwd=ROOT, check=True)

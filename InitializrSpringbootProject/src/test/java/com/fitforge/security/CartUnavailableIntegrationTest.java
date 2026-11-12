@@ -52,7 +52,7 @@ class CartUnavailableIntegrationTest {
             .andExpect(view().name("carrito/listado"))
             .andExpect(content().string(containsString("No disponible")))
             .andExpect(content().string(containsString("no se incluye en el total")))
-            .andExpect(content().string(containsString("Pedidos no disponibles")))
+            .andExpect(content().string(containsString("Revisá o eliminá las líneas no disponibles")))
             .andExpect(content().string(containsString("/carrito/eliminar/1")))
             .andExpect(content().string(containsString("_csrf")))
             .andExpect(model().attribute("total", 34.0)).andReturn();
@@ -73,7 +73,7 @@ class CartUnavailableIntegrationTest {
         mvc.perform(get("/carrito/ver").session(session)).andExpect(status().isOk())
             .andExpect(model().attribute("total", 17.0));
         mvc.perform(post("/carrito/eliminar/1").session(session)).andExpect(status().isForbidden());
-        mvc.perform(post("/carrito/confirmar-pedido").session(session).with(csrf())).andExpect(status().isForbidden());
+        mvc.perform(post("/carrito/confirmar-pedido").session(session).with(csrf())).andExpect(status().isBadRequest());
         assertThat((List<Item>) session.getAttribute("carrito")).hasSize(2);
         mvc.perform(post("/carrito/eliminar/1").session(session).with(csrf()))
             .andExpect(redirectedUrl("/carrito/ver"));

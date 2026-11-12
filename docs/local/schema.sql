@@ -32,7 +32,7 @@ CREATE TABLE producto_color_talla (
   id_producto BIGINT NOT NULL,
   id_color BIGINT NULL,
   id_talla BIGINT NULL,
-  existencias INT NOT NULL,
+  existencias INT NOT NULL CHECK (existencias >= 0),
   PRIMARY KEY (id_producto_color_talla),
   FOREIGN KEY (id_producto) REFERENCES producto(id_producto),
   FOREIGN KEY (id_color) REFERENCES color(id_color),
@@ -51,9 +51,12 @@ CREATE TABLE usuario (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE TABLE factura (
   id_factura BIGINT NOT NULL AUTO_INCREMENT,
-  id_usuario INT NULL,
+  id_usuario INT NOT NULL,
+  clave_confirmacion CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  huella_carrito CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  UNIQUE KEY uq_factura_confirmacion (id_usuario, clave_confirmacion),
   fecha DATE NOT NULL,
-  total DOUBLE NOT NULL,
+  total DOUBLE NOT NULL CHECK (total >= 0),
   estado VARCHAR(255) DEFAULT 'Pendiente',
   PRIMARY KEY (id_factura),
   FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
@@ -62,8 +65,8 @@ CREATE TABLE venta (
   id_venta BIGINT NOT NULL AUTO_INCREMENT,
   id_factura BIGINT NOT NULL,
   id_producto_color_talla BIGINT NOT NULL,
-  precio DOUBLE NOT NULL,
-  cantidad INT NOT NULL,
+  precio DOUBLE NOT NULL CHECK (precio >= 0),
+  cantidad INT NOT NULL CHECK (cantidad > 0),
   PRIMARY KEY (id_venta),
   FOREIGN KEY (id_factura) REFERENCES factura(id_factura),
   FOREIGN KEY (id_producto_color_talla) REFERENCES producto_color_talla(id_producto_color_talla)

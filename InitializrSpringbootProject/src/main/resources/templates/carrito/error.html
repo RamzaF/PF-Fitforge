@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head}"><title>Confirmación pendiente</title></head>
+<body>
+<header th:replace="~{layout/plantilla :: header}"/>
+<main class="container py-5">
+    <h2>No se pudo confirmar el resultado</h2>
+    <p role="alert">Tu carrito se conserva. Volvé al carrito y reintentá con la misma confirmación para consultar o registrar el pedido sin duplicarlo.</p>
+    <a href="/carrito/ver" class="btn btn-primary">Volver al carrito para reintentar</a>
+</main>
+<footer th:replace="~{layout/plantilla :: footer}"/>
+</body>
+</html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout/plantilla :: head}">
-    <title>Factura - FitForge</title>
+    <title>Comprobante interno - FitForge</title>
 </head>
 <body>
 <header th:replace="~{layout/plantilla :: header}"/>
@@ -10,14 +10,15 @@
         <div class="col-lg-8">
             <div class="card shadow-lg border-0">
                 <div class="card-header bg-success text-white text-center">
-                    <h2 class="mb-0">Factura generada</h2>
+                    <h2 class="mb-0">Pedido registrado</h2>
                 </div>
                 <div class="card-body">
                     <div class="mb-4 text-center">
-                        <h4 class="fw-bold">N° Factura: <span th:text="${factura.idFactura}"></span></h4>
-                        <p class="mb-1">Fecha: <span th:text="${#dates.format(factura.fecha, 'dd/MM/yyyy')}"></span></p>
+                        <h4 class="fw-bold">N° Pedido: <span th:text="${factura.idFactura}"></span></h4>
+                        <p class="mb-1">Fecha: <span th:text="${factura.fecha}"></span></p>
                         <p class="mb-1">Estado: <span class="badge bg-info" th:text="${factura.estado}"></span></p>
                     </div>
+                    <p class="alert alert-info">Comprobante interno, sin pago recibido ni validez fiscal. No incluye envío.</p>
                     <hr>
                     <h5 class="mb-3">Detalle de productos</h5>
                     <div class="table-responsive">
@@ -34,12 +35,12 @@
                             </thead>
                             <tbody>
                                 <tr th:each="venta : ${ventas}">
-                                    <td th:text="${venta.productoColorTalla.producto.descripcion}"></td>
-                                    <td th:text="${venta.productoColorTalla.color.nombreColor}"></td>
-                                    <td th:text="${venta.productoColorTalla.talla.nombreTalla}"></td>
+                                    <td th:text="${venta.producto}"></td>
+                                    <td th:text="${venta.color}"></td>
+                                    <td th:text="${venta.talla}"></td>
                                     <td th:text="${venta.cantidad}"></td>
                                     <td>₡ <span th:text="${#numbers.formatDecimal(venta.precio, 0, 'COMMA', 2, 'POINT')}"></span></td>
-                                    <td>₡ <span th:text="${#numbers.formatDecimal(venta.precio * venta.cantidad, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                                    <td>₡ <span th:text="${#numbers.formatDecimal(venta.subtotal, 0, 'COMMA', 2, 'POINT')}"></span></td>
                                 </tr>
                             </tbody>
                         </table>

@@ -151,7 +151,7 @@ class SecurityIntegrationTest {
 
     @Test void unknownRoutesAndUnownedInvoicesAreNotPublic() throws Exception {
         mvc.perform(get("/private-unmapped")).andExpect(redirectedUrl("http://localhost/login"));
-        mvc.perform(get("/carrito/factura/1").session(login("cliente"))).andExpect(status().isForbidden());
+        mvc.perform(get("/carrito/factura/999999").session(login("cliente"))).andExpect(status().isNotFound());
     }
 
     @Test void demoUnsupportedMailNeverClaimsSuccessOrWritesContact() throws Exception {
@@ -166,10 +166,10 @@ class SecurityIntegrationTest {
             .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("¡Mensaje enviado con éxito!"))));
     }
 
-    @Test void pendingCheckoutCannotEmptyCartOrClaimPurchase() throws Exception {
+    @Test void checkoutWithoutIssuedTokenCannotEmptyCartOrClaimPurchase() throws Exception {
         var session = login("cliente");
         mvc.perform(post("/carrito/agregar/1").session(session).with(csrf())).andExpect(status().is3xxRedirection());
-        mvc.perform(post("/carrito/confirmar-pedido").session(session).with(csrf())).andExpect(status().isForbidden());
+        mvc.perform(post("/carrito/confirmar-pedido").session(session).with(csrf())).andExpect(status().isBadRequest());
         assertThat((List<?>) session.getAttribute("carrito")).hasSize(1);
     }
 }

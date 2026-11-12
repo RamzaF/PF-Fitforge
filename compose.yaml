@@ -22,7 +22,7 @@ services:
       retries: 30
       start_period: 30s
   app:
-    image: fitforge-demo-app:local
+    image: fitforge-demo-app:${FITFORGE_IMAGE_TAG:-local}
     build:
       context: .
       target: runtime
@@ -66,12 +66,16 @@ services:
     read_only: true
     tmpfs: [/tmp]
   test:
-    image: fitforge-demo-test:local
+    image: fitforge-demo-test:${FITFORGE_IMAGE_TAG:-local}
     profiles: [tools]
     build:
       context: .
       target: test
-    environment: *demo-environment
+    environment:
+      <<: *demo-environment
+      FITFORGE_ORDERS_TESTS: "1"
+      FITFORGE_TEST_PROJECT: ${COMPOSE_PROJECT_NAME}
+      FITFORGE_TEST_ROOT_PASSWORD: demo-only-fitforge-root
     depends_on:
       db:
         condition: service_healthy

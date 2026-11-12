@@ -21,8 +21,10 @@ import com.fitforge.service.ProductoColorTallaService;
 @Service
 public class ProductoColorTallaServiceImpl implements ProductoColorTallaService {
 
-    @Autowired
-    private ProductoColorTallaDao productoColorTallaDao;
+    @Autowired private ProductoColorTallaDao productoColorTallaDao;
+    @Autowired private com.fitforge.dao.PedidoInventarioDao inventario;
+    @Autowired private org.springframework.jdbc.core.JdbcTemplate jdbc;
+    @Autowired private jakarta.persistence.EntityManager em;
     
     @Autowired
     private ColorDao colorDao;
@@ -53,13 +55,35 @@ public class ProductoColorTallaServiceImpl implements ProductoColorTallaService 
     @Override
     @Transactional
     public void guardar(ProductoColorTalla productoColorTalla) {
-        productoColorTallaDao.save(productoColorTalla);
+        var input=productoColorTalla;
+        if(input.getProducto()==null || input.getProducto().getIdProducto()==null || input.getExistencias()==null || input.getExistencias()<0)
+            throw new IllegalArgumentException("Inventario inválido");
+        Long pid=input.getProducto().getIdProducto();
+        if(inventario.bloquearProducto(pid)==null) throw new IllegalArgumentException("Producto no disponible");
+        Long color=input.getColor()==null?null:input.getColor().getIdColor();
+        Long talla=input.getTalla()==null?null:input.getTalla().getIdTalla();
+        if(input.getIdProductoColorTalla()!=null) {
+            var current=inventario.bloquearVariante(input.getIdProductoColorTalla());
+            if(current==null || current.producto()!=pid) throw new IllegalArgumentException("Variante no disponible para ese producto");
+            jdbc.update("UPDATE producto_color_talla SET id_color=?,id_talla=?,existencias=? WHERE id_producto_color_talla=?",color,talla,input.getExistencias(),input.getIdProductoColorTalla());
+        } else {
+            var fresh=new ProductoColorTalla(); fresh.setProducto(em.getReference(Producto.class,pid));
+            fresh.setColor(color==null?null:em.getReference(Color.class,color));fresh.setTalla(talla==null?null:em.getReference(Talla.class,talla));
+            fresh.setExistencias(input.getExistencias());em.persist(fresh);em.flush();input.setIdProductoColorTalla(fresh.getIdProductoColorTalla());
+        }
     }
 
     @Override
     @Transactional
     public void eliminar(Long id) {
-        productoColorTallaDao.deleteById(id);
+        Long pid=inventario.productoDe(id);
+        if(pid==null) return;
+        inventario.bloquearProducto(pid); var current=inventario.bloquearVariante(id);
+        if(current==null) return;
+        if(current.producto()!=pid) throw new IllegalArgumentException("La variante cambió; reintentá.");
+        if(jdbc.queryForObject("SELECT COUNT(*) FROM venta WHERE id_producto_color_talla=?",Integer.class,id)>0)
+            throw new IllegalArgumentException("La variante tiene pedidos registrados y no se puede eliminar.");
+        jdbc.update("DELETE FROM producto_color_talla WHERE id_producto_color_talla=?",id);
     }
     
     @Override
