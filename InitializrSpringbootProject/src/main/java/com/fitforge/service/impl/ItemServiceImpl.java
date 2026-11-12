@@ -49,7 +49,14 @@ public class ItemServiceImpl implements ItemService {
     // Return current server prices and defensive items, never the writable session list.
     @Override public List<Item> getItems() {
         return getSessionItems().stream().map(stored -> {
-            var item = new Item(serverVariant(stored.getProductoColorTalla().getIdProductoColorTalla()));
+            Long id = stored.getProductoColorTalla().getIdProductoColorTalla();
+            var variant = productoColorTallaService.getProductoColorTalla(id);
+            // Keep unavailable lines removable without trusting their stale session price.
+            if (variant == null) {
+                variant = new ProductoColorTalla();
+                variant.setIdProductoColorTalla(id);
+            }
+            var item = new Item(variant);
             item.setCantidad(stored.getCantidad());
             return item;
         }).toList();
