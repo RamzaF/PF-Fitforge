@@ -17,7 +17,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -29,56 +28,32 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        // Usuarios en memoria
-        UserDetails admin = User.builder()
-                .username("admin@fitforge.com")
-                .password(passwordEncoder().encode("admin123"))
-                .roles("ADMIN")
-                .build();
-
-        UserDetails user = User.builder()
-                .username("user@fitforge.com")
-                .password(passwordEncoder().encode("user123"))
-                .roles("USER")
-                .build();
-
-        InMemoryUserDetailsManager inMemoryManager = new InMemoryUserDetailsManager(admin, user);
-
-        // Servicio personalizado que combina memoria y base de datos
+        // Demo credentials live only in the isolated database, never in source.
         return username -> {
-            // Primero intenta autenticar con usuarios en memoria
-            try {
-                UserDetails inMemoryUser = inMemoryManager.loadUserByUsername(username);
-                if (inMemoryUser != null) {
-                    return inMemoryUser;
+            String sql = "SELECT u.correo, u.password, u.activo, r.nombre " +
+                         "FROM usuario u LEFT JOIN rol r ON u.id_usuario = r.id_usuario " +
+                         "WHERE u.correo = ?";
+            List<UserDetails> dbUsers = jdbcTemplate.query(sql, new Object[]{username}, (rs, rowNum) -> {
+                String correo = rs.getString("correo");
+                String password = rs.getString("password");
+                boolean activo = rs.getBoolean("activo");
+                String role = rs.getString("nombre");
+
+                if (role == null) {
+                    throw new UsernameNotFoundException("Usuario sin roles: " + correo);
                 }
-            } catch (UsernameNotFoundException e) {
-                // Si no está en memoria, busca en la base de datos
-                String sql = "SELECT u.correo, u.password, u.activo, r.nombre " +
-                             "FROM usuario u LEFT JOIN rol r ON u.id_usuario = r.id_usuario " +
-                             "WHERE u.correo = ?";
-                List<UserDetails> dbUsers = jdbcTemplate.query(sql, new Object[]{username}, (rs, rowNum) -> {
-                    String correo = rs.getString("correo");
-                    String password = rs.getString("password");
-                    boolean activo = rs.getBoolean("activo");
-                    String role = rs.getString("nombre");
 
-                    if (role == null) {
-                        throw new UsernameNotFoundException("Usuario sin roles: " + correo);
-                    }
+                return new User(
+                        correo,
+                        password,
+                        activo,
+                        true, true, true,
+                        Arrays.asList(new SimpleGrantedAuthority(role))
+                );
+            });
 
-                    return new User(
-                            correo,
-                            password,
-                            activo,
-                            true, true, true,
-                            Arrays.asList(new SimpleGrantedAuthority(role))
-                    );
-                });
-
-                if (!dbUsers.isEmpty()) {
-                    return dbUsers.get(0);
-                }
+            if (!dbUsers.isEmpty()) {
+                return dbUsers.get(0);
             }
 
             throw new UsernameNotFoundException("Usuario no encontrado: " + username);

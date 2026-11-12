@@ -1,0 +1,84 @@
+name: fitforge-demo
+x-demo-environment: &demo-environment
+  SPRING_PROFILES_ACTIVE: local
+  DEMO_DB_URL: jdbc:mysql://db:3306/fitforge_demo?allowPublicKeyRetrieval=true&useSSL=false
+  DEMO_DB_USER: fitforge_app
+  DEMO_DB_PASSWORD: demo-only-fitforge-app
+services:
+  db:
+    image: mysql:8.4.4@sha256:23818b7d7de427096ab1427b2e3d9d5e14a5b933f9a4431a482d6414bc879091
+    environment:
+      MYSQL_ROOT_PASSWORD: demo-only-fitforge-root
+      MYSQL_DATABASE: fitforge_demo
+    volumes:
+      - demo-db:/var/lib/mysql
+      - ./docs/local/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./docs/local/seed-demo.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    networks: [demo]
+    healthcheck:
+      test: [CMD-SHELL, 'MYSQL_PWD="$$MYSQL_ROOT_PASSWORD" mysql -h 127.0.0.1 -uroot -D fitforge_demo -e "SELECT COUNT(*) FROM producto" >/dev/null 2>&1']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+  app:
+    image: fitforge-demo-app:local
+    build:
+      context: .
+      target: runtime
+    environment: *demo-environment
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [demo]
+    healthcheck:
+      test: [CMD-SHELL, "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080'"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    tmpfs: [/tmp]
+  web:
+    image: nginx:1.28.0-alpine@sha256:30f1c0d78e0ad60901648be663a710bdadf19e4c10ac6782c235200619158284
+    user: "101:101"
+    entrypoint: [nginx, -g, "daemon off;"]
+    volumes:
+      - ./docs/local/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${FITFORGE_PORT:-18081}:8080"
+    networks: [demo, ingress]
+    healthcheck:
+      test: [CMD-SHELL, "wget -q -T 3 -O /dev/null http://127.0.0.1:8080/tienda/listado"]
+      interval: 5s
+      timeout: 4s
+      retries: 20
+      start_period: 10s
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    sysctls:
+      net.ipv4.ip_forward: "0"
+    read_only: true
+    tmpfs: [/tmp]
+  test:
+    image: fitforge-demo-test:local
+    profiles: [tools]
+    build:
+      context: .
+      target: test
+    environment: *demo-environment
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [demo]
+networks:
+  ingress: {}
+  demo:
+    internal: true
+volumes:
+  demo-db:
