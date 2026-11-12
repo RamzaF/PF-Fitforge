@@ -107,9 +107,8 @@
                                     <div class="col-md-4">
                                         <div class="mb-3">
                                             <label for="archivo" class="form-label">Imagen del Producto</label>
-                                            <input class="form-control" type="file" id="archivo" name="archivo" accept="image/*" 
-                                                  th:required="${producto.idProducto == null && producto.rutaImagen == null}">
-                                            <div class="form-text">Formatos recomendados: JPG, PNG. Máximo 2MB.</div>
+                                            <input class="form-control" type="file" id="archivo" name="archivo" accept="image/*" disabled aria-describedby="uploadUnavailable">
+                                            <div id="uploadUnavailable" class="form-text">Subida de imágenes no disponible en esta demo. Se conserva la imagen actual.</div>
                                             <div class="invalid-feedback">
                                                 Debe seleccionar una imagen para el producto.
                                             </div>

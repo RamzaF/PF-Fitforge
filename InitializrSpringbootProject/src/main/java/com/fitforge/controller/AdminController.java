@@ -67,8 +67,9 @@ public class AdminController {
     @GetMapping("/productos/inventario/{idProducto}")
     public String mostrarInventario(@PathVariable("idProducto") Long idProducto, 
                                    RedirectAttributes redirectAttributes) {
-        // Redirigimos a la ruta gestionada por AdminProductoController
-        return "redirect:/admin/productos/inventario/" + idProducto;
+        redirectAttributes.addFlashAttribute("mensaje", "Inventario no disponible en esta demo.");
+        redirectAttributes.addFlashAttribute("tipo", "warning");
+        return "redirect:/admin/productos/listado";
     }
     
     /**

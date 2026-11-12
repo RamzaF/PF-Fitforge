@@ -12,7 +12,6 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
         <!-- CSS personalizado -->
         <link rel="stylesheet" th:href="@{/css/estilos.css}" />
-        <link rel="icon" type="image/x-icon" th:href="@{/Uploads/favicon.ico}">
         <!-- Fuentes de Google -->
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     </head>
@@ -88,7 +87,7 @@
                                     <span class="ms-1 d-none d-lg-inline" sec:authentication="name">Usuario</span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
-                                    <li sec:authorize="hasRole('ROLE_USER') and !hasRole('ROLE_ADMIN')">
+                                    <li sec:authorize="hasAnyRole('ROLE_USER', 'ROLE_ADMIN')">
                                         <a class="dropdown-item" href="/perfil"><i class="bi bi-person me-2"></i>Mi Cuenta</a>
                                     </li>
                                     <!-- <li sec:authorize="hasRole('ROLE_USER') and !hasRole('ROLE_ADMIN')">
@@ -170,8 +169,6 @@
                         </div>
                         <div class="col-md-6 text-md-end">
                             <p class="small text-light mb-0">
-                                <a href="/terminos" class="text-light me-3 text-decoration-none">Términos y Condiciones</a>
-                                <a href="/privacidad" class="text-light text-decoration-none">Política de Privacidad</a>
                             </p>
                         </div>
                     </div>

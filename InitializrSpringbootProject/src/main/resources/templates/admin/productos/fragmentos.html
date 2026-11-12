@@ -75,7 +75,8 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="imagen" class="form-label">Imagen del Producto</label>
-                                <input type="file" class="form-control" id="imagen" name="imagenFile" accept="image/*">
+                                <input type="file" class="form-control" id="imagen" name="archivo" accept="image/*" disabled aria-describedby="newUploadUnavailable">
+                                <div id="newUploadUnavailable" class="form-text">Subida de imágenes no disponible en esta demo.</div>
                                 <div class="invalid-feedback">
                                     Formato de imagen no válido o tamaño excesivo.
                                 </div>

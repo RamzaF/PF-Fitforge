@@ -12,7 +12,7 @@
         <div th:if="${param.registerSuccess}" class="alert alert-success text-center">
             ¡Registro exitoso! Por favor, inicia sesión.
         </div>
-        <div th:if="${param.error}" class="alert alert-danger text-center">
+        <div th:if="${param.error}" role="alert" class="alert alert-danger text-center">
             Correo o contraseña incorrectos.
         </div>
         <div th:if="${param.logout}" class="alert alert-info text-center">
@@ -69,5 +69,6 @@
 
         <!-- Footer -->
         <footer th:replace="~{layout/plantilla :: footer}"/>
+        <th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
     </body>
 </html>

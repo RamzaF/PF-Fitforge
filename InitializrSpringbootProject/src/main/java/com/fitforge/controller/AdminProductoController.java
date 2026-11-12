@@ -1,7 +1,5 @@
 package com.fitforge.controller;
 
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.fitforge.domain.Producto;
 import com.fitforge.domain.ProductoColorTalla;
 import com.fitforge.service.CategoriaService;
-import com.fitforge.service.LocalStorageService;
 import com.fitforge.service.ProductoColorTallaService;
 import com.fitforge.service.ProductoService;
 
@@ -41,10 +38,6 @@ public class AdminProductoController {
     
     @Autowired
     private CategoriaService categoriaService;
-    
-    
-    @Autowired
-    private LocalStorageService localStorageService;
     
     @Autowired
     private ProductoColorTallaService productoColorTallaService;
@@ -154,6 +147,11 @@ public class AdminProductoController {
             @RequestParam(value = "existencias", required = false) Integer existencias,
             RedirectAttributes redirectAttributes) {
         
+        if (archivo != null && !archivo.isEmpty()) {
+            redirectAttributes.addFlashAttribute("mensaje", "Subida de imágenes no disponible en esta demo. No se guardaron cambios.");
+            redirectAttributes.addFlashAttribute("tipo", "warning");
+            return "redirect:/admin/productos/listado";
+        }
         try {
             boolean esNuevo = (producto.getIdProducto() == null || producto.getIdProducto() == 0);
             logger.info("Guardando producto: {} (esNuevo: {}, activo: {})", producto.getDescripcion(), esNuevo, producto.isActivo());
@@ -171,25 +169,6 @@ public class AdminProductoController {
                     }
                     
                     // Inventory is updated separately under its own product/variant locks.
-                }
-            }
-            
-            // Si hay archivo de imagen, procesarlo
-            if (archivo != null && !archivo.isEmpty()) {
-                try {
-                    // Para productos nuevos, necesitamos guardar primero para obtener el ID
-                    if (esNuevo) {
-                        productoService.guardarProducto(producto);
-                    }
-                    
-                    // Guardar la imagen y actualizar la ruta
-                    String rutaImagen = localStorageService.guardarImagen(archivo, producto.getIdProducto());
-                    producto.setRutaImagen(rutaImagen);
-                    logger.info("Imagen guardada para producto ID: {}, ruta: {}", producto.getIdProducto(), rutaImagen);
-                } catch (IOException e) {
-                    logger.error("Error al guardar imagen: {}", e.getMessage());
-                    redirectAttributes.addFlashAttribute("mensaje", "Error al procesar la imagen: " + e.getMessage());
-                    redirectAttributes.addFlashAttribute("tipo", "warning");
                 }
             }
             

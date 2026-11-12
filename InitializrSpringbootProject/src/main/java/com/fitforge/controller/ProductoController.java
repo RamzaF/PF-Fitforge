@@ -34,12 +34,7 @@ public class ProductoController {
 
     @GetMapping
     public String listado(Model model) {
-        var lista = productoService.getProductos(true); 
-        var categoria = categoriaService.getCategoria(false); 
-        model.addAttribute("productos", lista);
-        model.addAttribute("categoria", categoria);
-        model.addAttribute("totalProductos", lista.size());
-        return "/productos/productos"; 
+        return "redirect:/tienda/listado";
     }
 
     @GetMapping("/{id}")
