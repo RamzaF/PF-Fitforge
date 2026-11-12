@@ -380,7 +380,7 @@
                                             </form>
                                         </td>
                                         <td>
-                                            <a th:href="@{/admin/productos/inventario/eliminar/{id}(id=${pct.idProductoColorTalla})}" class="btn btn-danger btn-sm" onclick="return confirm('¿Está seguro de eliminar esta combinación?')">Eliminar</a>
+                                            <form th:action="@{/admin/productos/inventario/eliminar/{id}(id=${pct.idProductoColorTalla})}" onclick="return confirm('¿Está seguro de eliminar esta combinación?')" method="post"><button type="submit" class="btn btn-danger btn-sm">Eliminar</button></form>
                                         </td>
                                     </tr>
                                     <tr th:if="${#lists.isEmpty(producto.productoColorTallas)}">
@@ -500,11 +500,11 @@
                                                 <td th:text="${item.existencias}"></td>
                                                 <td>
                                                     <div class="btn-group">
-                                                        <a th:href="@{/admin/productos/inventario/eliminar/} + ${item.id}" 
-                                                           class="btn btn-sm btn-outline-danger" 
-                                                           onclick="return confirm('¿Está seguro de eliminar esta combinación?');">
+                                                        <form th:action="@{/admin/productos/inventario/eliminar/} + ${item.id}"
+
+                                                           onclick="return confirm('¿Está seguro de eliminar esta combinación?');" method="post"><button type="submit" class="btn btn-danger btn-sm">
                                                             <i class="bi bi-trash"></i>
-                                                        </a>
+                                                        </button></form>
                                                     </div>
                                                 </td>
                                             </tr>

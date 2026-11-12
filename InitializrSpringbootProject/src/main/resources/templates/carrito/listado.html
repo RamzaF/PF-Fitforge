@@ -9,35 +9,9 @@
 <div class="container py-5">
     <h2>Carrito de Compras</h2>
     
-    <!-- Mensaje de confirmación de pedido exitoso -->
-    <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i>
-        <span th:text="${mensajeExito}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    
-    <!-- Modal de confirmación automática cuando se procesa un pedido exitoso -->
-    <div th:if="${pedidoConfirmado}" class="modal fade" id="pedidoExitosoModal" tabindex="-1" aria-labelledby="pedidoExitosoModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="pedidoExitosoModalLabel">¡Pedido Confirmado!</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
-                    <h4 class="mt-3">¡Gracias por tu compra!</h4>
-                    <p class="lead" th:text="${mensajeExito}"></p>
-                    <p>Tu pedido ha sido registrado correctamente.</p>
-                </div>
-                <div class="modal-footer">
-                    <a href="/tienda/listado" class="btn btn-outline-success">Seguir comprando</a>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
+    <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+    <p class="alert alert-info">Los pedidos todavía no están habilitados. Podés revisar y ajustar tu carrito.</p>
+
     <div th:if="${items == null or items.isEmpty()}">
         <p>El carrito está vacío.</p>
         <a href="/tienda/listado" class="btn btn-primary mt-3">Ir a la tienda</a>
@@ -58,8 +32,8 @@
         <tr th:each="item : ${items}">
             <td th:text="${item.productoColorTalla?.producto?.descripcion ?: 'N/A'}"></td>
             <td>
-                <span th:text="${item.productoColorTalla?.color?.nombre ?: 'N/A'}"></span> /
-                <span th:text="${item.productoColorTalla?.talla?.nombre ?: 'N/A'}"></span>
+                <span th:text="${item.productoColorTalla?.color?.nombreColor ?: 'N/A'}"></span> /
+                <span th:text="${item.productoColorTalla?.talla?.nombreTalla ?: 'N/A'}"></span>
             </td>
             <td>₡ <span th:text="${#numbers.formatDecimal(item.productoColorTalla?.producto?.precio, 0, 'COMMA', 2, 'POINT')}"></span></td>
             <td>
@@ -73,7 +47,7 @@
             </td>
             <td>₡ <span th:text="${#numbers.formatDecimal(item.subtotal, 0, 'COMMA', 2, 'POINT')}"></span></td>
             <td>
-                <a th:href="@{/carrito/eliminar/{id}(id=${item.productoColorTalla.idProductoColorTalla})}" class="btn btn-sm btn-danger">Eliminar</a>
+                <form th:action="@{/carrito/eliminar/{id}(id=${item.productoColorTalla.idProductoColorTalla})}" method="post"><button type="submit" class="btn btn-sm btn-danger">Eliminar</button></form>
 
             </td>
         </tr>
@@ -82,44 +56,12 @@
 
     <div th:unless="${items == null or items.isEmpty()}">
         <h4>Total: ₡ <span th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 2, 'POINT')}"></span></h4>
-        <!-- Boton ara realizar pedido -->
-        <button type="button" class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#modalConfirmarPedido">
-            Realizar pedido
-        </button>
-    </div>
-
-    <!-- Modal de confirmacion e pedido -->
-    <div class="modal fade" id="modalConfirmarPedido" tabindex="-1" aria-labelledby="modalConfirmarPedidoLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="modalConfirmarPedidoLabel">Confirmar pedido</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>¿Deseas confirmar tu pedido por un total de <strong>₡ <span th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 2, 'POINT')}"></span></strong>?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form th:action="@{/carrito/confirmar-pedido}" method="post">
-                        <button type="submit" class="btn btn-success">Confirmar pedido</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+        <button type="button" class="btn btn-success mt-3" disabled>Pedidos no disponibles</button>
     </div>
 </div>
 
 <!-- Bootstrap para que funcionen los modales -->
 <th:block th:replace="~{layout/plantilla :: scripts}"/>
-
-<!-- Mostrar automáticamente el modal de confirmación -->
-<script th:if="${pedidoConfirmado}">
-    document.addEventListener('DOMContentLoaded', function() {
-        var myModal = new bootstrap.Modal(document.getElementById('pedidoExitosoModal'))
-        myModal.show()
-    })
-</script>
 
 <footer th:replace="~{layout/plantilla :: footer}"/>
 </body>

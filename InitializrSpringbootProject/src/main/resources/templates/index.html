@@ -64,7 +64,7 @@
                 <!-- Para usuarios autenticados no admin -->
                 <div sec:authorize="isAuthenticated() and !hasRole('ADMIN')">
                     <p class="lead">¡Bienvenido de nuevo!</p>
-                    <a href="/logout" class="btn btn-light btn-lg px-4 py-2 shadow-sm fw-bold">Cerrar Sesión</a>
+                    <form th:action="@{/logout}" method="post"><button type="submit" class="btn btn-light">Cerrar Sesión</button></form>
                 </div>
             </div>
         </section>

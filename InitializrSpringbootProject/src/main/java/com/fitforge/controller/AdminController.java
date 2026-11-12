@@ -118,7 +118,7 @@ public class AdminController {
      * @param redirectAttributes Atributos para mensajes de retroalimentación
      * @return Redirección a la página de inventario del producto o a la lista de productos
      */
-    @GetMapping("/productos/inventario/eliminar/{id}")
+    @PostMapping("/productos/inventario/eliminar/{id}")
     public String eliminarInventario(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
             ProductoColorTalla pct = productoColorTallaService.getProductoColorTalla(id);

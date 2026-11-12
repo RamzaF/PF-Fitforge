@@ -61,51 +61,49 @@ public class CarritoController {
             return "redirect:/";
         }
         var items = itemService.getItems();
-        System.out.println("Carrito contiene: " + items.size() + " ítems");
-        items.forEach(i -> System.out.println(i)); // Imprime mi prueba
         model.addAttribute("items", items); // Agrega la lista 
         model.addAttribute("total", itemService.getTotal());
         return "carrito/listado";
     }
 
-    @GetMapping("/agregar/{id}")
-    public String agregar(@PathVariable("id") Long id) {
-        if (!esUsuarioNormal()) {
-            return "redirect:/";
+    @PostMapping("/agregar/{id}")
+    public String agregar(@PathVariable("id") Long id,
+                          @RequestParam(defaultValue = "1") int cantidad,
+                          RedirectAttributes redirectAttributes) {
+        var variant = new ProductoColorTalla();
+        variant.setIdProductoColorTalla(id);
+        var item = new Item(variant);
+        item.setCantidad(cantidad);
+        try {
+            itemService.save(item);
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
-        ProductoColorTalla pct = productoColorTallaService.getProductoColorTalla(id);
-
-        if (pct == null || pct.getIdProductoColorTalla() == null) {
-           
-            return "redirect:/carrito/ver";
-        }
-
-        if (pct.getExistencias() != null && pct.getExistencias() > 0) {
-            itemService.save(new Item(pct));
-            
-        } else {
-       
-        }
-
         return "redirect:/carrito/ver";
     }
 
-    @GetMapping("/eliminar/{id}")
+    @PostMapping("/agregar")
+    public String agregarSeleccion(@RequestParam("id") Long id,
+                                    @RequestParam(defaultValue = "1") int cantidad,
+                                    RedirectAttributes redirectAttributes) {
+        return agregar(id, cantidad, redirectAttributes);
+    }
+
+    @PostMapping("/eliminar/{id}")
     public String eliminar(@PathVariable("id") Long id) {
-        if (!esUsuarioNormal()) {
-            return "redirect:/";
-        }
         itemService.delete(id);
         return "redirect:/carrito/ver";
     }
 
     @PostMapping("/actualizar")
     public String actualizar(@RequestParam("id") Long id,
-                             @RequestParam("cantidad") int cantidad) {
-        if (!esUsuarioNormal()) {
-            return "redirect:/";
+                             @RequestParam("cantidad") int cantidad,
+                             RedirectAttributes redirectAttributes) {
+        try {
+            itemService.updateCantidad(id, cantidad);
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
-        itemService.updateCantidad(id, cantidad);
         return "redirect:/carrito/ver";
     }
 

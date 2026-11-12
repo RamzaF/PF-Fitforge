@@ -96,10 +96,10 @@
                                                         </form>
                                                     </td>
                                                     <td>
-                                                        <a th:href="@{/admin/productos/inventario/eliminar/{id}(id=${item.id})}" class="btn btn-danger btn-sm" 
-                                                           onclick="return confirm('¿Está seguro de eliminar esta combinación?')">
+                                                        <form th:action="@{/admin/productos/inventario/eliminar/{id}(id=${item.id})}"
+                                                           onclick="return confirm('¿Está seguro de eliminar esta combinación?')" method="post"><button type="submit" class="btn btn-danger btn-sm">
                                                             <i class="fas fa-trash"></i>
-                                                        </a>
+                                                        </button></form>
                                                     </td>
                                                 </tr>
                                             </tbody>

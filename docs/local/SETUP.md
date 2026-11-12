@@ -1,6 +1,6 @@
 # FitForge local: solo Docker
 
-Entrega de entorno de la Tarea 1. Aplicación académica existente; no usar como tienda real.
+Entorno Docker de Tarea 1 y accesos/carrito de Tarea 2. Aplicación académica existente; no usar como tienda real.
 Requisitos del host: Docker Engine/Desktop, Compose y Python 3 estándar para transmitir el contexto. No requiere Java, Maven ni MySQL instalados en macOS. No instala paquetes en el host.
 
 ## Versiones
@@ -9,21 +9,22 @@ Spring Boot 3.4.2 y Java 21 según `pom.xml`. Imágenes fijadas por versión y d
 
 ## Build, pruebas y arranque
 
-Desde la raíz del repo, en la rama `portfolio/fitforge-docker`:
+Desde la raíz del repo, en la rama `portfolio/fitforge-access-cart` (base Docker `ac0bcc4`):
 
 ```sh
 python3 scripts/docker-build.py
 docker compose config --quiet
 docker compose up -d --no-build db
-docker compose run --rm test
-docker compose run --rm test mvn -o -B -ntp package
+docker compose -p fitforge-access-cart-tests up -d --no-build --wait db
+docker compose -p fitforge-access-cart-tests run --rm test
+docker compose -p fitforge-access-cart-tests run --rm test mvn -o -B -ntp package
 docker compose up -d --no-build --wait app web
 docker compose ps
 ```
 
 El script transmite únicamente Dockerfile, .dockerignore, pom y fuentes/recursos de tipos revisados. Construye ambas imágenes locales y excluye atributos extendidos, AppleDouble, enlaces simbólicos, Git, configuración del host, logs y dumps. Usar este script en este volumen externo: `docker compose build` falla por los atributos de AppleDouble. No borrar ni reparar esos archivos.
 
-El build puede descargar dependencias; tests y ejecución usan la red interna aislada. La primera compilación empaqueta con tests omitidos; eso **no** prueba la aplicación. Los dos comandos posteriores ejecutan la suite real y package contra MySQL demo. Si fallan, conservar el error y no asumir que el entorno está verificado.
+El build puede descargar dependencias; tests y ejecución usan la red interna aislada. La primera compilación empaqueta con tests omitidos; eso **no** prueba la aplicación. La suite funcional y package se ejecutan contra MySQL en el proyecto exclusivo `fitforge-access-cart-tests`, con volumen propio; no reutilizar datos personales ni la demo de revisión como destino de pruebas. Si fallan, conservar el error y no asumir que el entorno está verificado.
 
 Abrir <http://127.0.0.1:18081/tienda/listado>. Cambiar el puerto con `FITFORGE_PORT=18083 docker compose up -d --no-build --wait app web` si estuviera ocupado; siempre se publica en loopback.
 
@@ -69,4 +70,4 @@ docker compose down
 
 ## Límites
 
-No se ejecutaron Tareas 2–5. Carrito, confirmación de pedido, permisos/CSRF, recuperación de contraseña y administración conservan limitaciones previas. No anunciar ventas/pagos reales. La subida de archivos del código original necesita rediseñar su almacenamiento para ejecución como jar; no está validada y la raíz de la app es de solo lectura. El catálogo y sus imágenes estáticas son el objetivo de esta entrega. El favicon referenciado por el template original no existe y devuelve 404. El proxy traduce /Uploads a /uploads para servir las rutas históricas en Linux. No hay push, publicación ni licencia nueva.
+Tarea 2 restringe administración a ADMIN y carrito a USER, habilita CSRF y valida cantidades/stock/precios en servidor. Consultar [matriz de acceso y contrato](ACCESS-CART.md). Recuperación de contraseña y contacto están deshabilitados honestamente, sin envío real. Confirmación de pedido, comprobantes y `/pedidos/**` están bloqueados hasta Tarea 3; no anunciar ventas/pagos reales. Tareas 3–5 no se ejecutan. La subida de archivos del código original necesita rediseñar su almacenamiento para ejecución como jar; no está validada y la raíz de la app es de solo lectura. El catálogo y sus imágenes estáticas son el objetivo de esta entrega. El favicon referenciado por el template original no existe y devuelve 404. El proxy traduce /Uploads a /uploads para servir las rutas históricas en Linux. En esta entrega no hay push, merge, PR, publicación ni licencia nueva. La rama Docker base sí se publicó anteriormente; el registro de Tarea 1 describe el estado previo a ese push.

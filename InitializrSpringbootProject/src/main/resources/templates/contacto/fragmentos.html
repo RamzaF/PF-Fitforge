@@ -37,34 +37,7 @@
             <h2 class="text-center mb-5 fw-bold section-title">Contáctanos</h2>
             <div class="row justify-content-center">
                 <div class="col-md-8 col-lg-6">
-                    <div th:if="${param.exito}" class="alert alert-success">
-                        ¡Mensaje enviado con éxito!
-                    </div>
-                    <form th:action="@{/contacto/enviar}" method="post" th:object="${contacto}" class="shadow p-4 rounded" style="background-color: #FFFFFF;">
-                        <div class="mb-3">
-                            <label for="nombre" class="form-label">Nombre</label>
-                            <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
-                            <span th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}" class="text-danger"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label for="apellido" class="form-label">Apellido</label>
-                            <input type="text" class="form-control" id="apellido" th:field="*{apellido}" required>
-                            <span th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}" class="text-danger"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label for="correo" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="correo" th:field="*{correo}" required>
-                            <span th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}" class="text-danger"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label for="mensaje" class="form-label">Mensaje</label>
-                            <textarea class="form-control" id="mensaje" th:field="*{mensaje}" rows="5" required></textarea>
-                            <span th:if="${#fields.hasErrors('mensaje')}" th:errors="*{mensaje}" class="text-danger"></span>
-                        </div>
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-primary btn-lg px-4">Enviar</button>
-                        </div>
-                    </form>
+                    <p class="alert alert-info">El formulario de contacto todavía no está habilitado.</p>
                 </div>
             </div>
         </div>

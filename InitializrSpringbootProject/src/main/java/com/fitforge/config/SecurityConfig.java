@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -64,12 +65,17 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/admin/**", "/usuario/**").hasRole("ADMIN")
-                .requestMatchers("/carrito/**", "/pedidos/**", "/perfil").hasRole("USER")
-                .requestMatchers("/", "/login", "/register", "/forgot-password", "/tienda/**", "/categoria/**", 
-                                "/nosotros", "/contacto", "/css/**", "/js/**", "/img/**", "/webjars/**", 
-                                "/Uploads/**").permitAll()
-                .anyRequest().permitAll()
+                .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ERROR).permitAll()
+                // Order persistence and invoice ownership are not implemented yet.
+                .requestMatchers("/carrito/confirmar-pedido", "/carrito/factura/**", "/pedidos/**").denyAll()
+                .requestMatchers("/admin/**", "/usuario/**", "/api/imagenes/**").hasRole("ADMIN")
+                .requestMatchers("/carrito/**").hasRole("USER")
+                .requestMatchers("/perfil").hasAnyRole("USER", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/", "/home", "/login", "/register", "/forgot-password",
+                                "/tienda/**", "/productos/**", "/categoria/**", "/nosotros", "/contacto",
+                                "/css/**", "/js/**", "/img/**", "/webjars/**", "/Uploads/**", "/uploads/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/login", "/register", "/forgot-password", "/contacto/enviar").permitAll()
+                .anyRequest().denyAll()
             )
             .formLogin(form -> form
                 .loginPage("/login")
@@ -89,14 +95,9 @@ public class SecurityConfig {
                 .logoutSuccessUrl("/")
                 .permitAll()
             )
-            .csrf().disable();
+            .csrf(Customizer.withDefaults());
 
         return http.build();
-    }
-
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/css/**", "/js/**", "/img/**", "/webjars/**", "/Uploads/**");
     }
 
     @Bean

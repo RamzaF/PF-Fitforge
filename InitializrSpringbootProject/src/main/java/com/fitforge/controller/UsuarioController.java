@@ -100,6 +100,8 @@ public class UsuarioController {
             @RequestParam String nombre,
             @RequestParam String correo,
             @RequestParam(required = false) String password,
+            jakarta.servlet.http.HttpServletRequest request,
+            jakarta.servlet.http.HttpServletResponse response,
             Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || auth.getName() == null || "anonymousUser".equals(auth.getName())) {
@@ -142,6 +144,14 @@ public class UsuarioController {
         params[params.length - 1] = correoActual;
 
         jdbcTemplate.update(sql, params);
+
+        // The principal uses the login email. Reauthenticate after identity or
+        // password changes instead of retaining a stale authenticated session.
+        if (!correo.equals(correoActual) || (password != null && !password.isEmpty())) {
+            new org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler()
+                    .logout(request, response, auth);
+            return "redirect:/login";
+        }
 
         // Actualizar el modelo para reflejar los cambios
         Map<String, String> usuario = new HashMap<>();
