@@ -29,7 +29,9 @@ public class ItemServiceImpl implements ItemService {
     private ProductoColorTalla serverVariant(Long id) {
         if (id == null) throw new IllegalArgumentException("Seleccioná una variante válida.");
         var variant = productoColorTallaService.getProductoColorTalla(id);
-        if (variant == null || variant.getProducto() == null || !variant.getProducto().isActivo()) {
+        if (variant == null || !variant.isActivo() || variant.getProducto() == null
+                || !variant.getProducto().isActivo()
+                || (variant.getProducto().getCategoria() != null && !variant.getProducto().getCategoria().isActivo())) {
             throw new IllegalArgumentException("La variante no está disponible.");
         }
         return variant;

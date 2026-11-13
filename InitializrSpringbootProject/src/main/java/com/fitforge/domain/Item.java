@@ -25,8 +25,12 @@ public class Item {
     }
 
     public boolean isDisponible() {
-        return productoColorTalla != null && productoColorTalla.getProducto() != null
-            && productoColorTalla.getProducto().isActivo();
+        return productoColorTalla != null
+            && productoColorTalla.isActivo()
+            && productoColorTalla.getProducto() != null
+            && productoColorTalla.getProducto().isActivo()
+            && (productoColorTalla.getProducto().getCategoria() == null
+                || productoColorTalla.getProducto().getCategoria().isActivo());
     }
 
     public double getSubtotal() {

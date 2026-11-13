@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.fitforge.domain.Categoria;
 import com.fitforge.domain.Producto;
+import com.fitforge.service.CategoriaService;
 import com.fitforge.service.ProductoService;
 
 @Controller
@@ -24,20 +26,23 @@ public class CategoriaController {
     @Autowired
     private ProductoService productoService;
 
+    @Autowired
+    private CategoriaService categoriaService;
+
     @GetMapping("/{nombre}")
     public String verCategoria(@PathVariable String nombre, Model model) {
-        // Obtener productos de la categoría
-        List<Producto> productos = productoService.obtenerPorCategoria(nombre);
-        
-        // Filtrar para mostrar solo productos activos
-        productos = productos.stream()
-                .filter(Producto::isActivo)
+        Categoria activa = categoriaService.buscarActivaPorNombre(nombre).orElse(null);
+        if (activa == null) {
+            model.addAttribute("productos", List.of());
+            model.addAttribute("categoria", nombre);
+            return "categoria/listado";
+        }
+        List<Producto> productos = productoService.obtenerPorCategoria(activa.getDescripcion()).stream()
+                .filter(p -> p.isActivo() && p.getCategoria() != null && p.getCategoria().isActivo())
                 .collect(Collectors.toList());
-        
-        // Agregar datos a la vista
+
         model.addAttribute("productos", productos);
-        model.addAttribute("categoria", nombre);
-        
-        return "categoria/listado"; // Cargar la vista categoria/listado.html
+        model.addAttribute("categoria", activa.getDescripcion());
+        return "categoria/listado";
     }
 }

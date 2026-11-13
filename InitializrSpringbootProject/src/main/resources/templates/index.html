@@ -20,12 +20,16 @@
         <section class="products-catalog py-5">
             <div class="container">
                 <h2 class="text-center mb-5 fw-bold section-title">Nuestra Colección</h2>
-                <div class="row g-4">
+                <div th:if="${#lists.isEmpty(productos)}" class="text-center text-muted py-4">
+                    <p class="mb-2">Aún no hay productos disponibles en el catálogo.</p>
+                </div>
+                <div class="row g-4" th:unless="${#lists.isEmpty(productos)}">
                     <!-- Tarjeta de producto -->
                     <div class="col-md-4 mb-4" th:each="producto : ${productos}">
                         <div class="card h-100 border-0 shadow product-card">
                             <div class="overflow-hidden">
-                                <img th:src="@{${producto.imagen}}" class="card-img-top product-img" th:alt="${producto.descripcion}">
+                                <img th:src="${!#strings.isEmpty(producto.imagen)} ? @{${producto.imagen}} : @{/uploads/FitForge.png}"
+                                     class="card-img-top product-img" th:alt="${producto.descripcion}">
                             </div>
                             <div class="card-body text-center">
                                 <h5 class="card-title fw-bold" th:text="${producto.descripcion}">Descripción Producto</h5>

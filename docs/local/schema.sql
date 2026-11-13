@@ -3,8 +3,9 @@ USE fitforge_demo;
 CREATE TABLE categoria (
   id_categoria BIGINT NOT NULL AUTO_INCREMENT,
   descripcion VARCHAR(50) NOT NULL,
-  activo BOOLEAN DEFAULT TRUE,
-  PRIMARY KEY (id_categoria)
+  activo BOOLEAN NOT NULL DEFAULT TRUE,
+  PRIMARY KEY (id_categoria),
+  UNIQUE KEY uq_categoria_descripcion (descripcion)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE TABLE producto (
   id_producto BIGINT NOT NULL AUTO_INCREMENT,
@@ -13,19 +14,23 @@ CREATE TABLE producto (
   detalle TEXT NOT NULL,
   precio DOUBLE NOT NULL,
   imagen VARCHAR(255),
-  activo BOOLEAN DEFAULT TRUE,
+  activo BOOLEAN NOT NULL DEFAULT TRUE,
   PRIMARY KEY (id_producto),
   FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE TABLE color (
   id_color BIGINT NOT NULL AUTO_INCREMENT,
   nombre_color VARCHAR(50) NOT NULL,
-  PRIMARY KEY (id_color)
+  activo BOOLEAN NOT NULL DEFAULT TRUE,
+  PRIMARY KEY (id_color),
+  UNIQUE KEY uq_color_nombre (nombre_color)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE TABLE talla (
   id_talla BIGINT NOT NULL AUTO_INCREMENT,
   nombre_talla VARCHAR(50) NOT NULL,
-  PRIMARY KEY (id_talla)
+  activo BOOLEAN NOT NULL DEFAULT TRUE,
+  PRIMARY KEY (id_talla),
+  UNIQUE KEY uq_talla_nombre (nombre_talla)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE TABLE producto_color_talla (
   id_producto_color_talla BIGINT NOT NULL AUTO_INCREMENT,
@@ -33,7 +38,9 @@ CREATE TABLE producto_color_talla (
   id_color BIGINT NULL,
   id_talla BIGINT NULL,
   existencias INT NOT NULL CHECK (existencias >= 0),
+  activo BOOLEAN NOT NULL DEFAULT TRUE,
   PRIMARY KEY (id_producto_color_talla),
+  UNIQUE KEY uq_pct_variante (id_producto, id_color, id_talla),
   FOREIGN KEY (id_producto) REFERENCES producto(id_producto),
   FOREIGN KEY (id_color) REFERENCES color(id_color),
   FOREIGN KEY (id_talla) REFERENCES talla(id_talla)

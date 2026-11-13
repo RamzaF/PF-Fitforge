@@ -13,7 +13,9 @@ import com.fitforge.dao.TallaDao;
 import com.fitforge.domain.Color;
 import com.fitforge.domain.Producto;
 import com.fitforge.domain.Talla;
+import com.fitforge.service.ProductoService;
 import com.fitforge.service.TiendaService;
+
 /**
   *
   * @author bryam
@@ -22,20 +24,20 @@ import com.fitforge.service.TiendaService;
 public class TiendaServiceImpl implements TiendaService {
 
     @Autowired private ProductoDao productoDao;
-    @Autowired private com.fitforge.service.ProductoService productos;
+    @Autowired private ProductoService productos;
+    @Autowired private ColorDao colorDao;
+    @Autowired private TallaDao tallaDao;
 
-    @Autowired
-    private ColorDao colorDao;
-
-    @Autowired
-    private TallaDao tallaDao;
+    private boolean esPublico(Producto p) {
+        return p != null && p.isActivo() && p.getCategoria() != null && p.getCategoria().isActivo();
+    }
 
     @Override
     @Transactional(readOnly = true)
     public List<Producto> getProducto(boolean activos) {
         var lista = productoDao.findAll();
         if (activos) {
-            lista = lista.stream().filter(Producto::isActivo).collect(Collectors.toList());
+            lista = lista.stream().filter(this::esPublico).collect(Collectors.toList());
         }
         return lista;
     }
@@ -58,22 +60,16 @@ public class TiendaServiceImpl implements TiendaService {
         productos.eliminarProducto(producto.getIdProducto());
     }
 
-    /*@Override
-    @Transactional
-    public void delete(Producto producto) {
-    productoDao.deleteById(producto.getIdProducto());
-}*/
-
     @Override
     @Transactional(readOnly = true)
     public List<Color> getColores() {
-        return colorDao.findAll();
+        return colorDao.findByActivoTrueOrderByNombreColorAsc();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Talla> getTallas() {
-        return tallaDao.findAll();
+        return tallaDao.findByActivoTrueOrderByNombreTallaAsc();
     }
 
     @Override
@@ -93,26 +89,25 @@ public class TiendaServiceImpl implements TiendaService {
     @Override
     @Transactional(readOnly = true)
     public List<Producto> getProductosFiltrados(List<Long> categorias, List<Long> colores, List<Long> tallas, Double precioMin, Double precioMax) {
-        // Comenzamos con la lista de productos activos solamente
         List<Producto> lista = productoDao.findAll().stream()
-                .filter(Producto::isActivo)
+                .filter(this::esPublico)
                 .collect(Collectors.toList());
-                
+
         if (categorias != null && !categorias.isEmpty()) {
             lista = lista.stream()
-                    .filter(p -> categorias.contains(p.getCategoria().getIdCategoria()))
+                    .filter(p -> p.getCategoria() != null && categorias.contains(p.getCategoria().getIdCategoria()))
                     .collect(Collectors.toList());
         }
         if (colores != null && !colores.isEmpty()) {
             lista = lista.stream()
                     .filter(p -> p.getProductoColorTallas().stream()
-                            .anyMatch(pct -> pct.getColor() != null && colores.contains(pct.getColor().getIdColor())))
+                            .anyMatch(pct -> pct.isActivo() && pct.getColor() != null && colores.contains(pct.getColor().getIdColor())))
                     .collect(Collectors.toList());
         }
         if (tallas != null && !tallas.isEmpty()) {
             lista = lista.stream()
                     .filter(p -> p.getProductoColorTallas().stream()
-                            .anyMatch(pct -> pct.getTalla() != null && tallas.contains(pct.getTalla().getIdTalla())))
+                            .anyMatch(pct -> pct.isActivo() && pct.getTalla() != null && tallas.contains(pct.getTalla().getIdTalla())))
                     .collect(Collectors.toList());
         }
         if (precioMin != null) {
@@ -128,19 +123,13 @@ public class TiendaServiceImpl implements TiendaService {
     @Transactional(readOnly = true)
     public List<Producto> buscarProductos(String termino) {
         List<Producto> resultados;
-        
         if (termino == null || termino.trim().isEmpty()) {
-            // Si no hay término de búsqueda, obtener todos los productos
             resultados = productoDao.findAll();
         } else {
-            // Buscar productos por término
-            resultados = productoDao.buscarPorTermino(termino.toLowerCase());
+            resultados = productoDao.buscarPorTermino(termino.trim().toLowerCase());
         }
-        
-        // Filtrar para mostrar solo productos activos
         return resultados.stream()
-                .filter(Producto::isActivo)
+                .filter(this::esPublico)
                 .collect(Collectors.toList());
     }
-
 }

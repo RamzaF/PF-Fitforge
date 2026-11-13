@@ -1,5 +1,7 @@
 package com.fitforge.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.fitforge.domain.Categoria;
 import com.fitforge.domain.Producto;
-import com.fitforge.domain.ProductoColorTalla;
 import com.fitforge.service.CategoriaService;
 import com.fitforge.service.ProductoColorTallaService;
 import com.fitforge.service.ProductoService;
@@ -41,6 +43,13 @@ public class AdminProductoController {
     
     @Autowired
     private ProductoColorTallaService productoColorTallaService;
+
+    private void cargarCatalogosModal(Model model) {
+        model.addAttribute("categorias", categoriaService.getCategoria(true));
+        model.addAttribute("colores", productoColorTallaService.listarColoresActivos());
+        model.addAttribute("tallas", productoColorTallaService.listarTallasActivas());
+    }
+
     /**
      * Muestra la lista de todos los productos para administración.
      * 
@@ -51,13 +60,8 @@ public class AdminProductoController {
     public String listarProductos(Model model) {
         try {
             var productos = productoService.listarProductos();
-            var categorias = categoriaService.getCategoria(true);
-            var colores = productoColorTallaService.listarColores();
-            var tallas = productoColorTallaService.listarTallas();
+            cargarCatalogosModal(model);
             model.addAttribute("productos", productos);
-            model.addAttribute("categorias", categorias);
-            model.addAttribute("colores", colores);
-            model.addAttribute("tallas", tallas);
             model.addAttribute("totalProductos", productos.size());
             return "admin/productos/listado";
         } catch (Exception e) {
@@ -67,13 +71,6 @@ public class AdminProductoController {
         }
     }
     
-    /**
-     * Muestra la página de edición de un producto específico.
-     * 
-     * @param id ID del producto a editar
-     * @param model Modelo de la vista
-     * @return Vista de edición de producto
-     */
     /**
      * Método para mostrar el formulario de edición de un producto existente.
      * 
@@ -93,9 +90,17 @@ public class AdminProductoController {
                 return "redirect:/admin/productos/listado";
             }
             
-            var categorias = categoriaService.getCategoria(true);
+            List<Categoria> categorias = new ArrayList<>(categoriaService.getCategoria(true));
+            if (producto.getCategoria() != null
+                    && categorias.stream().noneMatch(c -> c.getIdCategoria().equals(producto.getCategoria().getIdCategoria()))) {
+                categorias.add(producto.getCategoria());
+            }
             model.addAttribute("producto", producto);
             model.addAttribute("categorias", categorias);
+            model.addAttribute("variantes", productoColorTallaService.listarPorProducto(id));
+            model.addAttribute("variantesVendidas", productoColorTallaService.variantesVendidasDeProducto(id));
+            model.addAttribute("colores", productoColorTallaService.listarColoresActivos());
+            model.addAttribute("tallas", productoColorTallaService.listarTallasActivas());
             model.addAttribute("titulo", "Editar Producto");
             return "admin/productos/formulario";
         } catch (Exception e) {
@@ -117,10 +122,8 @@ public class AdminProductoController {
     public String buscarProductos(@RequestParam(required = false) String termino, Model model) {
         try {
             var productos = productoService.buscarProductos(termino);
-            var categorias = categoriaService.getCategoria(true);
-            
+            cargarCatalogosModal(model);
             model.addAttribute("productos", productos);
-            model.addAttribute("categorias", categorias);
             model.addAttribute("totalProductos", productos.size());
             model.addAttribute("terminoBusqueda", termino);
             return "admin/productos/listado";
@@ -134,7 +137,7 @@ public class AdminProductoController {
      * Guarda un producto nuevo o actualiza uno existente.
      * 
      * @param producto Producto a guardar
-     * @param imagenFile Archivo de imagen (opcional)
+     * @param archivo Archivo de imagen (opcional)
      * @param redirectAttributes Para mensajes de redirección
      * @return Redirección a listado o página de edición
      */
@@ -156,51 +159,26 @@ public class AdminProductoController {
             boolean esNuevo = (producto.getIdProducto() == null || producto.getIdProducto() == 0);
             logger.info("Guardando producto: {} (esNuevo: {}, activo: {})", producto.getDescripcion(), esNuevo, producto.isActivo());
             
-            // Para productos nuevos, asegurarse que el ID sea null para auto-generar
             if (esNuevo) {
                 producto.setIdProducto(null);
+                producto.setRutaImagen(null);
+                productoService.guardarProductoConVarianteInicial(producto, idColor, idTalla, existencias);
             } else {
-                // Para productos existentes, obtener el producto actual para asegurar que mantengamos todos los datos
                 Producto productoActual = productoService.obtenerProductoPorId(producto.getIdProducto());
                 if (productoActual != null) {
-                    // Conservar la imagen si no se está subiendo una nueva
-                    if ((archivo == null || archivo.isEmpty()) && productoActual.getRutaImagen() != null) {
-                        producto.setRutaImagen(productoActual.getRutaImagen());
-                    }
-                    
-                    // Inventory is updated separately under its own product/variant locks.
+                    producto.setRutaImagen(productoActual.getRutaImagen());
                 }
+                productoService.guardarProducto(producto);
             }
             
-            // Guardar producto con forzamiento de estado activo
-            logger.info("Estado del producto antes de guardar: activo={}", producto.isActivo());
-            productoService.guardarProducto(producto);
-            
-            // Crear entrada de inventario inicial para productos nuevos
-            if (esNuevo && idColor != null && idTalla != null && existencias != null) {
-                var color = productoColorTallaService.listarColores().stream().filter(c -> c.getIdColor().equals(idColor)).findFirst().orElse(null);
-                var talla = productoColorTallaService.listarTallas().stream().filter(t -> t.getIdTalla().equals(idTalla)).findFirst().orElse(null);
-                if (color != null && talla != null) {
-                    ProductoColorTalla inventarioInicial = new ProductoColorTalla();
-                    inventarioInicial.setProducto(producto);
-                    inventarioInicial.setColor(color);
-                    inventarioInicial.setTalla(talla);
-                    inventarioInicial.setExistencias(existencias);
-                    productoColorTallaService.guardar(inventarioInicial);
-                }
-            }
-            
-            // Forzar refrescar el producto desde la base de datos para confirmar que el estado es correcto
             Producto productoGuardado = productoService.obtenerProductoPorId(producto.getIdProducto());
             logger.info("Producto guardado correctamente, ID: {}, estado activo: {}", 
                       productoGuardado.getIdProducto(), productoGuardado.isActivo());
             
-            // Mensaje de éxito
             String mensaje = esNuevo ? "Producto creado correctamente" : "Producto actualizado correctamente";
             redirectAttributes.addFlashAttribute("mensaje", mensaje);
             redirectAttributes.addFlashAttribute("tipo", "success");
             
-            // Siempre redirigir al listado después de guardar
             return "redirect:/admin/productos/listado";
             
         } catch (Exception e) {
@@ -209,6 +187,93 @@ public class AdminProductoController {
             redirectAttributes.addFlashAttribute("tipo", "danger");
             return "redirect:/admin/productos/listado";
         }
+    }
+
+    @PostMapping("/estado")
+    public String cambiarEstadoProducto(
+            @RequestParam Long idProducto,
+            @RequestParam boolean activo,
+            RedirectAttributes redirectAttributes) {
+        try {
+            productoService.cambiarEstado(idProducto, activo);
+            redirectAttributes.addFlashAttribute(
+                    "mensaje", activo ? "Producto activado correctamente" : "Producto desactivado correctamente");
+            redirectAttributes.addFlashAttribute("tipo", "success");
+        } catch (Exception e) {
+            logger.error("Error al cambiar estado del producto: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje", "Error al cambiar el estado del producto: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("tipo", "danger");
+        }
+        return "redirect:/admin/productos/listado";
+    }
+
+    @PostMapping("/variantes/guardar")
+    public String guardarVariante(
+            @RequestParam Long idProducto,
+            @RequestParam Long idColor,
+            @RequestParam Long idTalla,
+            @RequestParam(defaultValue = "0") int existencias,
+            RedirectAttributes redirectAttributes) {
+        try {
+            productoColorTallaService.guardarVariante(idProducto, idColor, idTalla, existencias);
+            redirectAttributes.addFlashAttribute("mensaje", "Variante agregada correctamente.");
+            redirectAttributes.addFlashAttribute("tipo", "success");
+        } catch (Exception e) {
+            logger.error("Error al guardar variante: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje", e.getMessage());
+            redirectAttributes.addFlashAttribute("tipo", "danger");
+        }
+        return "redirect:/admin/productos/editar/" + idProducto;
+    }
+
+    @PostMapping("/variantes/estado")
+    public String cambiarEstadoVariante(
+            @RequestParam Long idVariante,
+            @RequestParam boolean activo,
+            @RequestParam(required = false) Long idProducto,
+            RedirectAttributes redirectAttributes) {
+        Long redirectProductId = idProducto;
+        if (redirectProductId == null) {
+            var variante = productoColorTallaService.getProductoColorTalla(idVariante);
+            if (variante != null && variante.getProducto() != null) {
+                redirectProductId = variante.getProducto().getIdProducto();
+            }
+        }
+        try {
+            productoColorTallaService.cambiarEstado(idVariante, activo);
+            redirectAttributes.addFlashAttribute(
+                    "mensaje", activo ? "Variante activada correctamente." : "Variante desactivada correctamente.");
+            redirectAttributes.addFlashAttribute("tipo", "success");
+        } catch (Exception e) {
+            logger.error("Error al cambiar estado de variante: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje", e.getMessage());
+            redirectAttributes.addFlashAttribute("tipo", "danger");
+        }
+        return redirectProductId != null
+                ? "redirect:/admin/productos/editar/" + redirectProductId
+                : "redirect:/admin/productos/listado";
+    }
+
+    @PostMapping("/variantes/eliminar/{id}")
+    public String eliminarVariante(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes) {
+        var variante = productoColorTallaService.getProductoColorTalla(id);
+        Long idProducto = (variante != null && variante.getProducto() != null)
+                ? variante.getProducto().getIdProducto()
+                : null;
+        try {
+            productoColorTallaService.eliminar(id);
+            redirectAttributes.addFlashAttribute("mensaje", "Variante eliminada correctamente.");
+            redirectAttributes.addFlashAttribute("tipo", "success");
+        } catch (Exception e) {
+            logger.error("Error al eliminar variante: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje", e.getMessage());
+            redirectAttributes.addFlashAttribute("tipo", "danger");
+        }
+        return idProducto != null
+                ? "redirect:/admin/productos/editar/" + idProducto
+                : "redirect:/admin/productos/listado";
     }
     
     /**
@@ -224,7 +289,6 @@ public class AdminProductoController {
             RedirectAttributes redirectAttributes) {
         
         try {
-            // Obtener el producto
             Producto producto = productoService.obtenerProductoPorId(idProducto);
             
             if (producto == null) {
@@ -233,7 +297,6 @@ public class AdminProductoController {
                 return "redirect:/admin/productos/listado";
             }
             
-            // Marcar como inactivo en lugar de eliminar físicamente
             productoService.eliminarProducto(producto.getIdProducto());
             
             redirectAttributes.addFlashAttribute("mensaje", "Producto desactivado correctamente");
@@ -259,10 +322,8 @@ public class AdminProductoController {
     public String productosPorCategoria(@PathVariable String categoria, Model model) {
         try {
             var productos = productoService.obtenerPorCategoria(categoria);
-            var categorias = categoriaService.getCategoria(true);
-            
+            cargarCatalogosModal(model);
             model.addAttribute("productos", productos);
-            model.addAttribute("categorias", categorias);
             model.addAttribute("categoriaActual", categoria);
             model.addAttribute("totalProductos", productos.size());
             return "admin/productos/listado";
@@ -271,13 +332,5 @@ public class AdminProductoController {
             return "redirect:/admin/productos/listado?mensaje=Error+al+filtrar+por+categoría&tipo=danger";
         }
     }
-    
-    /**
-     * Redirige a la página de inventario para un producto específico.
-     * 
-     * @param id ID del producto
-     * @param model Modelo de la vista
-     * @return Vista de gestión de inventario
-     */
 }
 

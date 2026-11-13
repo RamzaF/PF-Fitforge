@@ -12,6 +12,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  *
@@ -34,6 +36,8 @@ public class Categoria implements Serializable {
 
     @OneToMany
     @JoinColumn(name = "id_categoria")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Producto> productos;
 
     public Categoria() {

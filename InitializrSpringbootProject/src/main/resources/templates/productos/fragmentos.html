@@ -7,7 +7,8 @@
         <!-- Fragmento para las imágenes a la izquierda -->
         <aside th:fragment="aside" class="aside-images">
             <div class="mb-3">
-                <img th:src="@{${producto.imagen}}" alt="Imagen 1" class="img-fluid rounded-4" style="width: 230px; height: 300px; object-fit: cover;">
+                <img th:src="${!#strings.isEmpty(producto.imagen)} ? @{${producto.imagen}} : @{/uploads/FitForge.png}"
+                     alt="Imagen 1" class="img-fluid rounded-4" style="width: 230px; height: 300px; object-fit: cover;">
             </div>
 
         </aside>
@@ -17,32 +18,37 @@
             <div class="container mt-4">
                 <div class="row">
                     <div class="col-md-6">
-                        <img th:src="@{${producto.imagen}}" alt="Imagen Principal" class="img-fluid rounded-4">
+                        <img th:src="${!#strings.isEmpty(producto.imagen)} ? @{${producto.imagen}} : @{/uploads/FitForge.png}"
+                             alt="Imagen Principal" class="img-fluid rounded-4">
                     </div>
                     <div class="col-md-6">
                         <h1 th:text="${producto.descripcion}">Camiseta Gymshark</h1>
+                        <p class="text-muted" th:text="${producto.detalle}">Detalle</p>
                         <p class="product-price" th:text="'₡ ' + ${#numbers.formatDecimal(producto.precio, 0, 'COMMA', 2, 'POINT')}">$25,000.00</p>
 
                         <!-- Si es admin, mostrar solo botón de editar -->
                         <div th:if="${esAdmin}">
-                            <a th:href="@{'/admin/productos/modifica/' + ${producto.idProducto}}" class="btn btn-warning">
+                            <a th:href="@{'/admin/productos/editar/' + ${producto.idProducto}}" class="btn btn-warning">
                                 Editar producto
                             </a>
                         </div>
                         <!-- Si no es admin, mostrar tallas, colores, cantidad y botón agregar al carrito -->
                         <div th:if="${!esAdmin}">
+                            <div th:if="${#lists.isEmpty(variantesActivas)}" class="alert alert-warning">
+                                Este producto aún no tiene variantes disponibles.
+                            </div>
                             <form th:action="@{/carrito/agregar}" method="post" id="agregarCarritoForm">
                                 <label for="variante" class="form-label">Color / Talla</label>
                                 <select id="variante" name="id" class="form-select mb-3" required>
                                     <option value="">Seleccioná una variante</option>
-                                    <option th:each="pct : ${producto.productoColorTallas}"
+                                    <option th:each="pct : ${variantesActivas}"
                                             th:value="${pct.idProductoColorTalla}"
                                             th:disabled="${pct.existencias == null or pct.existencias == 0}"
                                             th:text="${(pct.color != null ? pct.color.nombreColor : 'Sin color') + ' / ' + (pct.talla != null ? pct.talla.nombreTalla : 'Única') + ' — Stock: ' + pct.existencias}"></option>
                                 </select>
                                 <label for="cantidad" class="form-label">Cantidad</label>
                                 <input type="number" id="cantidad" name="cantidad" class="form-control mb-3" value="1" min="1" required>
-                                <button type="submit" class="btn btn-primary add-to-cart" th:disabled="${#lists.isEmpty(producto.productoColorTallas)}">Agregar al carrito</button>
+                                <button type="submit" class="btn btn-primary add-to-cart" th:disabled="${#lists.isEmpty(variantesActivas)}">Agregar al carrito</button>
                             </form>
                         </div>
                     </div>

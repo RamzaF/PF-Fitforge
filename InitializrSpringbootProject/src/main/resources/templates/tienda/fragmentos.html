@@ -22,7 +22,7 @@
                         <div class="col-12 col-md-10 col-lg-8">
                             <h1 class="display-2 fw-bold mb-3 fade-in">FITFORGE</h1>
                             <p class="lead fs-3 mb-4 slide-up">Forjando tu estilo Fitness</p>
-                            <a href="/tienda/tienda" class="btn btn-accent btn-lg px-4 py-2 fw-bold slide-up-delay">COMPRAR AHORA</a>
+                            <a href="/tienda/listado" class="btn btn-accent btn-lg px-4 py-2 fw-bold slide-up-delay">COMPRAR AHORA</a>
                         </div>
                     </div>
                 </div>
@@ -173,7 +173,7 @@
             <div class="container py-4">
                 <h2 class="display-6 fw-bold mb-3 text-white">ENTRENA CON ESTILO</h2>
                 <p class="lead mb-4 text-white">Descubre nuestra nueva colección diseñada para maximizar tu rendimiento</p>
-                <a href="/tienda/tienda" class="btn btn-light-accent btn-lg px-5 py-2">Explorar Ahora</a>
+                <a href="/tienda/listado" class="btn btn-light-accent btn-lg px-5 py-2">Explorar Ahora</a>
             </div>
         </div>
 
@@ -282,7 +282,6 @@
                     </div> 
                 </div>
             </div> 
-            </div> 
             <!-- Catálogo de productos -->
             <div class="products-catalog py-1">
                 <div class="container pb-5">
@@ -290,7 +289,7 @@
                     <!-- Mensaje cuando no hay resultados -->
                     <div th:if="${productos.isEmpty()}">
                         <p class="text-center text-muted" style="font-size: 1.2rem;">
-                            No se encontraron resultados con los filtros seleccionados.
+                            No se encontraron productos disponibles con los criterios seleccionados.
                         </p>
                     </div>
                     <!-- Mostrar productos si los hay -->
@@ -298,7 +297,8 @@
                         <div class="col-12 col-md-6 col-lg-4 mb-2" th:each="producto : ${productos}">
                             <div class="card h-100 border-0 shadow product-card" style="height: 100%; width: 100%;">
                                 <div class="overflow-hidden">
-                                    <img th:src="@{${producto.imagen}}" class="card-img-top product-img" 
+                                    <img th:src="${!#strings.isEmpty(producto.imagen)} ? @{${producto.imagen}} : @{/uploads/FitForge.png}"
+                                         class="card-img-top product-img" 
                                          th:alt="${producto.descripcion}" style="height: 300px; object-fit: cover; width: 100%;">
                                 </div>
                                 <div class="card-body text-center">

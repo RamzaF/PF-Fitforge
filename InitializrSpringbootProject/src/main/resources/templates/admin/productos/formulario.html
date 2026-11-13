@@ -21,13 +21,15 @@
                     </nav>
                     
                     <!-- Mensajes de retroalimentación -->
-                    <div th:if="${mensaje != null}" class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle"></i> <span th:text="${mensaje}"></span>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <div th:if="${mensaje != null}"
+                         th:class="'alert alert-' + (${tipo} ?: 'info') + ' alert-dismissible fade show'"
+                         role="alert">
+                        <span th:text="${mensaje}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
                     </div>
                     <div th:if="${error != null}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <span th:text="${error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
                     </div>
                     
                     <div class="card shadow-sm">
@@ -117,15 +119,15 @@
                                         <!-- Previsualización de imagen -->
                                         <div class="text-center mb-3">
                                             <div id="previewContainer" class="mt-3 mb-3">
-                                                <img th:if="${producto.rutaImagen != null}" th:src="@{${producto.rutaImagen}}" 
+                                                <img th:if="${!#strings.isEmpty(producto.rutaImagen)}" th:src="@{${producto.rutaImagen}}" 
                                                      id="previewImage" class="img-thumbnail" alt="Vista previa"
                                                      style="max-height: 200px; max-width: 100%;">
-                                                <img th:if="${producto.rutaImagen == null}" src="" 
+                                                <img th:if="${#strings.isEmpty(producto.rutaImagen)}" th:src="@{/uploads/FitForge.png}" 
                                                      id="previewNewImage" class="img-thumbnail d-none" alt="Vista previa"
                                                      style="max-height: 200px; max-width: 100%;">
                                             </div>
-                                            <div th:if="${producto.rutaImagen == null}" class="alert alert-info" id="noImageMessage">
-                                                <i class="fas fa-info-circle"></i> Sin imagen seleccionada
+                                            <div th:if="${#strings.isEmpty(producto.rutaImagen)}" class="alert alert-info" id="noImageMessage">
+                                                <i class="bi bi-info-circle"></i> Sin imagen asignada
                                             </div>
                                         </div>
                                     </div>
@@ -134,11 +136,98 @@
                                 <!-- Botones de acción -->
                                 <div class="d-flex justify-content-between mt-4">
                                     <a th:href="@{/admin/productos}" class="btn btn-secondary">
-                                        <i class="fas fa-arrow-left"></i> Volver
+                                        <i class="bi bi-arrow-left"></i> Volver
                                     </a>
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-save"></i> Guardar Producto
+                                        <i class="bi bi-save"></i> Guardar Producto
                                     </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Gestión de variantes separada (sin formularios anidados) -->
+                    <div th:if="${producto.idProducto != null}" class="card shadow-sm mt-4">
+                        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Variantes de Color y Talla</h5>
+                            <span class="badge bg-light text-dark" th:text="${variantes != null ? #lists.size(variantes) : 0}">0</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive mb-4">
+                                <table class="table table-bordered table-hover align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Color</th>
+                                            <th>Talla</th>
+                                            <th>Existencias</th>
+                                            <th>Estado</th>
+                                            <th class="text-end">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:if="${#lists.isEmpty(variantes)}">
+                                            <td colspan="5" class="text-center text-muted py-3">Este producto aún no tiene variantes registradas.</td>
+                                        </tr>
+                                        <tr th:each="v : ${variantes}">
+                                            <td th:text="${v.color != null ? v.color.nombreColor : 'N/A'}">Color</td>
+                                            <td th:text="${v.talla != null ? v.talla.nombreTalla : 'N/A'}">Talla</td>
+                                            <td th:text="${v.existencias}">0</td>
+                                            <td>
+                                                <span th:if="${v.activo}" class="badge bg-success">Activa</span>
+                                                <span th:unless="${v.activo}" class="badge bg-secondary">Inactiva</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <div class="d-inline-flex gap-1 align-items-center">
+                                                    <form th:action="@{/admin/productos/variantes/estado}" method="post" class="d-inline">
+                                                        <input type="hidden" name="idVariante" th:value="${v.idProductoColorTalla}" />
+                                                        <input type="hidden" name="idProducto" th:value="${producto.idProducto}" />
+                                                        <input type="hidden" name="activo" th:value="${!v.activo}" />
+                                                        <button type="submit"
+                                                                th:class="${v.activo} ? 'btn btn-sm btn-outline-warning' : 'btn btn-sm btn-outline-success'"
+                                                                th:text="${v.activo} ? 'Desactivar' : 'Activar'">Estado</button>
+                                                    </form>
+                                                    <form th:action="@{/admin/productos/variantes/eliminar/{id}(id=${v.idProductoColorTalla})}"
+                                                          method="post" class="d-inline">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                                th:disabled="${variantesVendidas != null and variantesVendidas.contains(v.idProductoColorTalla)}"
+                                                                th:title="${variantesVendidas != null and variantesVendidas.contains(v.idProductoColorTalla)} ? 'Tiene pedidos registrados; usá Desactivar' : 'Eliminar variante sin ventas'">
+                                                            Eliminar
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h6 class="fw-bold mb-3">Agregar nueva combinación</h6>
+                            <div th:if="${#lists.isEmpty(colores) or #lists.isEmpty(tallas)}" class="alert alert-warning mb-0">
+                                Para agregar variantes necesitás al menos un <a th:href="@{/admin/colores/listado}">color activo</a> y una <a th:href="@{/admin/tallas/listado}">talla activa</a>.
+                            </div>
+                            <form th:unless="${#lists.isEmpty(colores) or #lists.isEmpty(tallas)}"
+                                  th:action="@{/admin/productos/variantes/guardar}" method="post" class="row g-3 align-items-end">
+                                <input type="hidden" name="idProducto" th:value="${producto.idProducto}" />
+                                <div class="col-md-4">
+                                    <label for="idColorVariante" class="form-label">Color</label>
+                                    <select class="form-select" id="idColorVariante" name="idColor" required>
+                                        <option value="" selected disabled>Seleccionar color</option>
+                                        <option th:each="c : ${colores}" th:value="${c.idColor}" th:text="${c.nombreColor}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="idTallaVariante" class="form-label">Talla</label>
+                                    <select class="form-select" id="idTallaVariante" name="idTalla" required>
+                                        <option value="" selected disabled>Seleccionar talla</option>
+                                        <option th:each="t : ${tallas}" th:value="${t.idTalla}" th:text="${t.nombreTalla}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="existenciasVariante" class="form-label">Existencias</label>
+                                    <input type="number" class="form-control" id="existenciasVariante" name="existencias" min="0" value="0" required />
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-success w-100">Agregar</button>
                                 </div>
                             </form>
                         </div>

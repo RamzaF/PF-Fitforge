@@ -66,7 +66,8 @@
                             <div class="card h-100 border-0 shadow product-card-tienda" style="height: 100%; width: 100%;">
                                 <div class="overflow-hidden">
                                     <!-- Imagen con efecto hover, tamaño aumentado -->
-                                    <img th:src="@{${producto.imagen}}" class="card-img-top product-img-tienda" th:alt="${producto.descripcion}" style="height: 300px; object-fit: cover; width: 100%;">
+                                    <img th:src="${!#strings.isEmpty(producto.imagen)} ? @{${producto.imagen}} : @{/uploads/FitForge.png}"
+                                         class="card-img-top product-img-tienda" th:alt="${producto.descripcion}" style="height: 300px; object-fit: cover; width: 100%;">
                                 </div>
 
                                 <div class="card-body text-center">

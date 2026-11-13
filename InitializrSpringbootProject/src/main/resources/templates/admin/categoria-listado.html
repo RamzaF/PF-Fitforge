@@ -42,8 +42,8 @@
                             <div class="row" th:if="${not #lists.isEmpty(productos)}">
                                 <div class="col-md-4 mb-4" th:each="producto : ${productos}">
                                     <div class="card h-100">
-                                        <img th:if="${producto.rutaImagen != null}" th:src="@{${producto.rutaImagen}}" class="card-img-top" alt="Imagen del producto" style="height: 200px; object-fit: cover;">
-                                        <img th:if="${producto.rutaImagen == null}" th:src="@{/images/default-product.jpg}" class="card-img-top" alt="Imagen predeterminada" style="height: 200px; object-fit: cover;">
+                                        <img th:if="${!#strings.isEmpty(producto.rutaImagen)}" th:src="@{${producto.rutaImagen}}" class="card-img-top" alt="Imagen del producto" style="height: 200px; object-fit: cover;">
+                                        <img th:unless="${!#strings.isEmpty(producto.rutaImagen)}" th:src="@{/uploads/FitForge.png}" class="card-img-top" alt="Imagen predeterminada" style="height: 200px; object-fit: cover;">
                                         <div class="card-body">
                                             <h5 class="card-title" th:text="${producto.descripcion}">Nombre del producto</h5>
                                             <p class="card-text" th:text="${#strings.abbreviate(producto.descripcion, 100)}">Descripción del producto...</p>

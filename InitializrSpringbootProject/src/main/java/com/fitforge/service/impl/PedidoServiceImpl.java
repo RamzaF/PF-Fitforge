@@ -81,7 +81,8 @@ public class PedidoServiceImpl implements PedidoService {
         var prices=new HashMap<Long,BigDecimal>(); BigDecimal total=new BigDecimal("0.00");
         for(var l:lines) {
             var v=inventario.bloquearVariante(l.variante()); var p=products.get(associations.get(l.variante()));
-            if(v==null || p==null || v.producto()!=p.id() || !p.activo()) throw error("VARIANTE_NO_DISPONIBLE","Hay líneas no disponibles. Revisá el carrito.");
+            if(v==null || p==null || v.producto()!=p.id() || !p.activo() || !v.activo() || !inventario.categoriaActivaDeProducto(p.id()))
+                throw error("VARIANTE_NO_DISPONIBLE","Hay líneas no disponibles. Revisá el carrito.");
             if(v.stock()<l.cantidad()) throw error("STOCK_INSUFICIENTE","El stock cambió. Revisá las cantidades del carrito.");
             var price=Dinero.desdeDouble(p.precio());
             if(price.compareTo(l.precioAceptado())!=0) throw error("PRECIO_CAMBIADO","El precio cambió. Revisá el total actual y confirmá de nuevo.");

@@ -39,6 +39,9 @@ public class ProductoColorTalla implements Serializable {
     @Column(name = "existencias")
     private Integer existencias;
 
+    @Column(nullable = false)
+    private boolean activo = true;
+
     public ProductoColorTalla() {
     }
 

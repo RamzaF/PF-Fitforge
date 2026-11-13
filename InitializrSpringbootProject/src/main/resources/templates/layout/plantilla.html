@@ -43,7 +43,19 @@
                         <!-- Menú para administradores -->
                         <ul class="navbar-nav ms-auto mb-2 mb-lg-0" sec:authorize="hasRole('ROLE_ADMIN')">
                             <li class="nav-item">
-                                <a class="nav-link" href="/admin/productos/listado">Gestionar productos</a>
+                                <a class="nav-link" href="/admin">Panel</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/admin/productos/listado">Productos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/admin/categorias/listado">Categorías</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/admin/colores/listado">Colores</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/admin/tallas/listado">Tallas</a>
                             </li>
                         </ul>
                         <!-- Menú para no administradores -->
@@ -59,9 +71,14 @@
                                     Categorías
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="/categoria/Ropa Deportiva">Ropa Deportiva</a></li>
-                                    <li><a class="dropdown-item" href="/categoria/Suplementos">Suplementos</a></li>
-                                    <li><a class="dropdown-item" href="/categoria/Accesorios">Accesorios</a></li>
+                                    <li th:each="cat : ${navCategorias}">
+                                        <a class="dropdown-item"
+                                           th:href="@{/categoria/{nombre}(nombre=${cat.descripcion})}"
+                                           th:text="${cat.descripcion}">Categoría</a>
+                                    </li>
+                                    <li th:if="${#lists.isEmpty(navCategorias)}">
+                                        <span class="dropdown-item-text text-muted">Sin categorías</span>
+                                    </li>
                                 </ul>
                             </li>
                             <li class="nav-item">
@@ -150,9 +167,12 @@
                     </div>
                     <div class="col-md-2 mb-4">
                         <h6 class="text-uppercase fw-bold mb-4">Categorías</h6>
-                        <p><a href="/categoria/Ropa Deportiva" class="text-light text-decoration-none">Ropa deportiva</a></p>
-                        <p><a href="/categoria/accesorios" class="text-light text-decoration-none">Accesorios</a></p>
-                        <p><a href="/categoria/Suplementos" class="text-light text-decoration-none">Suplementos</a></p>
+                        <p th:each="cat : ${navCategorias}">
+                            <a th:href="@{/categoria/{nombre}(nombre=${cat.descripcion})}"
+                               class="text-light text-decoration-none"
+                               th:text="${cat.descripcion}">Categoría</a>
+                        </p>
+                        <p th:if="${#lists.isEmpty(navCategorias)}" class="text-light small">Sin categorías activas</p>
                     </div>
                     <div class="col-md-4 mb-4">
                         <h6 class="text-uppercase fw-bold mb-4">Contacto</h6>
