@@ -20,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.fitforge.domain.Categoria;
 import com.fitforge.domain.Producto;
 import com.fitforge.service.CategoriaService;
+import com.fitforge.service.LocalStorageService;
 import com.fitforge.service.ProductoColorTallaService;
 import com.fitforge.service.ProductoService;
 
@@ -43,6 +44,9 @@ public class AdminProductoController {
     
     @Autowired
     private ProductoColorTallaService productoColorTallaService;
+
+    @Autowired
+    private LocalStorageService localStorageService;
 
     private void cargarCatalogosModal(Model model) {
         model.addAttribute("categorias", categoriaService.getCategoria(true));
@@ -98,7 +102,7 @@ public class AdminProductoController {
             model.addAttribute("producto", producto);
             model.addAttribute("categorias", categorias);
             model.addAttribute("variantes", productoColorTallaService.listarPorProducto(id));
-            model.addAttribute("variantesVendidas", productoColorTallaService.variantesVendidasDeProducto(id));
+            model.addAttribute("variantesVendidas", productoColorTallaService.variantesConHistorialDeProducto(id));
             model.addAttribute("colores", productoColorTallaService.listarColoresActivos());
             model.addAttribute("tallas", productoColorTallaService.listarTallasActivas());
             model.addAttribute("titulo", "Editar Producto");
@@ -149,42 +153,67 @@ public class AdminProductoController {
             @RequestParam(value = "talla.idTalla", required = false) Long idTalla,
             @RequestParam(value = "existencias", required = false) Integer existencias,
             RedirectAttributes redirectAttributes) {
-        
-        if (archivo != null && !archivo.isEmpty()) {
-            redirectAttributes.addFlashAttribute("mensaje", "Subida de imágenes no disponible en esta demo. No se guardaron cambios.");
-            redirectAttributes.addFlashAttribute("tipo", "warning");
-            return "redirect:/admin/productos/listado";
+
+        boolean esNuevo = (producto.getIdProducto() == null || producto.getIdProducto() == 0);
+        Producto productoActual = null;
+        String imagenAnterior = null;
+        String nuevaMediaUrl = null;
+
+        if (!esNuevo) {
+            productoActual = productoService.obtenerProductoPorId(producto.getIdProducto());
+            if (productoActual == null) {
+                redirectAttributes.addFlashAttribute("mensaje", "Producto no encontrado");
+                redirectAttributes.addFlashAttribute("tipo", "danger");
+                return "redirect:/admin/productos/listado";
+            }
+            imagenAnterior = productoActual.getRutaImagen();
         }
+
         try {
-            boolean esNuevo = (producto.getIdProducto() == null || producto.getIdProducto() == 0);
+            if (archivo != null && !archivo.isEmpty()) {
+                var imagenValidada = localStorageService.validarImagen(archivo);
+                nuevaMediaUrl = localStorageService.guardarImagenValidada(imagenValidada);
+                producto.setRutaImagen(nuevaMediaUrl);
+            } else {
+                producto.setRutaImagen(esNuevo ? null : imagenAnterior);
+            }
+
             logger.info("Guardando producto: {} (esNuevo: {}, activo: {})", producto.getDescripcion(), esNuevo, producto.isActivo());
-            
+
             if (esNuevo) {
                 producto.setIdProducto(null);
-                producto.setRutaImagen(null);
                 productoService.guardarProductoConVarianteInicial(producto, idColor, idTalla, existencias);
             } else {
-                Producto productoActual = productoService.obtenerProductoPorId(producto.getIdProducto());
-                if (productoActual != null) {
-                    producto.setRutaImagen(productoActual.getRutaImagen());
-                }
                 productoService.guardarProducto(producto);
             }
-            
+
+            if (nuevaMediaUrl != null && imagenAnterior != null
+                    && !imagenAnterior.equals(nuevaMediaUrl)
+                    && productoService.contarProductosPorImagen(imagenAnterior) == 0) {
+                localStorageService.eliminarMediaGestionada(imagenAnterior);
+            }
+
             Producto productoGuardado = productoService.obtenerProductoPorId(producto.getIdProducto());
-            logger.info("Producto guardado correctamente, ID: {}, estado activo: {}", 
-                      productoGuardado.getIdProducto(), productoGuardado.isActivo());
-            
+            logger.info("Producto guardado correctamente, ID: {}, estado activo: {}",
+                    productoGuardado != null ? productoGuardado.getIdProducto() : producto.getIdProducto(),
+                    productoGuardado != null ? productoGuardado.isActivo() : producto.isActivo());
+
             String mensaje = esNuevo ? "Producto creado correctamente" : "Producto actualizado correctamente";
             redirectAttributes.addFlashAttribute("mensaje", mensaje);
             redirectAttributes.addFlashAttribute("tipo", "success");
-            
+
             return "redirect:/admin/productos/listado";
-            
+
         } catch (Exception e) {
+            if (nuevaMediaUrl != null) {
+                localStorageService.eliminarMediaGestionada(nuevaMediaUrl);
+            }
             logger.error("Error al guardar producto: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("mensaje", "Error al guardar el producto: " + e.getMessage());
             redirectAttributes.addFlashAttribute("tipo", "danger");
+            if (!esNuevo && productoActual != null) {
+                return "redirect:/admin/productos/editar/" + productoActual.getIdProducto();
+            }
             return "redirect:/admin/productos/listado";
         }
     }
@@ -207,12 +236,22 @@ public class AdminProductoController {
         return "redirect:/admin/productos/listado";
     }
 
+    private String redirectDestinoVariante(Long idProducto, String origen) {
+        if (idProducto == null) {
+            return "redirect:/admin/productos/listado";
+        }
+        return "inventario".equalsIgnoreCase(origen)
+                ? "redirect:/admin/productos/inventario/" + idProducto
+                : "redirect:/admin/productos/editar/" + idProducto;
+    }
+
     @PostMapping("/variantes/guardar")
     public String guardarVariante(
             @RequestParam Long idProducto,
             @RequestParam Long idColor,
             @RequestParam Long idTalla,
             @RequestParam(defaultValue = "0") int existencias,
+            @RequestParam(required = false) String origen,
             RedirectAttributes redirectAttributes) {
         try {
             productoColorTallaService.guardarVariante(idProducto, idColor, idTalla, existencias);
@@ -223,7 +262,7 @@ public class AdminProductoController {
             redirectAttributes.addFlashAttribute("mensaje", e.getMessage());
             redirectAttributes.addFlashAttribute("tipo", "danger");
         }
-        return "redirect:/admin/productos/editar/" + idProducto;
+        return redirectDestinoVariante(idProducto, origen);
     }
 
     @PostMapping("/variantes/estado")
@@ -231,6 +270,7 @@ public class AdminProductoController {
             @RequestParam Long idVariante,
             @RequestParam boolean activo,
             @RequestParam(required = false) Long idProducto,
+            @RequestParam(required = false) String origen,
             RedirectAttributes redirectAttributes) {
         Long redirectProductId = idProducto;
         if (redirectProductId == null) {
@@ -249,14 +289,13 @@ public class AdminProductoController {
             redirectAttributes.addFlashAttribute("mensaje", e.getMessage());
             redirectAttributes.addFlashAttribute("tipo", "danger");
         }
-        return redirectProductId != null
-                ? "redirect:/admin/productos/editar/" + redirectProductId
-                : "redirect:/admin/productos/listado";
+        return redirectDestinoVariante(redirectProductId, origen);
     }
 
     @PostMapping("/variantes/eliminar/{id}")
     public String eliminarVariante(
             @PathVariable Long id,
+            @RequestParam(required = false) String origen,
             RedirectAttributes redirectAttributes) {
         var variante = productoColorTallaService.getProductoColorTalla(id);
         Long idProducto = (variante != null && variante.getProducto() != null)
@@ -271,9 +310,7 @@ public class AdminProductoController {
             redirectAttributes.addFlashAttribute("mensaje", e.getMessage());
             redirectAttributes.addFlashAttribute("tipo", "danger");
         }
-        return idProducto != null
-                ? "redirect:/admin/productos/editar/" + idProducto
-                : "redirect:/admin/productos/listado";
+        return redirectDestinoVariante(idProducto, origen);
     }
     
     /**

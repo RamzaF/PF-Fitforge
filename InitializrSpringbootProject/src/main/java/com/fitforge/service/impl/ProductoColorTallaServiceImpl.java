@@ -16,6 +16,7 @@ import com.fitforge.domain.Color;
 import com.fitforge.domain.Producto;
 import com.fitforge.domain.ProductoColorTalla;
 import com.fitforge.domain.Talla;
+import com.fitforge.service.InventarioService;
 import com.fitforge.service.ProductoColorTallaService;
 
 /**
@@ -31,6 +32,7 @@ public class ProductoColorTallaServiceImpl implements ProductoColorTallaService 
     @Autowired private jakarta.persistence.EntityManager em;
     @Autowired private ColorDao colorDao;
     @Autowired private TallaDao tallaDao;
+    @Autowired private InventarioService inventarioService;
 
     @Override
     @Transactional(readOnly = true)
@@ -137,6 +139,7 @@ public class ProductoColorTallaServiceImpl implements ProductoColorTallaService 
         try {
             em.persist(fresh);
             em.flush();
+            inventarioService.registrarAltaInicialSiAplica(fresh.getIdProductoColorTalla(), existencias);
             Producto parent = em.find(Producto.class, idProducto);
             if (parent != null) {
                 em.refresh(parent);
@@ -190,6 +193,12 @@ public class ProductoColorTallaServiceImpl implements ProductoColorTallaService 
         if (salesCount != null && salesCount > 0) {
             throw new IllegalArgumentException("La variante tiene pedidos registrados y no se puede eliminar.");
         }
+        Integer movCount = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM movimiento_inventario WHERE id_producto_color_talla=?", Integer.class, id);
+        if (movCount != null && movCount > 0) {
+            throw new IllegalArgumentException(
+                    "La variante tiene historial de inventario registrado y no se puede eliminar; usá Desactivar.");
+        }
         em.flush();
         em.clear();
         jdbc.update("DELETE FROM producto_color_talla WHERE id_producto_color_talla=?", id);
@@ -206,6 +215,21 @@ public class ProductoColorTallaServiceImpl implements ProductoColorTallaService 
                 "JOIN producto_color_talla pct ON pct.id_producto_color_talla = v.id_producto_color_talla " +
                 "WHERE pct.id_producto = ?",
                 (rs, rowNum) -> rs.getLong(1), idProducto));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Set<Long> variantesConHistorialDeProducto(Long idProducto) {
+        if (idProducto == null) {
+            return Set.of();
+        }
+        Set<Long> ids = new HashSet<>(variantesVendidasDeProducto(idProducto));
+        ids.addAll(jdbc.query(
+                "SELECT DISTINCT m.id_producto_color_talla FROM movimiento_inventario m " +
+                "JOIN producto_color_talla pct ON pct.id_producto_color_talla = m.id_producto_color_talla " +
+                "WHERE pct.id_producto = ?",
+                (rs, rowNum) -> rs.getLong(1), idProducto));
+        return ids;
     }
 
     @Override

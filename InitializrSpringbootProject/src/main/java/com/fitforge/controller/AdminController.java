@@ -18,7 +18,8 @@ import com.fitforge.domain.ProductoColorTalla;
 import com.fitforge.domain.Color;
 import com.fitforge.domain.Talla;
 import com.fitforge.service.CategoriaService;
-import com.fitforge.service.LocalStorageService;
+import com.fitforge.service.InventarioService;
+import com.fitforge.service.InventarioService.TipoMovimiento;
 import com.fitforge.service.ProductoService;
 import com.fitforge.service.ProductoColorTallaService;
 
@@ -41,7 +42,7 @@ public class AdminController {
     private ProductoColorTallaService productoColorTallaService;
 
     @Autowired
-    private LocalStorageService localStorageService;
+    private InventarioService inventarioService;
     
     @Autowired
     private ProductoService productoService;
@@ -65,11 +66,22 @@ public class AdminController {
      * @return Vista de inventario o redirección si no existe el producto
      */
     @GetMapping("/productos/inventario/{idProducto}")
-    public String mostrarInventario(@PathVariable("idProducto") Long idProducto, 
-                                   RedirectAttributes redirectAttributes) {
-        redirectAttributes.addFlashAttribute("mensaje", "Inventario no disponible en esta demo.");
-        redirectAttributes.addFlashAttribute("tipo", "warning");
-        return "redirect:/admin/productos/listado";
+    public String mostrarInventario(@PathVariable("idProducto") Long idProducto,
+                                    Model model,
+                                    RedirectAttributes redirectAttributes) {
+        Producto producto = productoService.getProductoById(idProducto);
+        if (producto == null) {
+            redirectAttributes.addFlashAttribute("mensaje", "Producto no encontrado.");
+            redirectAttributes.addFlashAttribute("tipo", "danger");
+            return "redirect:/admin/productos/listado";
+        }
+        model.addAttribute("producto", producto);
+        model.addAttribute("variantes", productoColorTallaService.listarPorProducto(idProducto));
+        model.addAttribute("variantesConHistorial", productoColorTallaService.variantesConHistorialDeProducto(idProducto));
+        model.addAttribute("colores", productoColorTallaService.listarColoresActivos());
+        model.addAttribute("tallas", productoColorTallaService.listarTallasActivas());
+        model.addAttribute("movimientos", inventarioService.listarMovimientosDeProducto(idProducto, 50));
+        return "admin/productos/inventario";
     }
     
     /**
@@ -82,34 +94,51 @@ public class AdminController {
     @PostMapping("/productos/inventario/guardar")
     public String guardarInventario(ProductoColorTalla productoColorTalla, 
                                   RedirectAttributes redirectAttributes) {
+        Long idProducto = productoColorTalla != null && productoColorTalla.getProducto() != null
+                ? productoColorTalla.getProducto().getIdProducto()
+                : null;
+        if (idProducto == null) {
+            redirectAttributes.addFlashAttribute("error", "El producto no existe");
+            return "redirect:/admin/productos";
+        }
         try {
-            // Validaciones
-            if (productoColorTalla.getExistencias() < 0) {
+            if (productoColorTalla.getExistencias() == null || productoColorTalla.getExistencias() < 0) {
                 redirectAttributes.addFlashAttribute("error", "Las existencias no pueden ser negativas");
-                return "redirect:/admin/productos/inventario/" + productoColorTalla.getProducto().getIdProducto();
+                return "redirect:/admin/productos/inventario/" + idProducto;
             }
             
-            // Verificar que el producto exista
-            Producto producto = productoService.obtenerProductoPorId(productoColorTalla.getProducto().getIdProducto());
+            Producto producto = productoService.obtenerProductoPorId(idProducto);
             if (producto == null) {
                 redirectAttributes.addFlashAttribute("error", "El producto no existe");
                 return "redirect:/admin/productos";
             }
             
-            // Verificar que la combinación de color y talla sea válida
-            if (productoColorTalla.getColor() == null || productoColorTalla.getTalla() == null) {
-                redirectAttributes.addFlashAttribute("error", "Debe seleccionar un color y una talla");
-                return "redirect:/admin/productos/inventario/" + productoColorTalla.getProducto().getIdProducto();
+            if (productoColorTalla.getIdProductoColorTalla() != null) {
+                inventarioService.registrarMovimiento(
+                        productoColorTalla.getIdProductoColorTalla(),
+                        TipoMovimiento.AJUSTE,
+                        productoColorTalla.getExistencias(),
+                        "Ajuste directo desde inventario de producto");
+            } else {
+                if (productoColorTalla.getColor() == null || productoColorTalla.getColor().getIdColor() == null
+                        || productoColorTalla.getTalla() == null || productoColorTalla.getTalla().getIdTalla() == null) {
+                    redirectAttributes.addFlashAttribute("error", "Debe seleccionar un color y una talla");
+                    return "redirect:/admin/productos/inventario/" + idProducto;
+                }
+                productoColorTallaService.guardarVariante(
+                        idProducto,
+                        productoColorTalla.getColor().getIdColor(),
+                        productoColorTalla.getTalla().getIdTalla(),
+                        productoColorTalla.getExistencias());
             }
-            
-            productoColorTallaService.guardar(productoColorTalla);
             redirectAttributes.addFlashAttribute("mensaje", "Inventario actualizado correctamente");
+            redirectAttributes.addFlashAttribute("tipo", "success");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error al guardar inventario: " + e.getMessage());
-            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("tipo", "danger");
         }
         
-        return "redirect:/admin/productos/inventario/" + productoColorTalla.getProducto().getIdProducto();
+        return "redirect:/admin/productos/inventario/" + idProducto;
     }
     
     /**

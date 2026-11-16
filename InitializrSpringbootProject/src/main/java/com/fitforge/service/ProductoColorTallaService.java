@@ -21,6 +21,7 @@ public interface ProductoColorTallaService {
     void cambiarEstado(Long idVariante, boolean activo);
     void eliminar(Long id);
     Set<Long> variantesVendidasDeProducto(Long idProducto);
+    Set<Long> variantesConHistorialDeProducto(Long idProducto);
     List<Color> listarColores();
     List<Color> listarColoresActivos();
     List<Talla> listarTallas();

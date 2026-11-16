@@ -190,4 +190,15 @@ public class ProductoServiceImpl implements ProductoService {
         }
         return productoDao.buscarPorTermino(termino.trim());
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public int contarProductosPorImagen(String rutaImagen) {
+        if (rutaImagen == null || rutaImagen.isBlank()) {
+            return 0;
+        }
+        Integer count = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM producto WHERE imagen = ?", Integer.class, rutaImagen);
+        return count == null ? 0 : count;
+    }
 }

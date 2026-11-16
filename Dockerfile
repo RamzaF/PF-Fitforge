@@ -14,6 +14,7 @@ FROM build AS test
 CMD ["mvn", "-o", "-B", "-ntp", "test"]
 FROM eclipse-temurin:21.0.6_7-jre-jammy@sha256:903dcea12637919198041da42cd270d549656c06bfda9126be36f182bb0de72d AS runtime
 WORKDIR /app
+RUN mkdir -p /var/fitforge/uploads && chown -R 10001:10001 /var/fitforge/uploads
 COPY --from=build --chown=10001:10001 /workspace/target/Fitforge-1.jar /app/app.jar
 USER 10001:10001
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

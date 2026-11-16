@@ -53,12 +53,14 @@ class FunctionalPolishIntegrationTest {
         assertThat(html).contains("href=\"/perfil\"");
     }
 
-    @Test void inventoryRedirectEndsAtListWithVisibleUnavailableNotice() throws Exception {
-        var result = mvc.perform(get("/admin/productos/inventario/1").with(user("admin@fitforge.example").roles("ADMIN")))
-            .andExpect(redirectedUrl("/admin/productos/listado")).andExpect(flash().attributeExists("mensaje")).andReturn();
-        var html = mvc.perform(get("/admin/productos/listado").with(user("admin@fitforge.example").roles("ADMIN"))
-            .flashAttrs(result.getFlashMap())).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        assertThat(html).contains("Inventario no disponible");
+    @Test void inventoryPageRendersProductVariantsAndMissingProductRedirects() throws Exception {
+        var html = mvc.perform(get("/admin/productos/inventario/1").with(user("admin@fitforge.example").roles("ADMIN")))
+            .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertThat(html).contains("Camiseta deportiva", "Bitácora");
+
+        var missing = mvc.perform(get("/admin/productos/inventario/999999").with(user("admin@fitforge.example").roles("ADMIN")))
+            .andExpect(redirectedUrl("/admin/productos/listado")).andExpect(flash().attribute("tipo", "danger")).andReturn();
+        assertThat(missing.getFlashMap().get("mensaje").toString()).contains("Producto no encontrado");
     }
 
     @ParameterizedTest
@@ -68,25 +70,25 @@ class FunctionalPolishIntegrationTest {
         jdbc.update("UPDATE categoria SET descripcion=\"Accesorios\" WHERE id_categoria=2");
         var html = mvc.perform(get(path).with(user("admin@fitforge.example").roles("ADMIN")))
             .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        assertThat(html).doesNotContain("href=\"/admin/productos/nuevo", "href=\"/admin/productos/inventario/", "href=\"/admin/productos/eliminar/");
-        assertThat(html).contains("/admin/productos/listado", "Inventario no disponible");
+        assertThat(html).doesNotContain("href=\"/admin/productos/nuevo", "href=\"/admin/productos/eliminar/");
+        assertThat(html).contains("/admin/productos/listado");
     }
 
     @ParameterizedTest
     @ValueSource(strings={"/admin/productos/listado", "/admin/productos/editar/1"})
-    void uploadControlsAreDisabledAndFormsKeepCsrf(String path) throws Exception {
+    void uploadControlsAreEnabledAndFormsKeepCsrf(String path) throws Exception {
         var html = mvc.perform(get(path).with(user("admin@fitforge.example").roles("ADMIN")))
             .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        assertThat(html).contains("Subida de imágenes no disponible", "name=\"_csrf\"");
+        assertThat(html).contains("name=\"_csrf\"").doesNotContain("Subida de imágenes no disponible");
         var inputs = java.util.regex.Pattern.compile("<input[^>]*type=\"file\"[^>]*>").matcher(html);
         int count = 0;
-        while (inputs.find()) { assertThat(inputs.group()).contains("disabled"); count++; }
+        while (inputs.find()) { assertThat(inputs.group()).doesNotContain("disabled"); count++; }
         assertThat(count).isGreaterThan(0);
     }
 
     @ParameterizedTest
     @ValueSource(strings={"", "1"})
-    void rejectedFileNeverCreatesOrChangesProduct(String id) throws Exception {
+    void rejectedInvalidFileNeverCreatesOrChangesProduct(String id) throws Exception {
         var before = jdbc.queryForList("SELECT * FROM producto ORDER BY id_producto");
         var stock = jdbc.queryForList("SELECT * FROM producto_color_talla ORDER BY id_producto_color_talla");
         var response = mvc.perform(multipart("/admin/productos/guardar-producto")
@@ -97,15 +99,14 @@ class FunctionalPolishIntegrationTest {
             .andReturn();
         assertThat(jdbc.queryForList("SELECT * FROM producto ORDER BY id_producto")).isEqualTo(before);
         assertThat(jdbc.queryForList("SELECT * FROM producto_color_talla ORDER BY id_producto_color_talla")).isEqualTo(stock);
-        assertThat(response.getFlashMap().get("tipo")).isEqualTo("warning");
-        assertThat(response.getFlashMap().get("mensaje").toString()).contains("Subida de imágenes no disponible");
-        assertThat(response.getResponse().getRedirectedUrl()).isEqualTo("/admin/productos/listado");
+        assertThat(response.getFlashMap().get("tipo")).isEqualTo("danger");
+        assertThat(response.getResponse().getStatus()).isEqualTo(302);
     }
 
-    @Test void imageApiRejectsBeforeStorageWithSafeMessage() throws Exception {
+    @Test void imageApiRejectsInvalidFileWithBadRequest() throws Exception {
         mvc.perform(multipart("/api/imagenes/subir").file(new MockMultipartFile("archivo", "demo.png", "image/png", new byte[]{1}))
             .with(user("admin@fitforge.example").roles("ADMIN")).with(csrf()))
-            .andExpect(status().isServiceUnavailable()).andExpect(content().string("Subida de imágenes no disponible en esta demo."));
+            .andExpect(status().isBadRequest());
     }
 
     @Test void emptyFileAllowsEditingAndPreservesImage() throws Exception {

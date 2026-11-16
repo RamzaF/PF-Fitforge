@@ -1,8 +1,14 @@
 # FitForge local: solo Docker
 
-**Estado actual: Entrega 3.** Seguir primero [ORDERS.md](ORDERS.md) para build, pruebas y arranque en proyectos y volúmenes nuevos. URL de revisión: <http://127.0.0.1:18084/tienda/listado>. No usar las imágenes nuevas con los volúmenes anteriores: no se migran.
+**Estado actual: rama `portfolio/fitforge-media-stock` (imágenes persistentes e inventario auditable).** Seguir [ORDERS.md](ORDERS.md) y los comandos de esta sección para build, pruebas y arranque en proyectos y volúmenes nuevos. No usar las imágenes nuevas con volúmenes de BD anteriores: no se migran.
 
-Las instrucciones de Entregas 1–2 que siguen son históricas y corresponden a sus ramas/imágenes. Entorno Docker de Tarea 1 y accesos/carrito de Tarea 2. Aplicación académica existente; no usar como tienda real.
+### Almacenamiento de imágenes y mantenimiento (`portfolio/fitforge-media-stock`)
+
+- `compose.yaml` monta el volumen nombrado exclusivo `uploads-data` en `/var/fitforge/uploads` (`FITFORGE_UPLOADS_DIR=/var/fitforge/uploads`) con usuario `10001:10001`, manteniendo la raíz del contenedor `app` en `read_only: true` y sin montar `uploads-data` en Nginx.
+- Formatos aceptados: **PNG y JPG/JPEG** hasta **5 MB** (límite multipart 10 MB), validados por extensión, magic bytes, decodificación real vía `ImageIO` y dimensiones (`<= 8192x8192`, `<= 25 MP`). Los archivos se guardan con nombre UUID bajo `/media/{uuid}.{png|jpg}` y cabeceras `X-Content-Type-Options: nosniff` y `Content-Security-Policy: default-src 'none'`.
+- Consistencia y crash recovery: la escritura pasa por un archivo temporal `.tmp-<uuid>.part` en el mismo directorio antes del movimiento atómico y el commit en BD; si la BD falla, se ejecuta compensación eliminando el archivo recién creado y conservando la imagen previa. Ante un corte abrupto (`SIGKILL`), solo podrían quedar `.tmp-*.part` (depurados automáticamente al reiniciar la app) o archivos huérfanos sin referencia en `producto`; nunca se eliminan assets históricos de `/uploads/**` ni medios aún referenciados.
+
+Las instrucciones de Entregas 1–3 que siguen conservan su registro histórico. Aplicación académica existente; no usar como tienda real.
 Requisitos del host: Docker Engine/Desktop, Compose y Python 3 estándar para transmitir el contexto. No requiere Java, Maven ni MySQL instalados en macOS. No instala paquetes en el host.
 
 ## Versiones

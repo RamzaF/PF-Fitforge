@@ -42,6 +42,7 @@ class CatalogAdminIntegrationTest {
     @AfterEach
     void restoreBaseline() {
         OrderTestDatabase.requireDisposable();
+        jdbc.update("DELETE FROM movimiento_inventario");
         jdbc.update("DELETE FROM venta");
         jdbc.update("DELETE FROM factura");
         jdbc.update("DELETE FROM producto_color_talla");

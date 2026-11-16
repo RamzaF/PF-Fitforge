@@ -75,12 +75,11 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="imagen" class="form-label">Imagen del Producto</label>
-                                <input type="file" class="form-control" id="imagen" name="archivo" accept="image/*" disabled aria-describedby="newUploadUnavailable">
-                                <div id="newUploadUnavailable" class="form-text">Subida de imágenes no disponible en esta demo.</div>
+                                <input type="file" class="form-control" id="imagen" name="archivo" accept="image/png,image/jpeg,.png,.jpg,.jpeg" aria-describedby="newUploadHelp">
+                                <div id="newUploadHelp" class="form-text">Formatos permitidos: PNG, JPG/JPEG. Máximo 5 MB.</div>
                                 <div class="invalid-feedback">
                                     Formato de imagen no válido o tamaño excesivo.
                                 </div>
-                                <small class="text-muted">Formatos permitidos: JPG, JPEG, PNG, GIF. Máximo 5MB.</small>
                                 <div id="imagePreview" class="mt-2 d-none">
                                     <img th:src="@{/uploads/FitForge.png}" alt="Vista previa" class="img-thumbnail" style="max-height: 150px;">
                                 </div>
@@ -252,6 +251,9 @@
                                     <div class="d-inline-flex gap-1">
                                         <a th:href="@{/admin/productos/editar/} + ${producto.idProducto}" class="btn btn-sm btn-outline-primary" title="Editar producto y variantes">
                                             <i class="bi bi-pencil-square"></i> Editar
+                                        </a>
+                                        <a th:href="@{/admin/productos/inventario/} + ${producto.idProducto}" class="btn btn-sm btn-outline-dark" title="Gestionar inventario y bitácora">
+                                            <i class="bi bi-boxes"></i> Inventario
                                         </a>
                                         <form th:action="@{/admin/productos/estado}" method="post" class="d-inline">
                                             <input type="hidden" name="idProducto" th:value="${producto.idProducto}" />

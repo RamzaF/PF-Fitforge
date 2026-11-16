@@ -19,7 +19,7 @@
                         </ol>
                     </nav>
                     
-                    <p class="text-muted">Inventario no disponible en esta demo. Las altas se realizan desde el listado de productos.</p>
+                    <p class="text-muted">Administrá los productos de esta categoría o su inventario por variante.</p>
                     <!-- Mensajes de retroalimentación -->
                     <div th:if="${mensaje != null}" class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="fas fa-check-circle"></i> <span th:text="${mensaje}"></span>
@@ -53,12 +53,14 @@
                                             </p>
                                         </div>
                                         <div class="card-footer bg-white">
-                                            <div class="d-flex justify-content-between">
+                                            <div class="d-flex justify-content-between gap-2">
                                                 <a th:href="@{/admin/productos/editar/{id}(id=${producto.idProducto})}" class="btn btn-primary btn-sm">
-                                                    <i class="fas fa-edit"></i> Editar
+                                                    <i class="bi bi-edit"></i> Editar
                                                 </a>
-                                                <span class="text-muted small">Inventario no disponible en esta demo.</span>
-                                                <a th:href="@{/admin/productos/listado}" class="btn btn-secondary btn-sm">Gestionar productos</a>
+                                                <a th:href="@{/admin/productos/inventario/{id}(id=${producto.idProducto})}" class="btn btn-outline-dark btn-sm">
+                                                    Inventario
+                                                </a>
+                                                <a th:href="@{/admin/productos/listado}" class="btn btn-secondary btn-sm">Productos</a>
                                             </div>
                                         </div>
                                     </div>

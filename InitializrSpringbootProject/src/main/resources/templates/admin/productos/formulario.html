@@ -109,10 +109,10 @@
                                     <div class="col-md-4">
                                         <div class="mb-3">
                                             <label for="archivo" class="form-label">Imagen del Producto</label>
-                                            <input class="form-control" type="file" id="archivo" name="archivo" accept="image/*" disabled aria-describedby="uploadUnavailable">
-                                            <div id="uploadUnavailable" class="form-text">Subida de imágenes no disponible en esta demo. Se conserva la imagen actual.</div>
+                                            <input class="form-control" type="file" id="archivo" name="archivo" accept="image/png,image/jpeg,.png,.jpg,.jpeg" aria-describedby="uploadHelp">
+                                            <div id="uploadHelp" class="form-text">Formatos permitidos: PNG, JPG/JPEG. Máximo 5 MB. Si no seleccionás archivo, se conserva la imagen actual.</div>
                                             <div class="invalid-feedback">
-                                                Debe seleccionar una imagen para el producto.
+                                                Debe seleccionar una imagen válida (PNG o JPG/JPEG, máximo 5 MB).
                                             </div>
                                         </div>
                                         
@@ -149,8 +149,13 @@
                     <!-- Gestión de variantes separada (sin formularios anidados) -->
                     <div th:if="${producto.idProducto != null}" class="card shadow-sm mt-4">
                         <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Variantes de Color y Talla</h5>
-                            <span class="badge bg-light text-dark" th:text="${variantes != null ? #lists.size(variantes) : 0}">0</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <h5 class="mb-0">Variantes de Color y Talla</h5>
+                                <span class="badge bg-light text-dark" th:text="${variantes != null ? #lists.size(variantes) : 0}">0</span>
+                            </div>
+                            <a th:href="@{/admin/productos/inventario/{id}(id=${producto.idProducto})}" class="btn btn-sm btn-outline-light">
+                                Gestionar Stock y Bitácora
+                            </a>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive mb-4">
@@ -237,6 +242,7 @@
         </div>
         
         <footer th:replace="~{layout/plantilla :: footer}"></footer>
+        <th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
         
         <!-- Scripts específicos para este formulario -->
         <script>
@@ -244,10 +250,8 @@
             (function () {
                 'use strict'
                 
-                // Fetch all forms we want to apply validation to
                 var forms = document.querySelectorAll('.needs-validation')
                 
-                // Loop over them and prevent submission
                 Array.prototype.slice.call(forms)
                     .forEach(function (form) {
                         form.addEventListener('submit', function (event) {
@@ -262,7 +266,7 @@
             })()
             
             // Previsualización de imagen
-            document.getElementById('archivo').addEventListener('change', function(e) {
+            document.getElementById('archivo')?.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file) {
                     const reader = new FileReader();
@@ -270,17 +274,14 @@
                     const previewImage = document.getElementById('previewImage');
                     const noImageMessage = document.getElementById('noImageMessage');
                     
-                    reader.onload = function(e) {
-                        // Si hay una imagen existente
+                    reader.onload = function(ev) {
                         if (previewImage) {
-                            previewImage.src = e.target.result;
+                            previewImage.src = ev.target.result;
                         }
-                        
-                        // Para nueva imagen
-                        previewNewImage.src = e.target.result;
-                        previewNewImage.classList.remove('d-none');
-                        
-                        // Ocultar mensaje de no imagen
+                        if (previewNewImage) {
+                            previewNewImage.src = ev.target.result;
+                            previewNewImage.classList.remove('d-none');
+                        }
                         if (noImageMessage) {
                             noImageMessage.classList.add('d-none');
                         }

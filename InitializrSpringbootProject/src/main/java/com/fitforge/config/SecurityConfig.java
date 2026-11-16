@@ -74,7 +74,7 @@ public class SecurityConfig {
                 .requestMatchers("/perfil").hasAnyRole("USER", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/", "/home", "/login", "/register", "/forgot-password",
                                 "/tienda/**", "/productos/**", "/categoria/**", "/nosotros", "/contacto",
-                                "/css/**", "/js/**", "/img/**", "/webjars/**", "/Uploads/**", "/uploads/**").permitAll()
+                                "/css/**", "/js/**", "/img/**", "/webjars/**", "/Uploads/**", "/uploads/**", "/media/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/login", "/register", "/forgot-password", "/contacto/enviar").permitAll()
                 .anyRequest().denyAll()
             )

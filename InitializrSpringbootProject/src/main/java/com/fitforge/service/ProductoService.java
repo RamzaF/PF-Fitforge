@@ -19,4 +19,5 @@ public interface ProductoService {
     void cambiarEstado(Long id, boolean activo);
     void eliminarProducto(Long id);
     Producto getProductoById(Long id);
+    int contarProductosPorImagen(String rutaImagen);
 }

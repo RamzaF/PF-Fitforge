@@ -100,5 +100,20 @@ CREATE TABLE contacto (
   activo BOOLEAN DEFAULT TRUE,
   PRIMARY KEY (id_contacto)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE movimiento_inventario (
+  id_movimiento BIGINT NOT NULL AUTO_INCREMENT,
+  id_producto_color_talla BIGINT NOT NULL,
+  id_usuario_admin INT NOT NULL,
+  tipo VARCHAR(20) NOT NULL,
+  cantidad_anterior INT NOT NULL CHECK (cantidad_anterior >= 0),
+  cantidad_delta INT NOT NULL,
+  cantidad_nueva INT NOT NULL CHECK (cantidad_nueva >= 0),
+  motivo VARCHAR(200) NOT NULL,
+  fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id_movimiento),
+  INDEX idx_mov_inv_variante_fecha (id_producto_color_talla, fecha_creacion),
+  FOREIGN KEY (id_producto_color_talla) REFERENCES producto_color_talla(id_producto_color_talla),
+  FOREIGN KEY (id_usuario_admin) REFERENCES usuario(id_usuario)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE USER 'fitforge_app'@'%' IDENTIFIED BY 'demo-only-fitforge-app';
 GRANT SELECT, INSERT, UPDATE, DELETE ON fitforge_demo.* TO 'fitforge_app'@'%';

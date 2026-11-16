@@ -4,6 +4,7 @@ x-demo-environment: &demo-environment
   DEMO_DB_URL: jdbc:mysql://db:3306/fitforge_demo?allowPublicKeyRetrieval=true&useSSL=false
   DEMO_DB_USER: fitforge_app
   DEMO_DB_PASSWORD: demo-only-fitforge-app
+  FITFORGE_UPLOADS_DIR: /var/fitforge/uploads
 services:
   db:
     image: mysql:8.4.4@sha256:23818b7d7de427096ab1427b2e3d9d5e14a5b933f9a4431a482d6414bc879091
@@ -27,6 +28,8 @@ services:
       context: .
       target: runtime
     environment: *demo-environment
+    volumes:
+      - uploads-data:/var/fitforge/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -76,6 +79,7 @@ services:
       FITFORGE_ORDERS_TESTS: "1"
       FITFORGE_TEST_PROJECT: ${COMPOSE_PROJECT_NAME}
       FITFORGE_TEST_ROOT_PASSWORD: demo-only-fitforge-root
+      FITFORGE_UPLOADS_DIR: /tmp/fitforge-test-uploads
     depends_on:
       db:
         condition: service_healthy
@@ -86,3 +90,4 @@ networks:
     internal: true
 volumes:
   demo-db:
+  uploads-data:
