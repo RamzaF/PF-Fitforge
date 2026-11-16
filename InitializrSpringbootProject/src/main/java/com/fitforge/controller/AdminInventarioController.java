@@ -3,6 +3,9 @@ package com.fitforge.controller;
 import com.fitforge.service.InventarioService;
 import com.fitforge.service.InventarioService.TipoMovimiento;
 import java.util.Locale;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,12 +13,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/admin/inventario")
 @PreAuthorize("hasRole('ROLE_ADMIN')")
 public class AdminInventarioController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminInventarioController.class);
 
     private final InventarioService inventarioService;
 
@@ -77,7 +83,8 @@ public class AdminInventarioController {
                 throw new IllegalArgumentException("La cantidad debe ser un número entero válido dentro de rango.");
             }
 
-            var movimiento = inventarioService.registrarMovimiento(idVariante, tipoMov, cantidadEntera, motivo);
+            var movimiento = inventarioService.registrarMovimiento(
+                    idVariante, idProducto, tipoMov, cantidadEntera, motivo);
             redirectAttributes.addFlashAttribute("mensaje",
                     String.format("Stock actualizado (%s): %d → %d (%+d) — %s",
                             movimiento.tipo(),
@@ -86,8 +93,14 @@ public class AdminInventarioController {
                             movimiento.cantidadDelta(),
                             movimiento.motivo()));
             redirectAttributes.addFlashAttribute("tipo", "success");
-        } catch (Exception ex) {
+        } catch (ResponseStatusException | AccessDeniedException ex) {
+            throw ex;
+        } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("mensaje", ex.getMessage());
+            redirectAttributes.addFlashAttribute("tipo", "danger");
+        } catch (Exception ex) {
+            logger.error("Error al registrar movimiento de inventario: {}", ex.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje", "No se pudo registrar el movimiento de inventario.");
             redirectAttributes.addFlashAttribute("tipo", "danger");
         }
         return idProducto != null

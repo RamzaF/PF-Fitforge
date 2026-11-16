@@ -77,6 +77,13 @@ public class InventarioServiceImpl implements InventarioService {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED, timeout = 10, rollbackFor = Exception.class)
     public MovimientoView registrarMovimiento(Long idVariante, TipoMovimiento tipo, int cantidad, String motivo) {
+        return registrarMovimiento(idVariante, null, tipo, cantidad, motivo);
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED, timeout = 10, rollbackFor = Exception.class)
+    public MovimientoView registrarMovimiento(
+            Long idVariante, Long idProductoEsperado, TipoMovimiento tipo, int cantidad, String motivo) {
         int idAdmin = resolverAdminObligatorio();
         if (idVariante == null || idVariante < 1) {
             throw new IllegalArgumentException("Debe seleccionar una variante válida.");
@@ -96,11 +103,17 @@ public class InventarioServiceImpl implements InventarioService {
         if (pid == null) {
             throw new IllegalArgumentException("La variante solicitada no existe.");
         }
+        if (idProductoEsperado != null && !idProductoEsperado.equals(pid)) {
+            throw new IllegalArgumentException("La variante seleccionada no pertenece al producto indicado.");
+        }
         // Canonical lock order: producto -> variante (matches PedidoServiceImpl to prevent deadlocks).
         var prod = inventario.bloquearProducto(pid);
         var varActual = inventario.bloquearVariante(idVariante);
         if (prod == null || varActual == null || varActual.producto() != pid) {
             throw new IllegalArgumentException("La variante solicitada no existe.");
+        }
+        if (idProductoEsperado != null && varActual.producto() != idProductoEsperado) {
+            throw new IllegalArgumentException("La variante seleccionada no pertenece al producto indicado.");
         }
         if (!varActual.activo()) {
             throw new IllegalArgumentException(

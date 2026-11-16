@@ -346,4 +346,112 @@ class InventoryAuditIntegrationTest {
         assertThat(jdbc.queryForObject("SELECT descripcion FROM producto WHERE id_producto=1", String.class))
                 .isEqualTo("Camiseta Editada Concurrente");
     }
+
+    @Test
+    void alternativeInventorySaveEnforcesRoleCsrfMotivoAndProductVariantOwnership() throws Exception {
+        // Anonymous and USER cannot mutate via /admin/productos/inventario/guardar; ADMIN needs CSRF
+        mvc.perform(post("/admin/productos/inventario/guardar")
+                .param("idProductoColorTalla", "1")
+                .param("producto.idProducto", "1")
+                .param("existencias", "4")
+                .param("motivo", "Ajuste válido")
+                .with(csrf()))
+                .andExpect(redirectedUrl("http://localhost/login"));
+
+        mvc.perform(post("/admin/productos/inventario/guardar")
+                .param("idProductoColorTalla", "1")
+                .param("producto.idProducto", "1")
+                .param("existencias", "4")
+                .param("motivo", "Ajuste válido")
+                .with(user("cliente@fitforge.example").roles("USER"))
+                .with(csrf()))
+                .andExpect(status().isForbidden());
+
+        mvc.perform(post("/admin/productos/inventario/guardar")
+                .param("idProductoColorTalla", "1")
+                .param("producto.idProducto", "1")
+                .param("existencias", "4")
+                .param("motivo", "Ajuste válido")
+                .with(user("admin@fitforge.example").roles("ADMIN")))
+                .andExpect(status().isForbidden());
+
+        // Missing, blank, or too-short motivo on existing variant adjustment MUST be rejected with zero mutations
+        for (String badMotivo : new String[]{null, "   ", "ab"}) {
+            var req = post("/admin/productos/inventario/guardar")
+                    .param("idProductoColorTalla", "1")
+                    .param("producto.idProducto", "1")
+                    .param("color.idColor", "1")
+                    .param("talla.idTalla", "1")
+                    .param("existencias", "2")
+                    .with(user("admin@fitforge.example").roles("ADMIN"))
+                    .with(csrf());
+            if (badMotivo != null) {
+                req.param("motivo", badMotivo);
+            }
+            mvc.perform(req)
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(flash().attribute("tipo", "danger"));
+        }
+
+        // Variant 3 belongs to Product 2, NOT Product 1 -> MUST be rejected on both endpoints
+        mvc.perform(post("/admin/productos/inventario/guardar")
+                .param("idProductoColorTalla", "3")
+                .param("producto.idProducto", "1")
+                .param("existencias", "9")
+                .param("motivo", "Conteo producto incorrecto")
+                .with(user("admin@fitforge.example").roles("ADMIN"))
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("tipo", "danger"));
+
+        mvc.perform(post("/admin/inventario/movimiento")
+                .param("idVariante", "3")
+                .param("idProducto", "1")
+                .param("tipo", "AJUSTE")
+                .param("cantidad", "9")
+                .param("motivo", "Conteo producto incorrecto")
+                .with(user("admin@fitforge.example").roles("ADMIN"))
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("tipo", "danger"));
+
+        assertThat(jdbc.queryForObject("SELECT existencias FROM producto_color_talla WHERE id_producto_color_talla=1", Integer.class))
+                .isEqualTo(5);
+        assertThat(jdbc.queryForObject("SELECT existencias FROM producto_color_talla WHERE id_producto_color_talla=3", Integer.class))
+                .isEqualTo(3);
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM movimiento_inventario", Integer.class)).isZero();
+
+        // Creating a NEW variant (no idProductoColorTalla) via /admin/productos/inventario/guardar still works
+        mvc.perform(post("/admin/productos/inventario/guardar")
+                .param("producto.idProducto", "1")
+                .param("color.idColor", "2")
+                .param("talla.idTalla", "1")
+                .param("existencias", "6")
+                .with(user("admin@fitforge.example").roles("ADMIN"))
+                .with(csrf()))
+                .andExpect(redirectedUrl("/admin/productos/inventario/1"))
+                .andExpect(flash().attribute("tipo", "success"));
+
+        assertThat(jdbc.queryForObject(
+                "SELECT existencias FROM producto_color_talla WHERE id_producto=1 AND id_color=2 AND id_talla=1",
+                Integer.class)).isEqualTo(6);
+
+        // Valid adjustment on matching product + valid operador motivo succeeds and logs exact motivo
+        mvc.perform(post("/admin/productos/inventario/guardar")
+                .param("idProductoColorTalla", "1")
+                .param("producto.idProducto", "1")
+                .param("existencias", "4")
+                .param("motivo", "Conteo físico autorizado")
+                .with(user("admin@fitforge.example").roles("ADMIN"))
+                .with(csrf()))
+                .andExpect(redirectedUrl("/admin/productos/inventario/1"))
+                .andExpect(flash().attribute("tipo", "success"));
+
+        assertThat(jdbc.queryForObject("SELECT existencias FROM producto_color_talla WHERE id_producto_color_talla=1", Integer.class))
+                .isEqualTo(4);
+        String loggedMotivo = jdbc.queryForObject(
+                "SELECT motivo FROM movimiento_inventario WHERE id_producto_color_talla=1 ORDER BY id_movimiento DESC LIMIT 1",
+                String.class);
+        assertThat(loggedMotivo).isEqualTo("Conteo físico autorizado");
+    }
 }

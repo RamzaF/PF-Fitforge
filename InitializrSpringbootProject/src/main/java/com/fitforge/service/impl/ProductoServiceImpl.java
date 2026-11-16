@@ -18,6 +18,7 @@ import com.fitforge.service.CatalogoValidacion;
 import com.fitforge.service.Dinero;
 import com.fitforge.service.ProductoColorTallaService;
 import com.fitforge.service.ProductoService;
+import com.fitforge.service.TxCompletionTracker;
 
 /**
   *
@@ -63,9 +64,9 @@ public class ProductoServiceImpl implements ProductoService {
         return productoDao.findById(id).orElse(null);
     }
 
-    @Override
-    @Transactional
-    public void guardarProducto(Producto producto) {
+    private record ValidatedProductInput(String descripcion, String detalle, Categoria categoria) {}
+
+    private ValidatedProductInput validarEntradaProducto(Producto producto) {
         if (producto == null) {
             throw new IllegalArgumentException("Datos de producto inválidos.");
         }
@@ -82,43 +83,83 @@ public class ProductoServiceImpl implements ProductoService {
         }
         Categoria categoria = categoriaDao.findById(producto.getCategoria().getIdCategoria())
                 .orElseThrow(() -> new IllegalArgumentException("La categoría seleccionada no existe."));
+        return new ValidatedProductInput(descripcion, detalle, categoria);
+    }
+
+    private String ejecutarActualizacionBloqueada(
+            Producto producto, ValidatedProductInput input, boolean reemplazarImagen) {
+        if (inventario.bloquearProducto(producto.getIdProducto()) == null) {
+            throw new IllegalArgumentException("Producto no disponible");
+        }
+        var current = jdbc.queryForMap(
+                "SELECT id_categoria, imagen FROM producto WHERE id_producto=?",
+                producto.getIdProducto());
+        Long currentCategoryId = current.get("id_categoria") == null
+                ? null
+                : ((Number) current.get("id_categoria")).longValue();
+        String currentImagen = (String) current.get("imagen");
+        if (!input.categoria().isActivo()
+                && (currentCategoryId == null || !currentCategoryId.equals(input.categoria().getIdCategoria()))) {
+            throw new IllegalArgumentException("No podés mover un producto a una categoría inactiva.");
+        }
+
+        // Preserve the currently locked image when no replacement upload was provided.
+        String imagenFinal = reemplazarImagen ? producto.getRutaImagen() : currentImagen;
+        producto.setRutaImagen(imagenFinal);
+        producto.setDescripcion(input.descripcion());
+        producto.setDetalle(input.detalle());
+
+        // Scalar SQL deliberately avoids cascade merge/dirty checking of stale EAGER stock.
+        em.flush();
+        jdbc.update(
+                "UPDATE producto SET descripcion=?, detalle=?, imagen=?, precio=?, activo=?, id_categoria=? WHERE id_producto=?",
+                input.descripcion(), input.detalle(), imagenFinal, producto.getPrecio(), producto.isActivo(),
+                input.categoria().getIdCategoria(), producto.getIdProducto());
+        Producto managed = em.find(Producto.class, producto.getIdProducto());
+        if (managed != null) {
+            em.refresh(managed);
+        }
+        return reemplazarImagen ? currentImagen : null;
+    }
+
+    @Override
+    @Transactional
+    public void guardarProducto(Producto producto) {
+        TxCompletionTracker.bindToCurrentTransaction();
+        ValidatedProductInput input = validarEntradaProducto(producto);
 
         boolean nuevo = producto.getIdProducto() == null || producto.getIdProducto() == 0;
         if (nuevo) {
-            if (!categoria.isActivo()) {
+            if (!input.categoria().isActivo()) {
                 throw new IllegalArgumentException("La categoría seleccionada está inactiva.");
             }
-            var fresh = new Producto(descripcion, detalle, producto.getRutaImagen(), producto.getPrecio(), producto.isActivo());
-            fresh.setCategoria(categoria);
+            var fresh = new Producto(input.descripcion(), input.detalle(), producto.getRutaImagen(),
+                    producto.getPrecio(), producto.isActivo());
+            fresh.setCategoria(input.categoria());
             productoDao.saveAndFlush(fresh);
             producto.setIdProducto(fresh.getIdProducto());
-            producto.setDescripcion(descripcion);
-            producto.setDetalle(detalle);
+            producto.setDescripcion(input.descripcion());
+            producto.setDetalle(input.detalle());
         } else {
-            if (inventario.bloquearProducto(producto.getIdProducto()) == null) {
-                throw new IllegalArgumentException("Producto no disponible");
-            }
-            Long currentCategoryId = jdbc.queryForObject(
-                    "SELECT id_categoria FROM producto WHERE id_producto=?", Long.class, producto.getIdProducto());
-            if (!categoria.isActivo() && (currentCategoryId == null || !currentCategoryId.equals(categoria.getIdCategoria()))) {
-                throw new IllegalArgumentException("No podés mover un producto a una categoría inactiva.");
-            }
-            // Scalar SQL deliberately avoids cascade merge/dirty checking of stale EAGER stock.
-            em.flush();
-            jdbc.update(
-                    "UPDATE producto SET descripcion=?, detalle=?, imagen=?, precio=?, activo=?, id_categoria=? WHERE id_producto=?",
-                    descripcion, detalle, producto.getRutaImagen(), producto.getPrecio(), producto.isActivo(),
-                    categoria.getIdCategoria(), producto.getIdProducto());
-            Producto managed = em.find(Producto.class, producto.getIdProducto());
-            if (managed != null) {
-                em.refresh(managed);
-            }
+            ejecutarActualizacionBloqueada(producto, input, true);
         }
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public String actualizarProductoConMedia(Producto producto, boolean reemplazarImagen) {
+        TxCompletionTracker.bindToCurrentTransaction();
+        if (producto == null || producto.getIdProducto() == null || producto.getIdProducto() <= 0) {
+            throw new IllegalArgumentException("Producto no disponible");
+        }
+        ValidatedProductInput input = validarEntradaProducto(producto);
+        return ejecutarActualizacionBloqueada(producto, input, reemplazarImagen);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public Producto guardarProductoConVarianteInicial(Producto producto, Long idColor, Long idTalla, Integer existencias) {
+        TxCompletionTracker.bindToCurrentTransaction();
         if (existencias != null && existencias < 0) {
             throw new IllegalArgumentException("Las existencias iniciales no pueden ser negativas.");
         }

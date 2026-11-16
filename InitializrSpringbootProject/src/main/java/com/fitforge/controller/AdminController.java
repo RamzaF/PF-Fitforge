@@ -1,7 +1,10 @@
 package com.fitforge.controller;
 
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fitforge.domain.Producto;
@@ -34,6 +38,8 @@ import com.fitforge.service.ProductoColorTallaService;
 @RequestMapping("/admin")
 @PreAuthorize("hasRole('ROLE_ADMIN')")
 public class AdminController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
     @Autowired
     private CategoriaService categoriaService;
@@ -92,37 +98,43 @@ public class AdminController {
      * @return Redirección a la página de inventario del producto
      */
     @PostMapping("/productos/inventario/guardar")
-    public String guardarInventario(ProductoColorTalla productoColorTalla, 
+    public String guardarInventario(ProductoColorTalla productoColorTalla,
+                                  @RequestParam(value = "motivo", required = false) String motivo,
                                   RedirectAttributes redirectAttributes) {
         Long idProducto = productoColorTalla != null && productoColorTalla.getProducto() != null
                 ? productoColorTalla.getProducto().getIdProducto()
                 : null;
         if (idProducto == null) {
             redirectAttributes.addFlashAttribute("error", "El producto no existe");
+            redirectAttributes.addFlashAttribute("tipo", "danger");
             return "redirect:/admin/productos";
         }
         try {
             if (productoColorTalla.getExistencias() == null || productoColorTalla.getExistencias() < 0) {
                 redirectAttributes.addFlashAttribute("error", "Las existencias no pueden ser negativas");
+                redirectAttributes.addFlashAttribute("tipo", "danger");
                 return "redirect:/admin/productos/inventario/" + idProducto;
             }
-            
+
             Producto producto = productoService.obtenerProductoPorId(idProducto);
             if (producto == null) {
                 redirectAttributes.addFlashAttribute("error", "El producto no existe");
+                redirectAttributes.addFlashAttribute("tipo", "danger");
                 return "redirect:/admin/productos";
             }
-            
+
             if (productoColorTalla.getIdProductoColorTalla() != null) {
                 inventarioService.registrarMovimiento(
                         productoColorTalla.getIdProductoColorTalla(),
+                        idProducto,
                         TipoMovimiento.AJUSTE,
                         productoColorTalla.getExistencias(),
-                        "Ajuste directo desde inventario de producto");
+                        motivo);
             } else {
                 if (productoColorTalla.getColor() == null || productoColorTalla.getColor().getIdColor() == null
                         || productoColorTalla.getTalla() == null || productoColorTalla.getTalla().getIdTalla() == null) {
                     redirectAttributes.addFlashAttribute("error", "Debe seleccionar un color y una talla");
+                    redirectAttributes.addFlashAttribute("tipo", "danger");
                     return "redirect:/admin/productos/inventario/" + idProducto;
                 }
                 productoColorTallaService.guardarVariante(
@@ -133,11 +145,17 @@ public class AdminController {
             }
             redirectAttributes.addFlashAttribute("mensaje", "Inventario actualizado correctamente");
             redirectAttributes.addFlashAttribute("tipo", "success");
+        } catch (ResponseStatusException | AccessDeniedException ex) {
+            throw ex;
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("tipo", "danger");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al guardar inventario: " + e.getMessage());
+            logger.error("Error al guardar inventario: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "No se pudo actualizar el inventario.");
             redirectAttributes.addFlashAttribute("tipo", "danger");
         }
-        
+
         return "redirect:/admin/productos/inventario/" + idProducto;
     }
     
@@ -162,8 +180,16 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("mensaje", "Combinación eliminada correctamente");
             return "redirect:/admin/productos/inventario/" + idProducto;
             
+        } catch (ResponseStatusException | AccessDeniedException ex) {
+            throw ex;
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("tipo", "danger");
+            return "redirect:/admin/productos";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al eliminar la combinación: " + e.getMessage());
+            logger.error("Error al eliminar combinación de inventario: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "No se pudo eliminar la combinación.");
+            redirectAttributes.addFlashAttribute("tipo", "danger");
             return "redirect:/admin/productos";
         }
     }

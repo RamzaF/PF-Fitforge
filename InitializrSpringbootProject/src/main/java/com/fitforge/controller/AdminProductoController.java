@@ -5,6 +5,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fitforge.domain.Categoria;
@@ -23,6 +26,7 @@ import com.fitforge.service.CategoriaService;
 import com.fitforge.service.LocalStorageService;
 import com.fitforge.service.ProductoColorTallaService;
 import com.fitforge.service.ProductoService;
+import com.fitforge.service.TxCompletionTracker;
 
 /**
  * Controlador para la administración de productos.
@@ -52,6 +56,29 @@ public class AdminProductoController {
         model.addAttribute("categorias", categoriaService.getCategoria(true));
         model.addAttribute("colores", productoColorTallaService.listarColoresActivos());
         model.addAttribute("tallas", productoColorTallaService.listarTallasActivas());
+    }
+
+    private String mensajeSeguro(Exception e, String respaldo) {
+        if (e instanceof IllegalArgumentException && e.getMessage() != null && !e.getMessage().isBlank()) {
+            return e.getMessage();
+        }
+        return respaldo;
+    }
+
+    private boolean puedeEliminarNuevaMediaTrasRollback(String nuevaMediaUrl, Exception ex) {
+        if (nuevaMediaUrl == null) {
+            return false;
+        }
+        if (ex instanceof CannotCreateTransactionException) {
+            return true;
+        }
+        try {
+            return productoService.contarProductosPorImagen(nuevaMediaUrl) == 0;
+        } catch (Exception refEx) {
+            logger.warn("No se pudo verificar referencias de {} tras rollback; se conserva el archivo como huérfano seguro: {}",
+                    nuevaMediaUrl, refEx.getMessage());
+            return false;
+        }
     }
 
     /**
@@ -109,7 +136,7 @@ public class AdminProductoController {
             return "admin/productos/formulario";
         } catch (Exception e) {
             logger.error("Error al cargar producto para edición: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("mensaje", "Error al cargar el producto: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje", "Error al cargar el producto.");
             redirectAttributes.addFlashAttribute("tipo", "danger");
             return "redirect:/admin/productos/listado";
         }
@@ -166,56 +193,101 @@ public class AdminProductoController {
                 redirectAttributes.addFlashAttribute("tipo", "danger");
                 return "redirect:/admin/productos/listado";
             }
-            imagenAnterior = productoActual.getRutaImagen();
         }
 
+        // Phase 1: validate and stage uploaded media outside the database transaction.
         try {
             if (archivo != null && !archivo.isEmpty()) {
                 var imagenValidada = localStorageService.validarImagen(archivo);
                 nuevaMediaUrl = localStorageService.guardarImagenValidada(imagenValidada);
                 producto.setRutaImagen(nuevaMediaUrl);
             } else {
-                producto.setRutaImagen(esNuevo ? null : imagenAnterior);
+                producto.setRutaImagen(null);
             }
-
-            logger.info("Guardando producto: {} (esNuevo: {}, activo: {})", producto.getDescripcion(), esNuevo, producto.isActivo());
-
-            if (esNuevo) {
-                producto.setIdProducto(null);
-                productoService.guardarProductoConVarianteInicial(producto, idColor, idTalla, existencias);
-            } else {
-                productoService.guardarProducto(producto);
-            }
-
-            if (nuevaMediaUrl != null && imagenAnterior != null
-                    && !imagenAnterior.equals(nuevaMediaUrl)
-                    && productoService.contarProductosPorImagen(imagenAnterior) == 0) {
-                localStorageService.eliminarMediaGestionada(imagenAnterior);
-            }
-
-            Producto productoGuardado = productoService.obtenerProductoPorId(producto.getIdProducto());
-            logger.info("Producto guardado correctamente, ID: {}, estado activo: {}",
-                    productoGuardado != null ? productoGuardado.getIdProducto() : producto.getIdProducto(),
-                    productoGuardado != null ? productoGuardado.isActivo() : producto.isActivo());
-
-            String mensaje = esNuevo ? "Producto creado correctamente" : "Producto actualizado correctamente";
-            redirectAttributes.addFlashAttribute("mensaje", mensaje);
-            redirectAttributes.addFlashAttribute("tipo", "success");
-
-            return "redirect:/admin/productos/listado";
-
         } catch (Exception e) {
-            if (nuevaMediaUrl != null) {
-                localStorageService.eliminarMediaGestionada(nuevaMediaUrl);
-            }
-            logger.error("Error al guardar producto: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("mensaje", "Error al guardar el producto: " + e.getMessage());
+            logger.error("Error al validar/guardar imagen de producto: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje",
+                    mensajeSeguro(e, "No se pudo procesar la imagen del producto."));
             redirectAttributes.addFlashAttribute("tipo", "danger");
             if (!esNuevo && productoActual != null) {
                 return "redirect:/admin/productos/editar/" + productoActual.getIdProducto();
             }
             return "redirect:/admin/productos/listado";
         }
+
+        // Phase 2: transactional DB persistence (locked image preservation on edit without file).
+        boolean committed = false;
+        try (var tracker = TxCompletionTracker.begin()) {
+            try {
+                logger.info("Guardando producto: {} (esNuevo: {}, activo: {})",
+                        producto.getDescripcion(), esNuevo, producto.isActivo());
+                if (esNuevo) {
+                    producto.setIdProducto(null);
+                    productoService.guardarProductoConVarianteInicial(producto, idColor, idTalla, existencias);
+                } else {
+                    imagenAnterior = productoService.actualizarProductoConMedia(producto, nuevaMediaUrl != null);
+                }
+                committed = true;
+            } catch (ResponseStatusException | AccessDeniedException ex) {
+                throw ex;
+            } catch (Exception e) {
+                TxCompletionTracker.State txState = tracker.state();
+                if (txState == TxCompletionTracker.State.COMMITTED) {
+                    committed = true;
+                    logger.warn("Transacción confirmada para producto ID {}, pero ocurrió una excepción posterior: {}",
+                            producto.getIdProducto(), e.getMessage());
+                } else if (txState == TxCompletionTracker.State.ROLLED_BACK
+                        || e instanceof CannotCreateTransactionException) {
+                    if (puedeEliminarNuevaMediaTrasRollback(nuevaMediaUrl, e)) {
+                        localStorageService.eliminarMediaGestionada(nuevaMediaUrl);
+                    }
+                    logger.error("Error al guardar producto (rollback confirmado): {}", e.getMessage());
+                    redirectAttributes.addFlashAttribute("mensaje",
+                            mensajeSeguro(e, "No se pudo guardar el producto. Verificá los datos e intentá nuevamente."));
+                    redirectAttributes.addFlashAttribute("tipo", "danger");
+                    if (!esNuevo && productoActual != null) {
+                        return "redirect:/admin/productos/editar/" + productoActual.getIdProducto();
+                    }
+                    return "redirect:/admin/productos/listado";
+                } else {
+                    // Uncertain commit outcome: never delete potentially committed media.
+                    logger.warn("Resultado incierto al guardar producto (estado={}); se conserva {} sin borrar: {}",
+                            txState, nuevaMediaUrl, e.getMessage());
+                    redirectAttributes.addFlashAttribute("mensaje",
+                            "No se pudo confirmar si el producto se guardó correctamente. Verificá el listado antes de reintentar.");
+                    redirectAttributes.addFlashAttribute("tipo", "warning");
+                    return "redirect:/admin/productos/listado";
+                }
+            }
+        }
+
+        // Phase 3: post-commit cleanup only after confirmed commit; failures here NEVER delete nuevaMediaUrl.
+        boolean postCommitCleanupOk = true;
+        try {
+            if (nuevaMediaUrl != null
+                    && imagenAnterior != null
+                    && !imagenAnterior.equals(nuevaMediaUrl)
+                    && productoService.contarProductosPorImagen(imagenAnterior) == 0) {
+                localStorageService.eliminarMediaGestionada(imagenAnterior);
+            }
+            logger.info("Producto guardado correctamente, ID: {}, estado activo: {}",
+                    producto.getIdProducto(), producto.isActivo());
+        } catch (Exception postEx) {
+            postCommitCleanupOk = false;
+            logger.warn("Producto guardado (ID {}), pero falló la limpieza posterior post-commit: {}",
+                    producto.getIdProducto(), postEx.getMessage());
+        }
+
+        String mensajeBase = esNuevo ? "Producto creado correctamente" : "Producto actualizado correctamente";
+        if (postCommitCleanupOk) {
+            redirectAttributes.addFlashAttribute("mensaje", mensajeBase);
+            redirectAttributes.addFlashAttribute("tipo", "success");
+        } else {
+            redirectAttributes.addFlashAttribute("mensaje",
+                    mensajeBase + ", pero no se pudo completar la limpieza posterior de archivos.");
+            redirectAttributes.addFlashAttribute("tipo", "warning");
+        }
+        return "redirect:/admin/productos/listado";
     }
 
     @PostMapping("/estado")
@@ -230,7 +302,8 @@ public class AdminProductoController {
             redirectAttributes.addFlashAttribute("tipo", "success");
         } catch (Exception e) {
             logger.error("Error al cambiar estado del producto: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("mensaje", "Error al cambiar el estado del producto: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje",
+                    mensajeSeguro(e, "No se pudo cambiar el estado del producto."));
             redirectAttributes.addFlashAttribute("tipo", "danger");
         }
         return "redirect:/admin/productos/listado";
@@ -259,7 +332,8 @@ public class AdminProductoController {
             redirectAttributes.addFlashAttribute("tipo", "success");
         } catch (Exception e) {
             logger.error("Error al guardar variante: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("mensaje", e.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje",
+                    mensajeSeguro(e, "No se pudo agregar la variante."));
             redirectAttributes.addFlashAttribute("tipo", "danger");
         }
         return redirectDestinoVariante(idProducto, origen);
@@ -286,7 +360,8 @@ public class AdminProductoController {
             redirectAttributes.addFlashAttribute("tipo", "success");
         } catch (Exception e) {
             logger.error("Error al cambiar estado de variante: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("mensaje", e.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje",
+                    mensajeSeguro(e, "No se pudo cambiar el estado de la variante."));
             redirectAttributes.addFlashAttribute("tipo", "danger");
         }
         return redirectDestinoVariante(redirectProductId, origen);
@@ -307,7 +382,8 @@ public class AdminProductoController {
             redirectAttributes.addFlashAttribute("tipo", "success");
         } catch (Exception e) {
             logger.error("Error al eliminar variante: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("mensaje", e.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje",
+                    mensajeSeguro(e, "No se pudo eliminar la variante."));
             redirectAttributes.addFlashAttribute("tipo", "danger");
         }
         return redirectDestinoVariante(idProducto, origen);
@@ -342,7 +418,8 @@ public class AdminProductoController {
             
         } catch (Exception e) {
             logger.error("Error al eliminar producto: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("mensaje", "Error al desactivar el producto: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje",
+                    mensajeSeguro(e, "No se pudo desactivar el producto."));
             redirectAttributes.addFlashAttribute("tipo", "danger");
             return "redirect:/admin/productos/listado";
         }

@@ -69,7 +69,8 @@ class SecurityIntegrationTest {
             .andExpect(flash().attributeExists("error"));
         mvc.perform(post("/admin/productos/inventario/guardar").session(session).with(csrf())
             .param("idProductoColorTalla", "1").param("producto.idProducto", "1")
-            .param("color.idColor", "1").param("talla.idTalla", "1").param("existencias", "4"))
+            .param("color.idColor", "1").param("talla.idTalla", "1").param("existencias", "4")
+            .param("motivo", "Ajuste de prueba seguridad"))
             .andExpect(redirectedUrl("/admin/productos/inventario/1"));
         em.flush();
         assertThat(jdbc.queryForObject("SELECT existencias FROM producto_color_talla WHERE id_producto_color_talla=1", Integer.class)).isEqualTo(4);

@@ -41,6 +41,8 @@ public interface InventarioService {
 
     MovimientoView registrarMovimiento(Long idVariante, TipoMovimiento tipo, int cantidad, String motivo);
 
+    MovimientoView registrarMovimiento(Long idVariante, Long idProductoEsperado, TipoMovimiento tipo, int cantidad, String motivo);
+
     void registrarAltaInicialSiAplica(Long idVariante, int existencias);
 
     List<VarianteInventarioView> listarInventarioGeneral(String termino, String filtroStock);
