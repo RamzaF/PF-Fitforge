@@ -31,6 +31,17 @@ public class Factura implements Serializable {
     @Column(name = "huella_carrito", nullable = false, length = 64)
     private String huellaCarrito;
 
+    @Column(name="destinatario",nullable=false,length=80)
+    private String destinatario;
+    @Column(name="telefono_entrega",nullable=false,length=20)
+    private String telefonoEntrega;
+    @Column(name="direccion_entrega",nullable=false,length=240)
+    private String direccionEntrega;
+    @Column(name="nota_entrega",nullable=false,length=240)
+    private String notaEntrega;
+    @Column(name="consentimiento_demo",nullable=false)
+    private boolean consentimientoDemo;
+
     @Column(name = "fecha")
     private Date fecha;
 

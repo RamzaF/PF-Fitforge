@@ -29,7 +29,7 @@ class OrderAtomicityIntegrationTest {
     @BeforeEach void setup() throws Exception {
         OrderTestDatabase.requireDisposable();
         try(var c=root(); var s=c.createStatement()) { s.execute("DROP TRIGGER IF EXISTS test_fail_detail"); }
-        jdbc.update("DELETE FROM venta"); jdbc.update("DELETE FROM factura");
+        jdbc.update("DELETE FROM pedido_evento"); jdbc.update("DELETE FROM venta"); jdbc.update("DELETE FROM factura");
         jdbc.update("DELETE FROM rol WHERE id_usuario>=3"); jdbc.update("DELETE FROM usuario WHERE id_usuario>=3");
         jdbc.update("UPDATE usuario SET activo=true,correo='cliente@fitforge.example' WHERE id_usuario=2");
         jdbc.update("INSERT INTO usuario(id_usuario,username,password,nombre,correo,activo) VALUES(3,'test_other','unused','Otro ficticio','otro@fitforge.example',true)");
@@ -41,7 +41,7 @@ class OrderAtomicityIntegrationTest {
     @AfterEach void cleanup() throws Exception {
         OrderTestDatabase.requireDisposable();
         try(var c=root();var s=c.createStatement()) { s.execute("DROP TRIGGER IF EXISTS test_fail_detail"); }
-        jdbc.update("DELETE FROM venta");jdbc.update("DELETE FROM factura");
+        jdbc.update("DELETE FROM pedido_evento"); jdbc.update("DELETE FROM venta");jdbc.update("DELETE FROM factura");
         jdbc.update("DELETE FROM rol WHERE id_usuario>=3");jdbc.update("DELETE FROM usuario WHERE id_usuario>=3");
         jdbc.update("UPDATE usuario SET activo=true,correo='cliente@fitforge.example' WHERE id_usuario=2");
         jdbc.update("UPDATE producto SET activo=true,precio=CASE id_producto WHEN 1 THEN 25 ELSE 15 END,descripcion=CASE id_producto WHEN 1 THEN 'Camiseta deportiva' ELSE 'Guantes de entrenamiento' END");
@@ -193,7 +193,7 @@ class OrderAtomicityIntegrationTest {
     @Test void databaseConstraintsEnforceNonnegativeStockAndPersistentUniqueness() throws Exception {
         assertThatThrownBy(()->jdbc.update("UPDATE producto_color_talla SET existencias=-1 WHERE id_producto_color_talla=1")).isInstanceOf(org.springframework.dao.DataAccessException.class).hasMessageContaining("Check constraint");
         var c=cmd(line(1,1,"25"));buy(c);
-        assertThatThrownBy(()->jdbc.update("INSERT INTO factura(id_usuario,fecha,total,estado,clave_confirmacion,huella_carrito) SELECT id_usuario,fecha,total,estado,clave_confirmacion,huella_carrito FROM factura LIMIT 1")).isInstanceOf(org.springframework.dao.DuplicateKeyException.class);
+        assertThatThrownBy(()->jdbc.update("INSERT INTO factura(id_usuario,fecha,total,estado,clave_confirmacion,huella_carrito,destinatario,telefono_entrega,direccion_entrega,nota_entrega,consentimiento_demo) SELECT id_usuario,fecha,total,estado,clave_confirmacion,huella_carrito,destinatario,telefono_entrega,direccion_entrega,nota_entrega,consentimiento_demo FROM factura LIMIT 1")).isInstanceOf(org.springframework.dao.DuplicateKeyException.class);
     }
 
     @Test void realDeadlockVictimRollsBackAndSameKeyRecovers() throws Exception {

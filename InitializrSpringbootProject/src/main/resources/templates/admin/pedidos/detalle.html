@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head}">
+</head>
+<body>
+<header th:replace="~{layout/plantilla :: header}"/>
+<main class="container py-5">
+<a href="/admin/pedidos">Volver a pedidos</a>
+<h1 th:text="${'Pedido #' + detalle.pedido.id}">
+</h1>
+<p>Registro interno ficticio. Sin pago ni envío físico.</p>
+<p th:if="${mensaje}" role="status" class="alert alert-success" th:text="${mensaje}">
+</p>
+<dl>
+<dt>Dueño</dt>
+<dd th:text="${detalle.pedido.correo}">
+</dd>
+<dt>Fecha</dt>
+<dd th:text="${detalle.pedido.fecha}">
+</dd>
+<dt>Estado</dt>
+<dd th:text="${detalle.pedido.estado}">
+</dd>
+</dl>
+<section class="border rounded p-3 my-4">
+<h2 class="h5">Destino ficticio registrado</h2>
+<dl class="mb-0">
+<dt>Destinatario</dt>
+<dd th:text="${detalle.entrega.destinatario}">
+</dd>
+<dt>Teléfono ficticio</dt>
+<dd th:text="${detalle.entrega.telefono}">
+</dd>
+<dt>Dirección ficticia</dt>
+<dd th:text="${detalle.entrega.direccion}">
+</dd>
+<dt>Nota</dt>
+<dd th:text="${detalle.entrega.nota.isEmpty() ? 'Sin nota' : detalle.entrega.nota}">
+</dd>
+</dl>
+<small>Datos de demostración. Despacho manual sin envío físico.</small>
+</section>
+<div class="table-responsive">
+<table class="table">
+<thead>
+<tr>
+<th>Producto</th>
+<th>Color / talla</th>
+<th>Cantidad</th>
+<th>Precio snapshot</th>
+<th>Subtotal</th>
+</tr>
+</thead>
+<tbody>
+<tr th:each="l : ${detalle.lineas}">
+<td th:text="${l.producto}">
+</td>
+<td th:text="${l.color + ' / ' + l.talla}">
+</td>
+<td th:text="${l.cantidad}">
+</td>
+<td th:text="${#numbers.formatDecimal(l.precio,1,2)}">
+</td>
+<td th:text="${#numbers.formatDecimal(l.subtotal,1,2)}">
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 th:text="${'Total: ₡ ' + #numbers.formatDecimal(detalle.pedido.total,1,2)}">
+</h2>
+<form th:if="${detalle.pedido.estado != 'Despachado'}" th:action="@{/admin/pedidos/{id}/estado(id=${detalle.pedido.id})}" method="post" class="my-4">
+<input type="hidden" name="origen" th:value="${detalle.pedido.estado}"/>
+<input type="hidden" name="destino" th:value="${detalle.pedido.estado == 'Pendiente' ? 'En preparación' : 'Despachado'}"/>
+<button class="btn btn-primary" th:text="${detalle.pedido.estado == 'Pendiente' ? 'Preparar pedido' : 'Registrar despacho manual'}">
+</button>
+</form>
+<h2 class="h4 mt-4">Auditoría</h2>
+<p th:if="${detalle.eventos.isEmpty()}">Sin transiciones registradas.</p>
+<div class="table-responsive">
+<table class="table" th:unless="${detalle.eventos.isEmpty()}">
+<thead>
+<tr>
+<th>Fecha</th>
+<th>Administrador</th>
+<th>Origen</th>
+<th>Destino</th>
+</tr>
+</thead>
+<tbody>
+<tr th:each="e : ${detalle.eventos}">
+<td th:text="${e.fecha}">
+</td>
+<td th:text="${e.actor}">
+</td>
+<td th:text="${e.origen}">
+</td>
+<td th:text="${e.destino}">
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</main>
+<footer th:replace="~{layout/plantilla :: footer}"/>
+<th:block th:replace="~{layout/plantilla :: scripts}"/>
+</body>
+</html>

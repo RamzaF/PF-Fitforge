@@ -1,3 +1,5 @@
+> Esta rama añade operación de pedidos en paralelo a media/stock. Guía vigente: [ORDER-OPERATIONS.md](ORDER-OPERATIONS.md). Las URLs y comandos anteriores que siguen son evidencia histórica; para esta entrega usar el overlay y proyecto OrderOps.
+
 # FitForge local: solo Docker
 
 **Estado actual: Entrega 3.** Seguir primero [ORDERS.md](ORDERS.md) para build, pruebas y arranque en proyectos y volúmenes nuevos. URL de revisión: <http://127.0.0.1:18084/tienda/listado>. No usar las imágenes nuevas con los volúmenes anteriores: no se migran.

@@ -23,7 +23,7 @@ class OrderConfirmationIntegrationTest {
 
     @BeforeEach void baseline() {
         OrderTestDatabase.requireDisposable();
-        jdbc.update("DELETE FROM venta");
+        jdbc.update("DELETE FROM pedido_evento"); jdbc.update("DELETE FROM venta");
         jdbc.update("DELETE FROM factura");
         jdbc.update("UPDATE producto SET activo=true, precio=CASE id_producto WHEN 1 THEN 25 ELSE 15 END, descripcion=CASE id_producto WHEN 1 THEN 'Camiseta deportiva' ELSE 'Guantes de entrenamiento' END");
         jdbc.update("UPDATE producto_color_talla SET existencias=CASE id_producto_color_talla WHEN 1 THEN 5 WHEN 2 THEN 0 ELSE 3 END");
@@ -45,7 +45,7 @@ class OrderConfirmationIntegrationTest {
     @Test void committedOrderSurvivesReloadAndFreshSessionWithServerPrices() throws Exception {
         var s=login(); add(s,1,2); add(s,3,1); var key=review(s);
         assertThat(key).as("server confirmation token").isNotBlank();
-        var result=mvc.perform(post("/carrito/confirmar-pedido").session(s).with(csrf()).param("clave",key)
+        var result=mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(s).with(csrf()).param("clave",key)
             .param("precio","0.01").param("total","0.01").param("idUsuario","1"))
             .andExpect(status().isSeeOther()).andReturn();
         assertThat(count("factura")).isEqualTo(1); assertThat(count("venta")).isEqualTo(2);
@@ -60,20 +60,20 @@ class OrderConfirmationIntegrationTest {
     @Test void changedPriceRequiresNewReviewAndTokenBeforeAnyOrder() throws Exception {
         var s=login(); add(s,1,2); String old=review(s);
         assertThat(old).isNotBlank(); jdbc.update("UPDATE producto SET precio=30 WHERE id_producto=1");
-        mvc.perform(post("/carrito/confirmar-pedido").session(s).with(csrf()).param("clave",old))
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(s).with(csrf()).param("clave",old))
             .andExpect(redirectedUrl("/carrito/ver")).andExpect(flash().attributeExists("error"));
         assertThat(count("factura")).isZero(); assertThat((List<?>)s.getAttribute("carrito")).hasSize(1);
         String current=review(s); assertThat(current).isNotEqualTo(old);
-        mvc.perform(post("/carrito/confirmar-pedido").session(s).with(csrf()).param("clave",old)).andExpect(status().is3xxRedirection());
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(s).with(csrf()).param("clave",old)).andExpect(status().is3xxRedirection());
         assertThat(count("factura")).isZero();
-        mvc.perform(post("/carrito/confirmar-pedido").session(s).with(csrf()).param("clave",current)).andExpect(status().isSeeOther());
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(s).with(csrf()).param("clave",current)).andExpect(status().isSeeOther());
         assertThat(jdbc.queryForObject("SELECT total FROM factura",Double.class)).isEqualTo(60);
     }
     @Test void replayReturnsOriginalAndPreservesNewCart() throws Exception {
         var s=login(); add(s,1,1); var key=review(s); assertThat(key).isNotBlank();
-        var first=mvc.perform(post("/carrito/confirmar-pedido").session(s).with(csrf()).param("clave",key)).andExpect(status().isSeeOther()).andReturn();
+        var first=mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(s).with(csrf()).param("clave",key)).andExpect(status().isSeeOther()).andReturn();
         add(s,3,1); var newer=review(s); assertThat(newer).isNotEqualTo(key);
-        mvc.perform(post("/carrito/confirmar-pedido").session(s).with(csrf()).param("clave",key))
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(s).with(csrf()).param("clave",key))
             .andExpect(status().isSeeOther()).andExpect(redirectedUrl(first.getResponse().getRedirectedUrl()));
         assertThat(count("factura")).isEqualTo(1); assertThat((List<?>)s.getAttribute("carrito")).hasSize(1);
     }
@@ -84,7 +84,7 @@ class OrderConfirmationIntegrationTest {
     @Test void invalidLinesAreNeverSilentlyDiscarded() throws Exception {
         var s=login(); add(s,1,1); add(s,3,1); String key=review(s); assertThat(key).isNotBlank();
         jdbc.update("UPDATE producto SET activo=false WHERE id_producto=1");
-        mvc.perform(post("/carrito/confirmar-pedido").session(s).with(csrf()).param("clave",key))
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(s).with(csrf()).param("clave",key))
             .andExpect(redirectedUrl("/carrito/ver")).andExpect(flash().attributeExists("error"));
         assertThat(count("factura")).isZero(); assertThat(count("venta")).isZero();
         assertThat((List<?>)s.getAttribute("carrito")).hasSize(2);
@@ -92,7 +92,7 @@ class OrderConfirmationIntegrationTest {
     }
     @Test void staleRevisionCannotPurchaseChangedCart() throws Exception {
         var s=login(); add(s,1,1); String old=review(s); assertThat(old).isNotBlank(); add(s,3,1);
-        mvc.perform(post("/carrito/confirmar-pedido").session(s).with(csrf()).param("clave",old))
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(s).with(csrf()).param("clave",old))
             .andExpect(redirectedUrl("/carrito/ver")).andExpect(flash().attributeExists("error"));
         assertThat(count("factura")).isZero(); assertThat((List<?>)s.getAttribute("carrito")).hasSize(2);
     }
@@ -109,19 +109,19 @@ class OrderConfirmationIntegrationTest {
 
     @Test void csrfMethodsResidualRoutesAndErrorDispatchCannotExposeOrder() throws Exception {
         var s=login();add(s,1,1);String key=review(s);
-        mvc.perform(post("/carrito/confirmar-pedido").session(s).param("clave",key)).andExpect(status().isForbidden());
-        mvc.perform(post("/carrito/confirmar-pedido").session(s).with(csrf().useInvalidToken()).param("clave",key)).andExpect(status().isForbidden());
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(s).param("clave",key)).andExpect(status().isForbidden());
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(s).with(csrf().useInvalidToken()).param("clave",key)).andExpect(status().isForbidden());
         mvc.perform(get("/carrito/confirmar-pedido").session(s)).andExpect(status().isForbidden());
         mvc.perform(post("/carrito/factura/1").session(s).with(csrf())).andExpect(status().isForbidden());
-        mvc.perform(get("/pedidos/1").session(s)).andExpect(status().isForbidden());
+        mvc.perform(get("/pedidos/1").session(s)).andExpect(status().isNotFound());
         assertThat(count("factura")).isZero();
-        String url=mvc.perform(post("/carrito/confirmar-pedido").session(s).with(csrf()).param("clave",key))
+        String url=mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(s).with(csrf()).param("clave",key))
             .andExpect(status().isSeeOther()).andReturn().getResponse().getRedirectedUrl();
         mvc.perform(get(url)).andExpect(redirectedUrl("http://localhost/login"));
         var admin=(MockHttpSession)mvc.perform(formLogin().user("admin@fitforge.example").password("FitForge-demo-2026!"))
             .andReturn().getRequest().getSession(false);
         mvc.perform(get(url).session(admin)).andExpect(status().isForbidden());
-        mvc.perform(post("/carrito/confirmar-pedido").session(admin).with(csrf()).param("clave",key)).andExpect(status().isForbidden());
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(admin).with(csrf()).param("clave",key)).andExpect(status().isForbidden());
         mvc.perform(get(url).with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("otro@fitforge.example").roles("USER")))
             .andExpect(status().isForbidden()); // Unknown identity fails closed before any receipt lookup.
         jdbc.update("INSERT INTO usuario(id_usuario,username,password,nombre,correo,activo) SELECT 3,'otro',password,'Otro ficticio','otro@fitforge.example',true FROM usuario WHERE id_usuario=2");
@@ -138,13 +138,13 @@ class OrderConfirmationIntegrationTest {
         try(var c=java.sql.DriverManager.getConnection(System.getenv("DEMO_DB_URL"),"root",System.getenv("FITFORGE_TEST_ROOT_PASSWORD"));var statement=c.createStatement()) {
             statement.execute("CREATE TRIGGER test_http_fail_detail BEFORE INSERT ON venta FOR EACH ROW BEGIN IF NEW.id_producto_color_talla=3 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='controlled HTTP detail failure'; END IF; END");
             try {
-                mvc.perform(post("/carrito/confirmar-pedido").session(s).with(csrf()).param("clave",key)).andExpect(status().isServiceUnavailable());
+                mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(s).with(csrf()).param("clave",key)).andExpect(status().isServiceUnavailable());
                 assertThat(count("factura")).isZero();assertThat(count("venta")).isZero();
                 assertThat((List<?>)s.getAttribute("carrito")).hasSize(2);assertThat(review(s)).isEqualTo(key);
                 assertThat(jdbc.queryForObject("SELECT SUM(existencias) FROM producto_color_talla",Integer.class)).isEqualTo(8);
             } finally {statement.execute("DROP TRIGGER test_http_fail_detail");}
         }
-        mvc.perform(post("/carrito/confirmar-pedido").session(s).with(csrf()).param("clave",key)).andExpect(status().isSeeOther());
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(s).with(csrf()).param("clave",key)).andExpect(status().isSeeOther());
         assertThat(count("factura")).isEqualTo(1);
     }
     @Test void twoConcurrentPostsOnOneSessionReturnSameCommittedReceipt() throws Exception {
@@ -152,7 +152,7 @@ class OrderConfirmationIntegrationTest {
         var ready=new java.util.concurrent.CountDownLatch(2);var go=new java.util.concurrent.CountDownLatch(1);
         try {
             var task=(java.util.concurrent.Callable<String>)()->{ready.countDown();assertThat(go.await(5,java.util.concurrent.TimeUnit.SECONDS)).isTrue();
-                return mvc.perform(post("/carrito/confirmar-pedido").session(s).with(csrf()).param("clave",key))
+                return mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(s).with(csrf()).param("clave",key))
                     .andExpect(status().isSeeOther()).andReturn().getResponse().getRedirectedUrl();};
             var a=pool.submit(task);var b=pool.submit(task);assertThat(ready.await(5,java.util.concurrent.TimeUnit.SECONDS)).isTrue();go.countDown();
             assertThat(a.get(20,java.util.concurrent.TimeUnit.SECONDS)).isEqualTo(b.get(20,java.util.concurrent.TimeUnit.SECONDS));
@@ -163,9 +163,9 @@ class OrderConfirmationIntegrationTest {
     @Test void twoTabsShareTokenButTwoSessionsKeepSeparateCarts() throws Exception {
         var one=login();var two=login();add(one,1,1);add(two,3,1);
         var first=review(one);assertThat(review(one)).isEqualTo(first);var second=review(two);assertThat(second).isNotEqualTo(first);
-        mvc.perform(post("/carrito/confirmar-pedido").session(one).with(csrf()).param("clave",first)).andExpect(status().isSeeOther());
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(one).with(csrf()).param("clave",first)).andExpect(status().isSeeOther());
         assertThat((List<?>)two.getAttribute("carrito")).hasSize(1);
-        mvc.perform(post("/carrito/confirmar-pedido").session(two).with(csrf()).param("clave",second)).andExpect(status().isSeeOther());
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(two).with(csrf()).param("clave",second)).andExpect(status().isSeeOther());
         assertThat(count("factura")).isEqualTo(2);
     }
 
@@ -179,7 +179,7 @@ class OrderConfirmationIntegrationTest {
             observations.executeUpdate("UPDATE performance_schema.setup_consumers SET ENABLED='YES' WHERE NAME='events_transactions_current'");
             lock.setAutoCommit(false);statement.executeQuery("SELECT id_producto FROM producto WHERE id_producto=1 FOR UPDATE").close();
             try {
-                var confirm=pool.submit(()->mvc.perform(post("/carrito/confirmar-pedido").session(session).with(csrf()).param("clave",key))
+                var confirm=pool.submit(()->mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(session).with(csrf()).param("clave",key))
                     .andExpect(status().isSeeOther()).andReturn());
                 String isolation=null;long deadline=System.nanoTime()+java.util.concurrent.TimeUnit.SECONDS.toNanos(4);
                 while(isolation==null && System.nanoTime()<deadline) {

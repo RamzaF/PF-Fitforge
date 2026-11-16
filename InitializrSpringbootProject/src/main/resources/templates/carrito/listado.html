@@ -67,7 +67,14 @@
     <div th:unless="${items == null or items.isEmpty()}">
         <h4>Total de productos disponibles: ₡ <span th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 2, 'POINT')}"></span></h4>
         <form th:if="${claveConfirmacion != null}" th:action="@{/carrito/confirmar-pedido}" method="post">
-            <input type="hidden" name="clave" th:value="${claveConfirmacion}"/>
+            <fieldset class="border rounded p-3 my-3"><legend class="h5">Destino ficticio de demostración</legend>
+<p>Usá únicamente datos inventados. No se contactará a nadie ni se realizará un envío.</p>
+<div class="row g-3"><div class="col-md-6"><label for="destinatario" class="form-label">Destinatario ficticio</label><input id="destinatario" name="destinatario" required minlength="3" maxlength="80" class="form-control" th:value="${entrega.destinatario}"/></div>
+<div class="col-md-6"><label for="telefonoEntrega" class="form-label">Teléfono ficticio</label><input id="telefonoEntrega" name="telefonoEntrega" required minlength="7" maxlength="20" type="tel" placeholder="000-000-0000" class="form-control" th:value="${entrega.telefono}"/></div>
+<div class="col-12"><label for="direccionEntrega" class="form-label">Dirección ficticia</label><input id="direccionEntrega" name="direccionEntrega" required minlength="10" maxlength="240" class="form-control" th:value="${entrega.direccion}"/></div>
+<div class="col-12"><label for="notaEntrega" class="form-label">Nota (opcional)</label><textarea id="notaEntrega" name="notaEntrega" maxlength="240" class="form-control" th:text="${entrega.nota}"></textarea></div>
+<div class="col-12"><input id="consentimiento" name="consentimiento" value="true" type="checkbox" required th:checked="${entrega.consentimiento}"/> <label for="consentimiento">Confirmo que todos los datos de destino son ficticios y autorizo guardarlos para esta demostración.</label></div></div></fieldset>
+<input type="hidden" name="clave" th:value="${claveConfirmacion}"/>
             <p th:if="${requiereConsulta}" role="alert">Hay una confirmación anterior por verificar. Reintentá antes de modificar el carrito; se consultará el resultado con los importes que aceptaste.</p>
             <button th:if="${requiereConsulta}" type="submit" class="btn btn-success mt-3">Reintentar confirmación anterior</button>
             <button th:unless="${requiereConsulta}" type="submit" class="btn btn-success mt-3">Confirmar pedido por ₡ <span th:text="${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}"></span></button>

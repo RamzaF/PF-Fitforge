@@ -56,6 +56,7 @@ public class CarritoController {
             model.addAttribute("total", items.stream().mapToDouble(Item::getSubtotal).sum());
             model.addAttribute("claveConfirmacion", confirmaciones.preparar(items));
             model.addAttribute("requiereConsulta", confirmaciones.requiereConsulta());
+            model.addAttribute("entrega",confirmaciones.entregaActual());
         }
         return "carrito/listado";
     }
@@ -103,9 +104,12 @@ public class CarritoController {
 
     @PostMapping("/confirmar-pedido")
     public Object confirmarPedido(@RequestParam("clave") String clave,
+            @RequestParam(defaultValue="") String destinatario,@RequestParam(defaultValue="") String telefonoEntrega,
+            @RequestParam(defaultValue="") String direccionEntrega,@RequestParam(defaultValue="") String notaEntrega,
+            @RequestParam(defaultValue="false") boolean consentimiento,
             RedirectAttributes redirectAttributes) {
         String target;
-        try { target="/carrito/factura/"+confirmaciones.confirmar(clave).idFactura(); }
+        try { target="/carrito/factura/"+confirmaciones.confirmar(clave,new com.fitforge.service.EntregaPedido(destinatario,telefonoEntrega,direccionEntrega,notaEntrega,consentimiento)).idFactura(); }
         catch(com.fitforge.service.PedidoException e) {
             redirectAttributes.addFlashAttribute("error",e.getMessage()); target="/carrito/ver";
         } catch(org.springframework.dao.DataAccessException | org.springframework.transaction.TransactionException | jakarta.persistence.PersistenceException e) {

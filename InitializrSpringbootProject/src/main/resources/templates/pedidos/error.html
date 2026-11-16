@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head}">
+</head>
+<body>
+<header th:replace="~{layout/plantilla :: header}"/>
+<main class="container py-5">
+<h1>No se confirmó un nuevo cambio</h1>
+<p class="alert alert-warning" role="alert" th:text="${mensaje}">
+</p>
+<a href="/admin/pedidos" class="btn btn-primary">Volver a pedidos</a>
+</main>
+<footer th:replace="~{layout/plantilla :: footer}"/>
+<th:block th:replace="~{layout/plantilla :: scripts}"/>
+</body>
+</html>

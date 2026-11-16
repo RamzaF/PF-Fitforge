@@ -1,3 +1,9 @@
+# Operación de pedidos paralela — 2026-11-16
+
+Baseline propio: 99/99 con MySQL 8.4.4 en Docker. Entrega añade 20 casos de operación; suite completa y package: 119/119. Evidencia detallada y límites en `/Users/eduin/.hermes/documentation/portfolio-github/evidence/fitforge-ecommerce/fitforge-order-operations/RETURN.md` y guía [ORDER-OPERATIONS.md](../local/ORDER-OPERATIONS.md). No constituye integración de media/stock ni publicación.
+
+---
+
 # Verificación de Fitforge — Tareas 1 y 2
 
 > Las secciones iniciales conservan el registro histórico de Tarea 1. El estado actual y los resultados de Tarea 2 están al final.

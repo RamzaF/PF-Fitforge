@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head}">
+</head>
+<body>
+<header th:replace="~{layout/plantilla :: header}"/>
+<main class="container py-5">
+<h1 th:text="${administrativo ? 'Operación de pedidos' : 'Mis pedidos'}">
+</h1>
+<p>Pedidos internos de demostración. El despacho es un registro manual; no genera envíos físicos ni pagos.</p>
+<div class="d-flex gap-3 flex-wrap mb-3">
+<span th:each="c : ${resultado.conteos}" class="badge bg-secondary p-2" th:text="${c.key + ': ' + c.value}">
+</span>
+</div>
+<form method="get" class="row g-3 mb-4">
+<div class="col-md-5" th:if="${administrativo}">
+<label for="q" class="form-label">Buscar por ID, correo o destinatario ficticio</label>
+<input id="q" name="q" maxlength="100" th:value="${q}" class="form-control"/>
+</div>
+<div class="col-md-4">
+<label for="estado" class="form-label">Estado</label>
+<select id="estado" name="estado" class="form-select">
+<option value="">Todos</option>
+<option th:each="e : ${estados}" th:value="${e}" th:text="${e}" th:selected="${e == estado}">
+</option>
+</select>
+</div>
+<div class="col-md-3 align-self-end">
+<button class="btn btn-primary">Filtrar</button>
+</div>
+</form>
+<p th:text="${'Resultados: ' + resultado.total}">
+</p>
+<p th:if="${resultado.pedidos.isEmpty()}">No hay pedidos para esta consulta.</p>
+<div class="table-responsive">
+<table class="table align-middle" th:unless="${resultado.pedidos.isEmpty()}">
+<thead>
+<tr>
+<th>Pedido</th>
+<th th:if="${administrativo}">Dueño ficticio</th>
+<th>Fecha</th>
+<th>Estado</th>
+<th>Total</th>
+<th>Detalle</th>
+</tr>
+</thead>
+<tbody>
+<tr th:each="p : ${resultado.pedidos}">
+<td th:text="${p.id}">
+</td>
+<td th:if="${administrativo}" th:text="${p.correo}">
+</td>
+<td th:text="${p.fecha}">
+</td>
+<td th:text="${p.estado}">
+</td>
+<td th:text="${'₡ ' + #numbers.formatDecimal(p.total,1,2)}">
+</td>
+<td>
+<a th:href="${(administrativo ? '/admin/pedidos/' : '/pedidos/') + p.id}" th:aria-label="${'Ver pedido ' + p.id}">Ver detalle</a>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<nav aria-label="Paginación" class="d-flex gap-3">
+<a th:if="${resultado.anterior()}" th:href="@{${administrativo ? '/admin/pedidos' : '/pedidos'}(estado=${estado},q=${q},pagina=${resultado.pagina - 1})}">Anterior</a>
+<span th:text="${'Página ' + (resultado.pagina + 1)}">
+</span>
+<a th:if="${resultado.siguiente()}" th:href="@{${administrativo ? '/admin/pedidos' : '/pedidos'}(estado=${estado},q=${q},pagina=${resultado.pagina + 1})}">Siguiente</a>
+</nav>
+</main>
+<footer th:replace="~{layout/plantilla :: footer}"/>
+<th:block th:replace="~{layout/plantilla :: scripts}"/>
+</body>
+</html>

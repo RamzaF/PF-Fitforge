@@ -19,7 +19,12 @@
                         <p class="mb-1">Estado: <span class="badge bg-info" th:text="${factura.estado}"></span></p>
                     </div>
                     <p class="alert alert-info">Comprobante interno, sin pago recibido ni validez fiscal. No incluye envío.</p>
-                    <hr>
+                    <section class="border rounded p-3 my-4"><h2 class="h5">Destino ficticio registrado</h2><dl class="mb-0"><dt>Destinatario</dt><dd th:text="${factura.entrega.destinatario}"></dd><dt>Teléfono ficticio</dt><dd th:text="${factura.entrega.telefono}"></dd><dt>Dirección ficticia</dt><dd th:text="${factura.entrega.direccion}"></dd><dt>Nota</dt><dd th:text="${factura.entrega.nota.isEmpty() ? 'Sin nota' : factura.entrega.nota}"></dd></dl><small>Datos de demostración. Despacho manual sin envío físico.</small></section>
+                    <section class="my-4"><h2 class="h5">Historial de estado</h2>
+                        <p>Pedido registrado: <span th:text="${factura.fecha}"></span> — Pendiente</p>
+                        <p th:if="${factura.hitos.isEmpty()}">Aún no se registran cambios de estado.</p>
+                        <ol th:unless="${factura.hitos.isEmpty()}"><li th:each="h : ${factura.hitos}"><time th:text="${h.fecha}"></time> (UTC): <span th:text="${h.origen + ' → ' + h.destino}"></span></li></ol>
+                    </section><hr>
                     <h5 class="mb-3">Detalle de productos</h5>
                     <div class="table-responsive">
                         <table class="table table-bordered align-middle">
@@ -50,6 +55,7 @@
                     </div>
                 </div>
                 <div class="card-footer text-center">
+                    <a href="/pedidos" class="btn btn-outline-primary">Mis pedidos</a>
                     <a href="/carrito/ver" class="btn btn-primary">Volver al carrito</a>
                     <a href="/tienda/listado" class="btn btn-outline-success ms-2">Seguir comprando</a>
                 </div>
@@ -58,5 +64,6 @@
     </div>
 </div>
 <footer th:replace="~{layout/plantilla :: footer}"/>
+<th:block th:replace="~{layout/plantilla :: scripts}"/>
 </body>
 </html>

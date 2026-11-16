@@ -1,3 +1,5 @@
+> Esta rama añade operación de pedidos en paralelo a media/stock. Guía vigente: [ORDER-OPERATIONS.md](ORDER-OPERATIONS.md). Las URLs y comandos anteriores que siguen son evidencia histórica; para esta entrega usar el overlay y proyecto OrderOps.
+
 # Entrega 3 — pedido interno
 
 Base aprobada: `d90e510416a08d478113900dcb7548e5f4bba238`. Rama local `portfolio/fitforge-orders`. Reutiliza `Factura` como cabecera y `Venta` como detalle. No incluye pago, envío, factura fiscal, reservas, cancelaciones ni devoluciones.

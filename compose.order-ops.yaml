@@ -1,0 +1,11 @@
+# Overlay exclusivo; aplicar junto a compose.yaml. Solo bases nuevas.
+services:
+  db:
+    volumes:
+      - ./docs/local/order-operations.sql:/docker-entrypoint-initdb.d/03-order-operations.sql:ro
+  app:
+    environment:
+      SERVER_SERVLET_SESSION_COOKIE_NAME: FITFORGE_ORDER_OPS_SESSION
+    image: fitforge-demo-app:${FITFORGE_IMAGE_TAG:?exclusive tag required}
+  test:
+    image: fitforge-demo-test:${FITFORGE_IMAGE_TAG:?exclusive tag required}
