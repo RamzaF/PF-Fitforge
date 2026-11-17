@@ -66,6 +66,7 @@ class InventoryAuditIntegrationTest {
     }
 
     private void restoreBaseline() {
+        jdbc.update("DELETE FROM pedido_evento");
         jdbc.update("DELETE FROM movimiento_inventario");
         jdbc.update("DELETE FROM venta");
         jdbc.update("DELETE FROM factura");

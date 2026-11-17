@@ -42,6 +42,7 @@ class CatalogAdminIntegrationTest {
     @AfterEach
     void restoreBaseline() {
         OrderTestDatabase.requireDisposable();
+        jdbc.update("DELETE FROM pedido_evento");
         jdbc.update("DELETE FROM movimiento_inventario");
         jdbc.update("DELETE FROM venta");
         jdbc.update("DELETE FROM factura");
@@ -222,7 +223,7 @@ class CatalogAdminIntegrationTest {
                 .andExpect(redirectedUrl("/carrito/ver"));
         String key = (String) mvc.perform(get("/carrito/ver").session(client))
                 .andReturn().getModelAndView().getModel().get("claveConfirmacion");
-        mvc.perform(post("/carrito/confirmar-pedido").session(client).with(csrf()).param("clave", key))
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(client).with(csrf()).param("clave", key))
                 .andExpect(status().isSeeOther());
 
         // Attempting to physically delete sold variant fails cleanly
@@ -260,7 +261,7 @@ class CatalogAdminIntegrationTest {
 
     @Test
     void emptyCatalogSupportsFullAdminCreationAndCustomerNavigationWithoutHardcodedIds() throws Exception {
-        jdbc.update("DELETE FROM venta");
+        jdbc.update("DELETE FROM pedido_evento"); jdbc.update("DELETE FROM venta");
         jdbc.update("DELETE FROM factura");
         jdbc.update("DELETE FROM producto_color_talla");
         jdbc.update("DELETE FROM producto");

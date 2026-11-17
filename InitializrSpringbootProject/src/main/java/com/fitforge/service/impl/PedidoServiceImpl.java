@@ -49,16 +49,19 @@ public class PedidoServiceImpl implements PedidoService {
         }
         return List.copyOf(lines.values());
     }
-    private String huella(List<Linea> lines) {
-        var text=new StringBuilder("v2");
+    private String huella(List<Linea> lines,EntregaPedido entrega) {
+        var text=new StringBuilder("v3");
         for(var l:lines) text.append('|').append(l.variante()).append(':').append(l.cantidad()).append(':').append(l.precioAceptado().toPlainString());
+        text.append(entrega.huella());
         try { return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(text.toString().getBytes(StandardCharsets.UTF_8))); }
         catch(java.security.NoSuchAlgorithmException e) { throw new IllegalStateException(e); }
     }
     @Override
     @Transactional(propagation=Propagation.REQUIRES_NEW,isolation=Isolation.READ_COMMITTED,timeout=10,rollbackFor=Exception.class)
     public Confirmacion confirmar(Comando c) {
-        int owner=propietario(); var lines=normalizar(c); String fingerprint=huella(lines);
+        int owner=propietario(); var lines=normalizar(c);
+        if(c.entrega()==null) throw error("ENTREGA_INVALIDA","Falta el destino ficticio.");
+        var entrega=c.entrega().validar(); String fingerprint=huella(lines,entrega);
         // Serialize this owner's keys across connections. READ COMMITTED and current reads avoid missing-key gap locks.
         var current=jdbc.query("SELECT activo, correo FROM usuario WHERE id_usuario=? FOR UPDATE",(rs,n)->new Object[]{rs.getBoolean(1),rs.getString(2)},owner);
         if(current.isEmpty() || !Boolean.TRUE.equals(current.getFirst()[0]) || !current.getFirst()[1].equals(SecurityContextHolder.getContext().getAuthentication().getName()))
@@ -91,6 +94,8 @@ public class PedidoServiceImpl implements PedidoService {
         double storedTotal=Dinero.paraDouble(total);
         var factura=new Factura(); factura.setIdUsuario(owner); factura.setClaveConfirmacion(c.clave().toString());
         factura.setHuellaCarrito(fingerprint); factura.setFecha(Date.valueOf(LocalDate.now())); factura.setEstado("Pendiente"); factura.setTotal(storedTotal);
+        factura.setDestinatario(entrega.destinatario());factura.setTelefonoEntrega(entrega.telefono());
+        factura.setDireccionEntrega(entrega.direccion());factura.setNotaEntrega(entrega.nota());factura.setConsentimientoDemo(true);
         em.persist(factura);
         for(var l:lines) {
             if(!inventario.descontar(l.variante(),l.cantidad())) throw error("STOCK_INSUFICIENTE","El stock cambió. Revisá el carrito.");
@@ -104,11 +109,11 @@ public class PedidoServiceImpl implements PedidoService {
     @Transactional(readOnly=true,propagation=Propagation.REQUIRES_NEW)
     public Comprobante obtenerPropio(Long id) {
         int owner=propietario();
-        var headers=jdbc.query("SELECT id_factura,fecha,estado,total FROM factura WHERE id_factura=? AND id_usuario=?",
-            (rs,n)->new Comprobante(rs.getLong(1),rs.getDate(2).toLocalDate(),rs.getString(3),Dinero.desdeDouble(rs.getDouble(4)),List.of()),id,owner);
+        var headers=jdbc.query("SELECT id_factura,fecha,estado,total,destinatario,telefono_entrega,direccion_entrega,nota_entrega,consentimiento_demo FROM factura WHERE id_factura=? AND id_usuario=?",
+            (rs,n)->new Comprobante(rs.getLong(1),rs.getDate(2).toLocalDate(),rs.getString(3),Dinero.desdeDouble(rs.getDouble(4)),List.of(),new EntregaPedido(rs.getString(5),rs.getString(6),rs.getString(7),rs.getString(8),rs.getBoolean(9)),List.of()),id,owner);
         if(headers.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         var lines=jdbc.query("SELECT p.descripcion,c.nombre_color,t.nombre_talla,v.cantidad,v.precio FROM venta v JOIN producto_color_talla pct ON v.id_producto_color_talla=pct.id_producto_color_talla JOIN producto p ON p.id_producto=pct.id_producto LEFT JOIN color c ON c.id_color=pct.id_color LEFT JOIN talla t ON t.id_talla=pct.id_talla WHERE v.id_factura=? ORDER BY v.id_venta",
             (rs,n)->{ var price=Dinero.desdeDouble(rs.getDouble(5)); int quantity=rs.getInt(4); return new Detalle(rs.getString(1),Objects.requireNonNullElse(rs.getString(2),"N/A"),Objects.requireNonNullElse(rs.getString(3),"N/A"),quantity,price,price.multiply(BigDecimal.valueOf(quantity))); },id);
-        var h=headers.getFirst();return new Comprobante(h.idFactura(),h.fecha(),h.estado(),h.total(),List.copyOf(lines));
+        var h=headers.getFirst();return new Comprobante(h.idFactura(),h.fecha(),h.estado(),h.total(),List.copyOf(lines),h.entrega(),jdbc.query("SELECT fecha,origen,destino FROM pedido_evento WHERE id_factura=? ORDER BY id_evento",(rs,n)->new Hito(rs.getTimestamp(1).toLocalDateTime(),rs.getString(2),rs.getString(3)),id));
     }
 }

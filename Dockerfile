@@ -1,4 +1,5 @@
 FROM maven:3.9.9-eclipse-temurin-21@sha256:3a4ab3276a087bf276f79cae96b1af04f53731bec53fb2e651aca79e4b10211e AS build
+ENV MAVEN_OPTS="-Xmx256m -XX:MaxMetaspaceSize=192m"
 WORKDIR /workspace
 COPY InitializrSpringbootProject/pom.xml ./pom.xml
 COPY InitializrSpringbootProject/src ./src

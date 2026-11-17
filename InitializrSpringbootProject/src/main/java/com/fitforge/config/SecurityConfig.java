@@ -68,10 +68,12 @@ public class SecurityConfig {
                 .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ERROR).permitAll()
                 .requestMatchers(HttpMethod.POST, "/carrito/confirmar-pedido").hasRole("USER")
                 .requestMatchers(HttpMethod.GET, "/carrito/factura/*").hasRole("USER")
+                .requestMatchers(HttpMethod.GET, "/pedidos", "/pedidos/*").hasRole("USER")
                 .requestMatchers("/carrito/confirmar-pedido", "/carrito/factura/**", "/pedidos/**").denyAll()
                 .requestMatchers("/admin/**", "/usuario/**", "/api/imagenes/**").hasRole("ADMIN")
                 .requestMatchers("/carrito/**").hasRole("USER")
                 .requestMatchers("/perfil").hasAnyRole("USER", "ADMIN")
+                .requestMatchers(HttpMethod.HEAD, "/media/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/", "/home", "/login", "/register", "/forgot-password",
                                 "/tienda/**", "/productos/**", "/categoria/**", "/nosotros", "/contacto",
                                 "/css/**", "/js/**", "/img/**", "/webjars/**", "/Uploads/**", "/uploads/**", "/media/**").permitAll()

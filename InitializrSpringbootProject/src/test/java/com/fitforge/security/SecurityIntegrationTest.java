@@ -170,7 +170,7 @@ class SecurityIntegrationTest {
     @Test void checkoutWithoutIssuedTokenCannotEmptyCartOrClaimPurchase() throws Exception {
         var session = login("cliente");
         mvc.perform(post("/carrito/agregar/1").session(session).with(csrf())).andExpect(status().is3xxRedirection());
-        mvc.perform(post("/carrito/confirmar-pedido").session(session).with(csrf())).andExpect(status().isBadRequest());
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(session).with(csrf())).andExpect(status().isBadRequest());
         assertThat((List<?>) session.getAttribute("carrito")).hasSize(1);
     }
 }

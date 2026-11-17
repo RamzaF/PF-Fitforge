@@ -1,0 +1,5 @@
+# Extra fictitious identities only for this isolated browser review database.
+services:
+  db:
+    volumes:
+      - ./docs/local/order-ops-demo.sql:/docker-entrypoint-initdb.d/04-orderops-demo.sql:ro

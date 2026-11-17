@@ -34,26 +34,45 @@ public class ConfirmacionCarritoService {
             lines.sort(Comparator.comparing(PedidoService.Linea::variante));
             var old=(Intento)session.getAttribute(PENDING);
             if(old!=null && old.owner()==owner && old.revision()==CarritoSesion.revision() && old.comando().lineas().equals(lines)) return old.comando().clave().toString();
-            var next=new Intento(owner,CarritoSesion.revision(),new PedidoService.Comando(UUID.randomUUID(),lines));
+            var next=new Intento(owner,CarritoSesion.revision(),new PedidoService.Comando(UUID.randomUUID(),lines,null));
             session.setAttribute(PENDING,next);return next.comando().clave().toString();
         }
     }
     public boolean requiereConsulta() {
         synchronized(CarritoSesion.mutex()) { return Boolean.TRUE.equals(CarritoSesion.actual().getAttribute(VERIFY)); }
     }
-    public PedidoService.Confirmacion confirmar(String key) {
+    public EntregaPedido entregaActual() {
+        synchronized(CarritoSesion.mutex()) {
+            var value=(EntregaPedido)CarritoSesion.actual().getAttribute("pedidoEntregaFormulario");
+            return value==null?new EntregaPedido("","","","",false):value;
+        }
+    }
+    public PedidoService.Confirmacion confirmar(String key,EntregaPedido entrada) {
         synchronized(CarritoSesion.mutex()) {
             int owner=pedidos.propietario(); var session=CarritoSesion.actual();
+            var entrega=entrada.validar();
             var completed=completados().get(key);
-            if(completed!=null && completed.owner()==owner) return pedidos.confirmar(completed.comando());
+            if(completed!=null && completed.owner()==owner) {
+                return pedidos.confirmar(new PedidoService.Comando(completed.comando().clave(),completed.comando().lineas(),entrega));
+            }
             var pending=(Intento)session.getAttribute(PENDING);
             if(pending==null || pending.owner()!=owner || pending.revision()!=CarritoSesion.revision() || !pending.comando().clave().toString().equals(key))
                 throw new PedidoException("CONFIRMACION_CONFLICTIVA","Revisá el carrito antes de confirmar de nuevo.");
+            if(pending.comando().entrega()!=null && !pending.comando().entrega().equals(entrega))
+                throw new PedidoException("CONFIRMACION_CONFLICTIVA","El destino cambió para una confirmación ya enviada. Reintentá con el destino original o revisá Mis pedidos.");
+            session.setAttribute("pedidoEntregaFormulario",entrega);
+            pending=new Intento(owner,pending.revision(),new PedidoService.Comando(pending.comando().clave(),pending.comando().lineas(),entrega));
+            session.setAttribute(PENDING,pending);
             PedidoService.Confirmacion result;
             try { result=pedidos.confirmar(pending.comando()); }
             catch(PedidoException e) {
-                session.removeAttribute(VERIFY);
-                if(e.codigo().equals("PRECIO_CAMBIADO")) session.removeAttribute(PENDING);
+                // A business rejection from the transactional proxy is a known rollback.
+                // A previously uncertain attempt must keep its original key and destination.
+                if(!Boolean.TRUE.equals(session.getAttribute(VERIFY))) {
+                    if(e.codigo().equals("PRECIO_CAMBIADO")) session.removeAttribute(PENDING);
+                    else session.setAttribute(PENDING,new Intento(owner,pending.revision(),
+                        new PedidoService.Comando(pending.comando().clave(),pending.comando().lineas(),null)));
+                }
                 throw e;
             } catch(org.springframework.dao.DataAccessException | org.springframework.transaction.TransactionException | jakarta.persistence.PersistenceException e) {
                 // Do not rotate a key when the caller cannot establish the commit result.

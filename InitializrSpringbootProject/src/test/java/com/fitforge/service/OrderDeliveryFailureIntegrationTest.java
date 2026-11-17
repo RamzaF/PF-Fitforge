@@ -40,7 +40,7 @@ class OrderDeliveryFailureIntegrationTest {
     @Autowired AtomicBoolean loseNextResult;
     @BeforeEach @AfterEach void reset(){
         OrderTestDatabase.requireDisposable();loseNextResult.set(false);
-        jdbc.update("DELETE FROM venta");jdbc.update("DELETE FROM factura");jdbc.update("UPDATE producto SET precio=25 WHERE id_producto=1");
+        jdbc.update("DELETE FROM pedido_evento"); jdbc.update("DELETE FROM venta");jdbc.update("DELETE FROM factura");jdbc.update("UPDATE producto SET precio=25 WHERE id_producto=1");
         jdbc.update("UPDATE producto_color_talla SET existencias=5 WHERE id_producto_color_talla=1");
     }
     @Test void lostResultAfterCommitMustRetainOriginalKeyEvenIfPriceChangesBeforeRetry() throws Exception {
@@ -49,13 +49,17 @@ class OrderDeliveryFailureIntegrationTest {
         mvc.perform(post("/carrito/agregar/1").session(session).with(csrf()).param("cantidad","2")).andExpect(status().is3xxRedirection());
         String key=(String)mvc.perform(get("/carrito/ver").session(session)).andReturn().getModelAndView().getModel().get("claveConfirmacion");
         loseNextResult.set(true);
-        mvc.perform(post("/carrito/confirmar-pedido").session(session).with(csrf()).param("clave",key)).andExpect(status().isServiceUnavailable());
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(session).with(csrf()).param("clave",key)).andExpect(status().isServiceUnavailable());
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM factura",Integer.class)).isEqualTo(1);
         assertThat((java.util.List<?>)session.getAttribute("carrito")).hasSize(1);
+        mvc.perform(post("/carrito/confirmar-pedido").param("destinatario","Persona ficticia").param("telefonoEntrega","000-000-0000").param("direccionEntrega","Otra dirección demo 456").param("notaEntrega","Solo demostración").param("consentimiento","true").session(session).with(csrf()).param("clave",key))
+            .andExpect(redirectedUrl("/carrito/ver")).andExpect(flash().attributeExists("error"));
+        var review=mvc.perform(get("/carrito/ver").session(session)).andReturn().getModelAndView().getModel();
+        assertThat(((EntregaPedido)review.get("entrega")).direccion()).isEqualTo("Calle Demo 123, Ciudad Ficticia");
         jdbc.update("UPDATE producto SET precio=30 WHERE id_producto=1");
         String retry=(String)mvc.perform(get("/carrito/ver").session(session)).andReturn().getModelAndView().getModel().get("claveConfirmacion");
         assertThat(retry).as("delivery failure must not issue a different key on cart refresh").isEqualTo(key);
-        mvc.perform(post("/carrito/confirmar-pedido").session(session).with(csrf()).param("clave",retry)).andExpect(status().isSeeOther());
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(session).with(csrf()).param("clave",retry)).andExpect(status().isSeeOther());
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM factura",Integer.class)).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT total FROM factura",Double.class)).isEqualTo(50);
         assertThat(jdbc.queryForObject("SELECT existencias FROM producto_color_talla WHERE id_producto_color_talla=1",Integer.class)).isEqualTo(3);

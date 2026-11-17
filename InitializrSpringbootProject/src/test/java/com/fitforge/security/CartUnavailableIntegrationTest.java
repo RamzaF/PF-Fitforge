@@ -73,7 +73,7 @@ class CartUnavailableIntegrationTest {
         mvc.perform(get("/carrito/ver").session(session)).andExpect(status().isOk())
             .andExpect(model().attribute("total", 17.0));
         mvc.perform(post("/carrito/eliminar/1").session(session)).andExpect(status().isForbidden());
-        mvc.perform(post("/carrito/confirmar-pedido").session(session).with(csrf())).andExpect(status().isBadRequest());
+        mvc.perform(post("/carrito/confirmar-pedido").with(com.fitforge.service.OrderTestDatabase.entregaDemo()).session(session).with(csrf())).andExpect(status().isBadRequest());
         assertThat((List<Item>) session.getAttribute("carrito")).hasSize(2);
         mvc.perform(post("/carrito/eliminar/1").session(session).with(csrf()))
             .andExpect(redirectedUrl("/carrito/ver"));

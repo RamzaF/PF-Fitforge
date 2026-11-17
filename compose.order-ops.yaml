@@ -1,0 +1,28 @@
+# Overlay exclusivo; aplicar junto a compose.yaml. Solo bases nuevas.
+services:
+  db:
+    mem_limit: 768m
+    memswap_limit: 768m
+    cpus: 1.0
+    volumes:
+      - ./docs/local/order-operations.sql:/docker-entrypoint-initdb.d/03-order-operations.sql:ro
+  app:
+    mem_limit: 768m
+    memswap_limit: 768m
+    cpus: 2.0
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx256m -XX:MaxMetaspaceSize=192m"
+      SERVER_SERVLET_SESSION_COOKIE_NAME: FITFORGE_ORDER_OPS_SESSION
+    image: fitforge-demo-app:${FITFORGE_IMAGE_TAG:?exclusive tag required}
+  web:
+    mem_limit: 64m
+    memswap_limit: 64m
+    cpus: 0.5
+  test:
+    mem_limit: 1152m
+    memswap_limit: 1152m
+    cpus: 2.0
+    environment:
+      MAVEN_OPTS: "-Xmx128m -XX:MaxMetaspaceSize=96m"
+    command: [mvn, -o, -B, -ntp, "-DargLine=-Xmx384m -XX:MaxMetaspaceSize=256m -Dspring.test.context.cache.maxSize=2", test]
+    image: fitforge-demo-test:${FITFORGE_IMAGE_TAG:?exclusive tag required}

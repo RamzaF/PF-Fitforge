@@ -57,7 +57,7 @@ class SecurityHttpErrorIntegrationTest {
             assertThat(get(client(),path).statusCode()).isEqualTo(302);
         }finally {
             org.springframework.security.core.context.SecurityContextHolder.clearContext();
-            if(id!=null) {jdbc.update("DELETE FROM venta WHERE id_factura=?",id);jdbc.update("DELETE FROM factura WHERE id_factura=?",id);jdbc.update("UPDATE producto_color_talla SET existencias=existencias+1 WHERE id_producto_color_talla=1");}
+            if(id!=null) {jdbc.update("DELETE FROM pedido_evento WHERE id_factura=?",id);jdbc.update("DELETE FROM venta WHERE id_factura=?",id);jdbc.update("DELETE FROM factura WHERE id_factura=?",id);jdbc.update("UPDATE producto_color_talla SET existencias=existencias+1 WHERE id_producto_color_talla=1");}
             jdbc.update("DELETE FROM rol WHERE id_usuario=88");jdbc.update("DELETE FROM usuario WHERE id_usuario=88");
         }
     }

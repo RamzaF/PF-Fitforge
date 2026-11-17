@@ -123,6 +123,7 @@ class MediaConsistencyIntegrationTest {
     }
 
     private void restoreBaseline() {
+        jdbc.update("DELETE FROM pedido_evento");
         jdbc.update("DELETE FROM movimiento_inventario");
         jdbc.update("DELETE FROM venta");
         jdbc.update("DELETE FROM factura");
@@ -1015,5 +1016,15 @@ class MediaConsistencyIntegrationTest {
             pool.shutdownNow();
             assertThat(pool.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
         }
+    }
+
+    @Test void mediaGetAndHeadArePublicForAnonymousClientAndAdmin() throws Exception {
+        String image=uploadInitialImageForProduct(1L,"png");
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head(image)).andExpect(status().isOk());
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head(image).with(user("cliente@fitforge.example").roles("USER"))).andExpect(status().isOk());
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head(image).with(user("admin@fitforge.example").roles("ADMIN"))).andExpect(status().isOk());
+        mvc.perform(get(image).with(user("cliente@fitforge.example").roles("USER"))).andExpect(status().isOk());
+        mvc.perform(get(image).with(user("admin@fitforge.example").roles("ADMIN"))).andExpect(status().isOk());
+        mvc.perform(post(image).with(user("admin@fitforge.example").roles("ADMIN")).with(csrf())).andExpect(status().isForbidden());
     }
 }

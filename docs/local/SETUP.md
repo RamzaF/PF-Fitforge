@@ -1,4 +1,8 @@
+> Esta rama añade operación de pedidos en paralelo a media/stock. Guía vigente: [ORDER-OPERATIONS.md](ORDER-OPERATIONS.md). Las URLs y comandos anteriores que siguen son evidencia histórica; para esta entrega usar el overlay y proyecto OrderOps.
+
 # FitForge local: solo Docker
+
+**Integración ecommerce local:** seguir [ECOMMERCE-INTEGRATION.md](ECOMMERCE-INTEGRATION.md). Requiere BD NUEVA y compose.yaml + compose.order-ops.yaml con límites explícitos y ejecución secuencial. La evidencia de las entregas anteriores que sigue es histórica.
 
 **Estado actual: rama `portfolio/fitforge-media-consistency` (imágenes persistentes, consistencia archivo/BD e inventario auditable).** Seguir [ORDERS.md](ORDERS.md) y los comandos de esta sección para build, pruebas y arranque en proyectos y volúmenes nuevos. No usar las imágenes nuevas con volúmenes de BD anteriores: no se migran.
 
