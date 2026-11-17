@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fitforge.dao.PedidoInventarioDao;
 import com.fitforge.domain.Producto;
+import com.fitforge.service.CategoriaService;
 import com.fitforge.service.InventarioService;
 import com.fitforge.service.LocalStorageService;
 import com.fitforge.service.OrderTestDatabase;
@@ -78,6 +79,9 @@ class MediaConsistencyIntegrationTest {
     PlatformTransactionManager txManager;
 
     @MockitoSpyBean
+    CategoriaService categoriaService;
+
+    @MockitoSpyBean
     ProductoService productoService;
 
     @MockitoSpyBean
@@ -92,7 +96,7 @@ class MediaConsistencyIntegrationTest {
     @BeforeEach
     void resetDatabaseAndUploads() throws Exception {
         OrderTestDatabase.requireDisposable();
-        Mockito.reset(productoService, localStorageService, pedidoInventarioDao, inventarioService);
+        Mockito.reset(categoriaService, productoService, localStorageService, pedidoInventarioDao, inventarioService);
         cleanUploadRoot();
         restoreBaseline();
     }
@@ -100,7 +104,7 @@ class MediaConsistencyIntegrationTest {
     @AfterEach
     void cleanup() throws Exception {
         OrderTestDatabase.requireDisposable();
-        Mockito.reset(productoService, localStorageService, pedidoInventarioDao, inventarioService);
+        Mockito.reset(categoriaService, productoService, localStorageService, pedidoInventarioDao, inventarioService);
         cleanUploadRoot();
         restoreBaseline();
     }
@@ -673,5 +677,343 @@ class MediaConsistencyIntegrationTest {
                 .andReturn();
         assertThat(String.valueOf(r2.getFlashMap().get("error")))
                 .doesNotContain("INTERNAL_DB_SECRET_CONSTRAINT");
+    }
+
+    @Test
+    void categoryActivationBeforeValidationMustNotRestoreDeletedImage() throws Exception {
+        String imageA = uploadInitialImageForProduct(1L, "png");
+        byte[] jpegB = createImageBytes("jpg", 30, 30);
+
+        jdbc.update("UPDATE categoria SET activo=false WHERE id_categoria=2");
+        CountDownLatch beforeCategoryLookup = new CountDownLatch(1);
+        CountDownLatch categoryActivated = new CountDownLatch(1);
+
+        CountDownLatch eBeforeLock = new CountDownLatch(1);
+        CountDownLatch rCompleted = new CountDownLatch(1);
+        AtomicReference<Thread> editThreadRef = new AtomicReference<>();
+
+        doAnswer(inv -> {
+            Object result = inv.callRealMethod();
+            if (Thread.currentThread().equals(editThreadRef.get())) {
+                beforeCategoryLookup.countDown();
+                assertThat(categoryActivated.await(10, TimeUnit.SECONDS)).isTrue();
+            }
+            return result;
+        }).when(categoriaService).getCategoria(true);
+
+        doAnswer(inv -> {
+            if (Thread.currentThread().equals(editThreadRef.get())) {
+                eBeforeLock.countDown();
+                assertThat(rCompleted.await(10, TimeUnit.SECONDS)).isTrue();
+            }
+            return inv.callRealMethod();
+        }).when(pedidoInventarioDao).bloquearProducto(1L);
+
+        var pool = Executors.newSingleThreadExecutor();
+        try {
+            Future<MvcResult> editFuture = pool.submit(() -> {
+                editThreadRef.set(Thread.currentThread());
+                return mvc.perform(multipart("/admin/productos/guardar-producto")
+                        .file(new MockMultipartFile("archivo", new byte[0]))
+                        .param("idProducto", "1")
+                        .param("descripcion", "Camiseta Editada Sin Archivo")
+                        .param("detalle", "Detalle editado sin archivo")
+                        .param("precio", "33.00")
+                        .param("categoria.idCategoria", "2")
+                        .param("activo", "true")
+                        .with(user("admin@fitforge.example").roles("ADMIN"))
+                        .with(csrf()))
+                        .andExpect(redirectedUrl("/admin/productos/listado"))
+                        .andExpect(flash().attribute("tipo", "success"))
+                        .andReturn();
+            });
+
+            assertThat(beforeCategoryLookup.await(10, TimeUnit.SECONDS)).isTrue();
+            mvc.perform(post("/admin/categorias/estado")
+                    .param("idCategoria", "2").param("activo", "true")
+                    .with(user("admin@fitforge.example").roles("ADMIN")).with(csrf()))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(flash().attribute("tipo", "success"));
+            categoryActivated.countDown();
+            assertThat(eBeforeLock.await(10, TimeUnit.SECONDS)).isTrue();
+
+            // Concurrent replacement R runs completely while E is paused before lock
+            mvc.perform(multipart("/admin/productos/guardar-producto")
+                    .file(new MockMultipartFile("archivo", "replace.jpg", "image/jpeg", jpegB))
+                    .param("idProducto", "1")
+                    .param("descripcion", "Camiseta Reemplazo B")
+                    .param("detalle", "Detalle reemplazo")
+                    .param("precio", "29.00")
+                    .param("categoria.idCategoria", "1")
+                    .param("activo", "true")
+                    .with(user("admin@fitforge.example").roles("ADMIN"))
+                    .with(csrf()))
+                    .andExpect(redirectedUrl("/admin/productos/listado"))
+                    .andExpect(flash().attribute("tipo", "success"));
+
+            String imageB = jdbc.queryForObject("SELECT imagen FROM producto WHERE id_producto = 1", String.class);
+            assertThat(imageB).startsWith("/media/").endsWith(".jpg").isNotEqualTo(imageA);
+            mvc.perform(get(imageA)).andExpect(status().isNotFound());
+
+            rCompleted.countDown();
+            editFuture.get(15, TimeUnit.SECONDS);
+
+            // Final DB state MUST still reference B (never deleted A!), and GET B MUST return 200 OK
+            String finalImg = jdbc.queryForObject("SELECT imagen FROM producto WHERE id_producto = 1", String.class);
+            assertThat(finalImg).isEqualTo(imageB);
+            assertThat(jdbc.queryForObject("SELECT descripcion FROM producto WHERE id_producto = 1", String.class))
+                    .isEqualTo("Camiseta Editada Sin Archivo");
+            mvc.perform(get(imageB))
+                    .andExpect(status().isOk())
+                    .andExpect(header().string("Content-Type", "image/jpeg"));
+            assertThat(filesInUploadRoot()).hasSize(1);
+        } finally {
+            categoryActivated.countDown();
+            rCompleted.countDown();
+            pool.shutdownNow();
+            assertThat(pool.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+        }
+    }
+
+    @Test
+    void categoryDeactivationAfterNavigationLookupRejectsMoveAndCleansStagedMedia() throws Exception {
+        String imageA = uploadInitialImageForProduct(1L, "png");
+        byte[] jpegB = createImageBytes("jpg", 28, 28);
+
+        CountDownLatch afterNavLookup = new CountDownLatch(1);
+        CountDownLatch categoryDeactivated = new CountDownLatch(1);
+        AtomicReference<Thread> editThreadRef = new AtomicReference<>();
+
+        doAnswer(inv -> {
+            Object result = inv.callRealMethod();
+            if (Thread.currentThread().equals(editThreadRef.get())) {
+                afterNavLookup.countDown();
+                assertThat(categoryDeactivated.await(10, TimeUnit.SECONDS)).isTrue();
+            }
+            return result;
+        }).when(categoriaService).getCategoria(true);
+
+        var pool = Executors.newSingleThreadExecutor();
+        try {
+            Future<MvcResult> editFuture = pool.submit(() -> {
+                editThreadRef.set(Thread.currentThread());
+                return mvc.perform(multipart("/admin/productos/guardar-producto")
+                        .file(new MockMultipartFile("archivo", "staged.jpg", "image/jpeg", jpegB))
+                        .param("idProducto", "1")
+                        .param("descripcion", "Camiseta Movida a Inactiva")
+                        .param("detalle", "No debe persistir")
+                        .param("precio", "33.00")
+                        .param("categoria.idCategoria", "2")
+                        .param("activo", "true")
+                        .with(user("admin@fitforge.example").roles("ADMIN"))
+                        .with(csrf()))
+                        .andExpect(redirectedUrl("/admin/productos/editar/1"))
+                        .andExpect(flash().attribute("tipo", "danger"))
+                        .andReturn();
+            });
+
+            assertThat(afterNavLookup.await(10, TimeUnit.SECONDS)).isTrue();
+            mvc.perform(post("/admin/categorias/estado")
+                    .param("idCategoria", "2").param("activo", "false")
+                    .with(user("admin@fitforge.example").roles("ADMIN")).with(csrf()))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(flash().attribute("tipo", "success"));
+            categoryDeactivated.countDown();
+
+            MvcResult editResult = editFuture.get(15, TimeUnit.SECONDS);
+            assertThat(String.valueOf(editResult.getFlashMap().get("mensaje")))
+                    .contains("categoría inactiva");
+            assertThat(jdbc.queryForObject("SELECT imagen FROM producto WHERE id_producto = 1", String.class))
+                    .isEqualTo(imageA);
+            assertThat(jdbc.queryForObject("SELECT id_categoria FROM producto WHERE id_producto = 1", Long.class))
+                    .isEqualTo(1L);
+            assertThat(filesInUploadRoot()).hasSize(1);
+            mvc.perform(get(imageA)).andExpect(status().isOk());
+        } finally {
+            categoryDeactivated.countDown();
+            pool.shutdownNow();
+            assertThat(pool.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+        }
+    }
+
+    @Test
+    void categoryActivationBeforeDoubleReplacementReadsCurrentPreviousImageAndCleansIntermediate() throws Exception {
+        String imageA = uploadInitialImageForProduct(1L, "png");
+        byte[] jpegB = createImageBytes("jpg", 24, 24);
+        byte[] pngC = createImageBytes("png", 32, 32);
+
+        jdbc.update("UPDATE categoria SET activo=false WHERE id_categoria=2");
+        CountDownLatch beforeCategoryLookup = new CountDownLatch(1);
+        CountDownLatch categoryActivated = new CountDownLatch(1);
+        CountDownLatch r2BeforeLock = new CountDownLatch(1);
+        CountDownLatch r1Completed = new CountDownLatch(1);
+        AtomicReference<Thread> r2ThreadRef = new AtomicReference<>();
+
+        doAnswer(inv -> {
+            Object result = inv.callRealMethod();
+            if (Thread.currentThread().equals(r2ThreadRef.get())) {
+                beforeCategoryLookup.countDown();
+                assertThat(categoryActivated.await(10, TimeUnit.SECONDS)).isTrue();
+            }
+            return result;
+        }).when(categoriaService).getCategoria(true);
+
+        doAnswer(inv -> {
+            if (Thread.currentThread().equals(r2ThreadRef.get())) {
+                r2BeforeLock.countDown();
+                assertThat(r1Completed.await(10, TimeUnit.SECONDS)).isTrue();
+            }
+            return inv.callRealMethod();
+        }).when(pedidoInventarioDao).bloquearProducto(1L);
+
+        var pool = Executors.newSingleThreadExecutor();
+        try {
+            Future<MvcResult> r2Future = pool.submit(() -> {
+                r2ThreadRef.set(Thread.currentThread());
+                return mvc.perform(multipart("/admin/productos/guardar-producto")
+                        .file(new MockMultipartFile("archivo", "c.png", "image/png", pngC))
+                        .param("idProducto", "1")
+                        .param("descripcion", "Producto Final C")
+                        .param("detalle", "Detalle C")
+                        .param("precio", "35.00")
+                        .param("categoria.idCategoria", "2")
+                        .param("activo", "true")
+                        .with(user("admin@fitforge.example").roles("ADMIN"))
+                        .with(csrf()))
+                        .andExpect(redirectedUrl("/admin/productos/listado"))
+                        .andExpect(flash().attribute("tipo", "success"))
+                        .andReturn();
+            });
+
+            assertThat(beforeCategoryLookup.await(10, TimeUnit.SECONDS)).isTrue();
+            mvc.perform(post("/admin/categorias/estado")
+                    .param("idCategoria", "2").param("activo", "true")
+                    .with(user("admin@fitforge.example").roles("ADMIN")).with(csrf()))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(flash().attribute("tipo", "success"));
+            categoryActivated.countDown();
+            assertThat(r2BeforeLock.await(10, TimeUnit.SECONDS)).isTrue();
+
+            mvc.perform(multipart("/admin/productos/guardar-producto")
+                    .file(new MockMultipartFile("archivo", "b.jpg", "image/jpeg", jpegB))
+                    .param("idProducto", "1")
+                    .param("descripcion", "Producto Intermedio B")
+                    .param("detalle", "Detalle B")
+                    .param("precio", "30.00")
+                    .param("categoria.idCategoria", "1")
+                    .param("activo", "true")
+                    .with(user("admin@fitforge.example").roles("ADMIN"))
+                    .with(csrf()))
+                    .andExpect(redirectedUrl("/admin/productos/listado"))
+                    .andExpect(flash().attribute("tipo", "success"));
+
+            String imageB = jdbc.queryForObject("SELECT imagen FROM producto WHERE id_producto = 1", String.class);
+            assertThat(imageB).startsWith("/media/").endsWith(".jpg").isNotEqualTo(imageA);
+            mvc.perform(get(imageA)).andExpect(status().isNotFound());
+
+            r1Completed.countDown();
+            r2Future.get(15, TimeUnit.SECONDS);
+
+            String imageC = jdbc.queryForObject("SELECT imagen FROM producto WHERE id_producto = 1", String.class);
+            assertThat(imageC).startsWith("/media/").endsWith(".png").isNotEqualTo(imageB);
+            assertThat(filesInUploadRoot()).hasSize(1);
+            mvc.perform(get(imageA)).andExpect(status().isNotFound());
+            mvc.perform(get(imageB)).andExpect(status().isNotFound());
+            mvc.perform(get(imageC)).andExpect(status().isOk());
+        } finally {
+            categoryActivated.countDown();
+            r1Completed.countDown();
+            pool.shutdownNow();
+            assertThat(pool.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+        }
+    }
+
+    @Test
+    void categoryActivationBeforeSharedReferenceEditWithoutFilePreservesSharedFile() throws Exception {
+        String sharedA = uploadInitialImageForProduct(1L, "png");
+        jdbc.update("UPDATE producto SET imagen = ? WHERE id_producto = 2", sharedA);
+        jdbc.update("UPDATE categoria SET activo=false WHERE id_categoria=2");
+        byte[] jpegB = createImageBytes("jpg", 26, 26);
+
+        CountDownLatch beforeCategoryLookup = new CountDownLatch(1);
+        CountDownLatch categoryActivated = new CountDownLatch(1);
+        CountDownLatch e2BeforeLock = new CountDownLatch(1);
+        CountDownLatch r1Completed = new CountDownLatch(1);
+        AtomicReference<Thread> e2ThreadRef = new AtomicReference<>();
+
+        doAnswer(inv -> {
+            Object result = inv.callRealMethod();
+            if (Thread.currentThread().equals(e2ThreadRef.get())) {
+                beforeCategoryLookup.countDown();
+                assertThat(categoryActivated.await(10, TimeUnit.SECONDS)).isTrue();
+            }
+            return result;
+        }).when(categoriaService).getCategoria(true);
+
+        doAnswer(inv -> {
+            if (Thread.currentThread().equals(e2ThreadRef.get())) {
+                e2BeforeLock.countDown();
+                assertThat(r1Completed.await(10, TimeUnit.SECONDS)).isTrue();
+            }
+            return inv.callRealMethod();
+        }).when(pedidoInventarioDao).bloquearProducto(2L);
+
+        var pool = Executors.newSingleThreadExecutor();
+        try {
+            Future<MvcResult> e2Future = pool.submit(() -> {
+                e2ThreadRef.set(Thread.currentThread());
+                return mvc.perform(multipart("/admin/productos/guardar-producto")
+                        .file(new MockMultipartFile("archivo", new byte[0]))
+                        .param("idProducto", "2")
+                        .param("descripcion", "Guantes Compartidos Cat2")
+                        .param("detalle", "Detalle guantes")
+                        .param("precio", "18.00")
+                        .param("categoria.idCategoria", "2")
+                        .param("activo", "true")
+                        .with(user("admin@fitforge.example").roles("ADMIN"))
+                        .with(csrf()))
+                        .andExpect(redirectedUrl("/admin/productos/listado"))
+                        .andExpect(flash().attribute("tipo", "success"))
+                        .andReturn();
+            });
+
+            assertThat(beforeCategoryLookup.await(10, TimeUnit.SECONDS)).isTrue();
+            mvc.perform(post("/admin/categorias/estado")
+                    .param("idCategoria", "2").param("activo", "true")
+                    .with(user("admin@fitforge.example").roles("ADMIN")).with(csrf()))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(flash().attribute("tipo", "success"));
+            categoryActivated.countDown();
+            assertThat(e2BeforeLock.await(10, TimeUnit.SECONDS)).isTrue();
+
+            mvc.perform(multipart("/admin/productos/guardar-producto")
+                    .file(new MockMultipartFile("archivo", "p1.jpg", "image/jpeg", jpegB))
+                    .param("idProducto", "1")
+                    .param("descripcion", "Camiseta Nueva B")
+                    .param("detalle", "Detalle")
+                    .param("precio", "27.00")
+                    .param("categoria.idCategoria", "1")
+                    .param("activo", "true")
+                    .with(user("admin@fitforge.example").roles("ADMIN"))
+                    .with(csrf()))
+                    .andExpect(redirectedUrl("/admin/productos/listado"))
+                    .andExpect(flash().attribute("tipo", "success"));
+
+            r1Completed.countDown();
+            e2Future.get(15, TimeUnit.SECONDS);
+
+            String img1 = jdbc.queryForObject("SELECT imagen FROM producto WHERE id_producto = 1", String.class);
+            String img2 = jdbc.queryForObject("SELECT imagen FROM producto WHERE id_producto = 2", String.class);
+            assertThat(img1).startsWith("/media/").endsWith(".jpg").isNotEqualTo(sharedA);
+            assertThat(img2).isEqualTo(sharedA);
+            assertThat(filesInUploadRoot()).hasSize(2);
+            mvc.perform(get(img1)).andExpect(status().isOk());
+            mvc.perform(get(sharedA)).andExpect(status().isOk());
+        } finally {
+            categoryActivated.countDown();
+            r1Completed.countDown();
+            pool.shutdownNow();
+            assertThat(pool.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+        }
     }
 }

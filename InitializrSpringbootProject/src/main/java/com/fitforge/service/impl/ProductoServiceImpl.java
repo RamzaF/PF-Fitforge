@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fitforge.dao.CategoriaDao;
 import com.fitforge.dao.PedidoInventarioDao;
 import com.fitforge.dao.ProductoDao;
 import com.fitforge.domain.Categoria;
@@ -28,7 +27,6 @@ import com.fitforge.service.TxCompletionTracker;
 public class ProductoServiceImpl implements ProductoService {
 
     @Autowired private ProductoDao productoDao;
-    @Autowired private CategoriaDao categoriaDao;
     @Autowired private PedidoInventarioDao inventario;
     @Autowired private ProductoColorTallaService productoColorTallaService;
     @Autowired private JdbcTemplate jdbc;
@@ -64,7 +62,7 @@ public class ProductoServiceImpl implements ProductoService {
         return productoDao.findById(id).orElse(null);
     }
 
-    private record ValidatedProductInput(String descripcion, String detalle, Categoria categoria) {}
+    private record ValidatedProductInput(String descripcion, String detalle, Long idCategoria) {}
 
     private ValidatedProductInput validarEntradaProducto(Producto producto) {
         if (producto == null) {
@@ -81,9 +79,19 @@ public class ProductoServiceImpl implements ProductoService {
         if (producto.getCategoria() == null || producto.getCategoria().getIdCategoria() == null) {
             throw new IllegalArgumentException("Debe seleccionar una categoría válida.");
         }
-        Categoria categoria = categoriaDao.findById(producto.getCategoria().getIdCategoria())
-                .orElseThrow(() -> new IllegalArgumentException("La categoría seleccionada no existe."));
-        return new ValidatedProductInput(descripcion, detalle, categoria);
+        return new ValidatedProductInput(descripcion, detalle, producto.getCategoria().getIdCategoria());
+    }
+
+    private boolean leerCategoriaActivaVigente(Long idCategoria) {
+        // Locking current read bypasses both REPEATABLE READ snapshots and OSIV L1 cache.
+        List<Boolean> rows = jdbc.query(
+                "SELECT activo FROM categoria WHERE id_categoria = ? FOR SHARE",
+                (rs, n) -> rs.getBoolean(1),
+                idCategoria);
+        if (rows.isEmpty()) {
+            throw new IllegalArgumentException("La categoría seleccionada no existe.");
+        }
+        return Boolean.TRUE.equals(rows.getFirst());
     }
 
     private String ejecutarActualizacionBloqueada(
@@ -91,15 +99,20 @@ public class ProductoServiceImpl implements ProductoService {
         if (inventario.bloquearProducto(producto.getIdProducto()) == null) {
             throw new IllegalArgumentException("Producto no disponible");
         }
-        var current = jdbc.queryForMap(
-                "SELECT id_categoria, imagen FROM producto WHERE id_producto=?",
+        var currentRows = jdbc.query(
+                "SELECT id_categoria, imagen FROM producto WHERE id_producto = ? FOR UPDATE",
+                (rs, n) -> new Object[] {
+                        rs.getObject("id_categoria") == null ? null : rs.getLong("id_categoria"),
+                        rs.getString("imagen")
+                },
                 producto.getIdProducto());
-        Long currentCategoryId = current.get("id_categoria") == null
-                ? null
-                : ((Number) current.get("id_categoria")).longValue();
-        String currentImagen = (String) current.get("imagen");
-        if (!input.categoria().isActivo()
-                && (currentCategoryId == null || !currentCategoryId.equals(input.categoria().getIdCategoria()))) {
+        if (currentRows.isEmpty()) {
+            throw new IllegalArgumentException("Producto no disponible");
+        }
+        Long currentCategoryId = (Long) currentRows.getFirst()[0];
+        String currentImagen = (String) currentRows.getFirst()[1];
+        if (!leerCategoriaActivaVigente(input.idCategoria())
+                && (currentCategoryId == null || !currentCategoryId.equals(input.idCategoria()))) {
             throw new IllegalArgumentException("No podés mover un producto a una categoría inactiva.");
         }
 
@@ -114,7 +127,7 @@ public class ProductoServiceImpl implements ProductoService {
         jdbc.update(
                 "UPDATE producto SET descripcion=?, detalle=?, imagen=?, precio=?, activo=?, id_categoria=? WHERE id_producto=?",
                 input.descripcion(), input.detalle(), imagenFinal, producto.getPrecio(), producto.isActivo(),
-                input.categoria().getIdCategoria(), producto.getIdProducto());
+                input.idCategoria(), producto.getIdProducto());
         Producto managed = em.find(Producto.class, producto.getIdProducto());
         if (managed != null) {
             em.refresh(managed);
@@ -130,12 +143,12 @@ public class ProductoServiceImpl implements ProductoService {
 
         boolean nuevo = producto.getIdProducto() == null || producto.getIdProducto() == 0;
         if (nuevo) {
-            if (!input.categoria().isActivo()) {
+            if (!leerCategoriaActivaVigente(input.idCategoria())) {
                 throw new IllegalArgumentException("La categoría seleccionada está inactiva.");
             }
             var fresh = new Producto(input.descripcion(), input.detalle(), producto.getRutaImagen(),
                     producto.getPrecio(), producto.isActivo());
-            fresh.setCategoria(input.categoria());
+            fresh.setCategoria(em.getReference(Categoria.class, input.idCategoria()));
             productoDao.saveAndFlush(fresh);
             producto.setIdProducto(fresh.getIdProducto());
             producto.setDescripcion(input.descripcion());
