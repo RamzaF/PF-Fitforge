@@ -1,26 +1,15 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="es">
     <head th:replace="~{layout/plantilla :: head}">
         <title th:text="|Detalles de ${producto.descripcion} - FitForge|">Detalles del Producto</title>
     </head>
     <body>
         <header th:replace="~{layout/plantilla :: header}"/>
-        
-        <section class="products-catalog py-5">
-            <div class="container">
-                <div class="row g-4">
-                    <!-- Aside a la izquierda (imágenes) -->
-                    <div class="col-md-4">
-                        <aside th:replace="~{productos/fragmentos :: aside}"/>
-                    </div>
-                    <!-- Detalles del producto a la derecha -->
-                    <div class="col-md-8">
-                        <section th:replace="~{productos/fragmentos :: product-details}"/>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
+        <main id="mainContent" class="main-container" tabindex="-1">
+            <section th:replace="~{productos/fragmentos :: product-details}"/>
+        </main>
         <footer th:replace="~{layout/plantilla :: footer}"/>
         <th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
     </body>

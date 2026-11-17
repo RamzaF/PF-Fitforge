@@ -1,102 +1,96 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="es">
 <head>
     <title>Admin - Productos</title>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
 <body>
-    <!-- Fragmento para el botón de agregar producto -->
-    <div th:fragment="botonAgregar" class="mb-3" sec:authorize="hasRole('ROLE_ADMIN')">
+    <!-- Botón para abrir modal de nuevo producto -->
+    <div th:fragment="botonAgregar" sec:authorize="hasRole('ROLE_ADMIN')">
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoProducto">
-            <i class="bi bi-plus-circle"></i> Nuevo Producto
+            <i class="bi bi-plus-circle" aria-hidden="true"></i>
+            <span>Nuevo Producto</span>
         </button>
     </div>
-    
-    <!-- Fragmento para el formulario modal de nuevo producto -->
+
+    <!-- Modal de alta de nuevo producto -->
     <div th:fragment="modalNuevoProducto" class="modal fade" id="modalNuevoProducto" tabindex="-1" aria-labelledby="modalNuevoProductoLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="modalNuevoProductoLabel">Nuevo Producto</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header" style="background-color: var(--ff-dark); color: #ffffff;">
+                    <h2 class="modal-title h5 mb-0" id="modalNuevoProductoLabel">Nuevo Producto</h2>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
                     <form th:action="@{/admin/productos/guardar-producto}" method="post" enctype="multipart/form-data" id="nuevoProductoForm" class="needs-validation" novalidate>
                         <input type="hidden" name="idProducto" th:value="${null}">
-                        
-                        <!-- Área de mensajes de validación -->
-                        <div class="alert alert-danger d-none" id="formErrorMessages">
-                            <strong>Por favor corrige los siguientes errores:</strong>
-                            <ul id="errorList"></ul>
+
+                        <div class="alert alert-danger d-none" id="formErrorMessages" role="alert">
+                            <strong>Por favor corregí los siguientes campos:</strong>
+                            <ul id="errorList" class="mb-0"></ul>
                         </div>
-                        
-                        <div class="row mb-3">
+
+                        <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label for="descripcion" class="form-label">Descripción <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="descripcion" name="descripcion" required 
-                                       minlength="3" maxlength="100">
+                                <label for="descripcion" class="form-label">Nombre del Producto <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="descripcion" name="descripcion" required minlength="3" maxlength="100">
                                 <div class="invalid-feedback">
-                                    La descripción es obligatoria y debe tener entre 3 y 100 caracteres.
+                                    El nombre es obligatorio (entre 3 y 100 caracteres).
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <label for="categoria" class="form-label">Categoría <span class="text-danger">*</span></label>
                                 <select class="form-select" id="categoria" name="categoria.idCategoria" required>
                                     <option value="" selected disabled>Seleccionar categoría</option>
-                                    <option th:each="cat : ${categorias}" 
-                                            th:value="${cat.idCategoria}" 
+                                    <option th:each="cat : ${categorias}"
+                                            th:value="${cat.idCategoria}"
                                             th:text="${cat.descripcion}"></option>
                                 </select>
                                 <div class="invalid-feedback">
-                                    Por favor seleccione una categoría.
+                                    Seleccioná una categoría activa.
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="mb-3">
-                            <label for="detalle" class="form-label">Detalle <span class="text-danger">*</span></label>
+                            <label for="detalle" class="form-label">Descripción Detallada <span class="text-danger">*</span></label>
                             <textarea class="form-control" id="detalle" name="detalle" rows="3" required maxlength="1000"></textarea>
                             <div class="form-text"><span id="detalleCharCount">0</span>/1000 caracteres</div>
                         </div>
-                        
-                        <div class="row mb-3">
+
+                        <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label for="precio" class="form-label">Precio <span class="text-danger">*</span></label>
+                                <label for="precio" class="form-label">Precio (₡ CRC) <span class="text-danger">*</span></label>
                                 <div class="input-group has-validation">
                                     <span class="input-group-text">₡</span>
-                                    <input type="number" step="0.01" min="0" class="form-control" id="precio" name="precio" required>
+                                    <input type="number" step="0.01" min="0" class="form-control tabular-nums" id="precio" name="precio" required>
                                     <div class="invalid-feedback">
-                                        Por favor ingrese un precio válido mayor o igual a 0.
+                                        Ingresá un precio válido mayor o igual a 0.
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <label for="imagen" class="form-label">Imagen del Producto</label>
                                 <input type="file" class="form-control" id="imagen" name="archivo" accept="image/png,image/jpeg,.png,.jpg,.jpeg" aria-describedby="newUploadHelp">
-                                <div id="newUploadHelp" class="form-text">Formatos permitidos: PNG, JPG/JPEG. Máximo 5 MB.</div>
-                                <div class="invalid-feedback">
-                                    Formato de imagen no válido o tamaño excesivo.
-                                </div>
+                                <div id="newUploadHelp" class="form-text">PNG o JPG/JPEG, máximo 5 MB.</div>
                                 <div id="imagePreview" class="mt-2 d-none">
-                                    <img th:src="@{/uploads/FitForge.png}" alt="Vista previa" class="img-thumbnail" style="max-height: 150px;">
+                                    <img th:src="@{/uploads/FitForge.png}" alt="Vista previa" class="img-thumbnail" style="max-height: 120px;">
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="form-check mb-3">
+
+                        <div class="form-check form-switch mb-3">
                             <input class="form-check-input" type="checkbox" value="true" id="activo" name="activo" checked>
-                            <label class="form-check-label" for="activo">
-                                Producto activo
-                            </label>
+                            <label class="form-check-label" for="activo">Producto activo</label>
                         </div>
-                        
-                        <!-- Inventario inicial al crear producto (opcional) -->
-                        <div class="mb-3">
-                            <h5>Variante Inicial (Opcional)</h5>
-                            <div class="row">
+
+                        <div class="p-3 rounded border mb-3" style="background-color: var(--ff-surface-subtle);">
+                            <h3 class="h6 fw-bold mb-2">Variante Inicial (Opcional)</h3>
+                            <div class="row g-2">
                                 <div class="col-md-4">
                                     <label for="colorNuevo" class="form-label">Color</label>
                                     <select class="form-select" id="colorNuevo" name="color.idColor">
@@ -117,392 +111,165 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label for="existenciasNueva" class="form-label">Existencias</label>
-                                    <input type="number" class="form-control" id="existenciasNueva" name="existencias" min="0" value="0">
+                                    <input type="number" class="form-control tabular-nums" id="existenciasNueva" name="existencias" min="0" value="0">
                                 </div>
                             </div>
-                            <div class="form-text">Si elegís color y talla, se creará la variante inicial en la misma transacción.</div>
+                            <div class="form-text mt-1">Si seleccionás color y talla, se creará la primera variante junto con el producto.</div>
                         </div>
-                        
-                        <div class="d-flex justify-content-end">
-                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
                             <button type="submit" class="btn btn-primary">Guardar Producto</button>
                         </div>
                     </form>
-                    
+
                     <script>
                     document.addEventListener('DOMContentLoaded', function() {
-                        // Validación del formulario
                         const form = document.getElementById('nuevoProductoForm');
                         const errorMessages = document.getElementById('formErrorMessages');
                         const errorList = document.getElementById('errorList');
-                        
-                        // Preview de imagen
                         const imageInput = document.getElementById('imagen');
                         const imagePreview = document.getElementById('imagePreview');
-                        const previewImg = imagePreview.querySelector('img');
-                        
-                        // Contador de caracteres para el detalle
+                        const previewImg = imagePreview ? imagePreview.querySelector('img') : null;
                         const detalleTextarea = document.getElementById('detalle');
                         const charCount = document.getElementById('detalleCharCount');
-                        
-                        // Actualizar contador de caracteres
-                        detalleTextarea.addEventListener('input', function() {
-                            charCount.textContent = this.value.length;
-                        });
-                        
-                        // Previsualización de imagen
-                        imageInput.addEventListener('change', function() {
-                            if (this.files && this.files[0]) {
-                                const file = this.files[0];
-                                // Validar tamaño (máximo 5MB)
-                                if (file.size > 5 * 1024 * 1024) {
-                                    this.value = '';
-                                    alert('La imagen no debe superar los 5MB.');
+
+                        if (detalleTextarea && charCount) {
+                            detalleTextarea.addEventListener('input', function() {
+                                charCount.textContent = this.value.length;
+                            });
+                        }
+
+                        if (imageInput && imagePreview && previewImg) {
+                            imageInput.addEventListener('change', function() {
+                                if (this.files && this.files[0]) {
+                                    const file = this.files[0];
+                                    if (file.size > 5 * 1024 * 1024) {
+                                        this.value = '';
+                                        imagePreview.classList.add('d-none');
+                                        return;
+                                    }
+                                    const reader = new FileReader();
+                                    reader.onload = function(e) {
+                                        previewImg.src = e.target.result;
+                                        imagePreview.classList.remove('d-none');
+                                    };
+                                    reader.readAsDataURL(file);
+                                } else {
                                     imagePreview.classList.add('d-none');
-                                    return;
                                 }
-                                
-                                const reader = new FileReader();
-                                reader.onload = function(e) {
-                                    previewImg.src = e.target.result;
-                                    imagePreview.classList.remove('d-none');
-                                }
-                                reader.readAsDataURL(file);
-                            } else {
-                                imagePreview.classList.add('d-none');
-                            }
-                        });
-                        
-                        // Validación al enviar el formulario
-                        form.addEventListener('submit', function(event) {
-                            if (!form.checkValidity()) {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                
-                                // Mostrar mensajes de error específicos
-                                errorList.innerHTML = '';
-                                const invalidInputs = form.querySelectorAll(':invalid');
-                                
-                                if (invalidInputs.length > 0) {
-                                    errorMessages.classList.remove('d-none');
-                                    invalidInputs.forEach(input => {
-                                        if (input.id) {
-                                            const label = form.querySelector(`label[for="${input.id}"]`);
-                                            const labelText = label ? label.textContent.trim() : input.name;
-                                            const li = document.createElement('li');
-                                            li.textContent = `${labelText} es un campo obligatorio.`;
-                                            errorList.appendChild(li);
+                            });
+                        }
+
+                        if (form) {
+                            form.addEventListener('submit', function(event) {
+                                if (!form.checkValidity()) {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    if (errorList && errorMessages) {
+                                        errorList.innerHTML = '';
+                                        const invalidInputs = form.querySelectorAll(':invalid');
+                                        if (invalidInputs.length > 0) {
+                                            errorMessages.classList.remove('d-none');
+                                            invalidInputs.forEach(input => {
+                                                if (input.id) {
+                                                    const label = form.querySelector(`label[for="${input.id}"]`);
+                                                    const labelText = label ? label.textContent.trim() : input.name;
+                                                    const li = document.createElement('li');
+                                                    li.textContent = `${labelText} es obligatorio.`;
+                                                    errorList.appendChild(li);
+                                                }
+                                            });
                                         }
-                                    });
+                                    }
+                                } else if (errorMessages) {
+                                    errorMessages.classList.add('d-none');
                                 }
-                            } else {
-                                errorMessages.classList.add('d-none');
-                            }
-                            
-                            form.classList.add('was-validated');
-                        });
+                                form.classList.add('was-validated');
+                            });
+                        }
                     });
                     </script>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Fragmento para la tabla de listado de productos -->
-    <div th:fragment="listadoProductos" sec:authorize="hasRole('ROLE_ADMIN')">
-        <div class="card">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0">Gestión de Productos</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th scope="col">ID</th>
-                                <th scope="col">Imagen</th>
-                                <th scope="col">Descripción</th>
-                                <th scope="col">Categoría</th>
-                                <th scope="col">Precio</th>
-                                <th scope="col">Estado</th>
-                                <th scope="col">Inventario</th>
-                                <th scope="col">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:if="${productos.empty}">
-                                <td colspan="8" class="text-center">No hay productos registrados</td>
-                            </tr>
-                            <tr th:each="producto : ${productos}">
-                                <td th:text="${producto.idProducto}"></td>
-                                <td>
-                                    <img th:if="${!#strings.isEmpty(producto.imagen)}" th:src="@{${producto.imagen}}" alt="Imagen de producto" class="img-thumbnail" style="max-width: 50px;">
-                                    <span th:unless="${!#strings.isEmpty(producto.imagen)}" class="badge bg-secondary">Sin imagen</span>
-                                </td>
-                                <td th:text="${producto.descripcion}"></td>
-                                <td th:text="${producto.categoria != null ? producto.categoria.descripcion : 'Sin categoría'}"></td>
-                                <td>₡<span th:text="${#numbers.formatDecimal(producto.precio, 0, 'COMMA', 2, 'POINT')}"></span></td>
-                                <td>
-                                    <span th:if="${producto.activo}" class="badge bg-success">Activo</span>
-                                    <span th:unless="${producto.activo}" class="badge bg-danger">Inactivo</span>
-                                </td>
-                                <td th:text="${producto.existencias}"></td>
-                                <td>
-                                    <div class="d-inline-flex gap-1">
-                                        <a th:href="@{/admin/productos/editar/} + ${producto.idProducto}" class="btn btn-sm btn-outline-primary" title="Editar producto y variantes">
-                                            <i class="bi bi-pencil-square"></i> Editar
-                                        </a>
-                                        <a th:href="@{/admin/productos/inventario/} + ${producto.idProducto}" class="btn btn-sm btn-outline-dark" title="Gestionar inventario y bitácora">
-                                            <i class="bi bi-boxes"></i> Inventario
-                                        </a>
-                                        <form th:action="@{/admin/productos/estado}" method="post" class="d-inline">
-                                            <input type="hidden" name="idProducto" th:value="${producto.idProducto}" />
-                                            <input type="hidden" name="activo" th:value="${!producto.activo}" />
-                                            <button type="submit"
-                                                    th:class="${producto.activo} ? 'btn btn-sm btn-outline-warning' : 'btn btn-sm btn-outline-success'"
-                                                    th:text="${producto.activo} ? 'Desactivar' : 'Activar'">Estado</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Fragmento para el formulario de edición -->
-    <div th:fragment="formularioEdicion" sec:authorize="hasRole('ROLE_ADMIN')">
-        <div class="card">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0">Editar Producto</h5>
-            </div>
-            <div class="card-body">
-                <form th:action="@{/admin/productos/guardar-producto}" method="post" enctype="multipart/form-data" th:object="${producto}">
-                    <input type="hidden" th:field="*{idProducto}">
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label for="descripcion" class="form-label">Descripción*</label>
-                            <input type="text" class="form-control" id="descripcion" th:field="*{descripcion}" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="categoria" class="form-label">Categoría*</label>
-                            <select class="form-select" id="categoria" name="categoria.idCategoria" required>
-                                <option value="" disabled>Seleccionar categoría</option>
-                                <option th:each="cat : ${categorias}" 
-                                        th:value="${cat.idCategoria}" 
-                                        th:text="${cat.descripcion}"
-                                        th:selected="${producto.categoria != null && producto.categoria.idCategoria == cat.idCategoria}"></option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label for="detalle" class="form-label">Detalle</label>
-                        <textarea class="form-control" id="detalle" th:field="*{detalle}" rows="3"></textarea>
-                    </div>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label for="precio" class="form-label">Precio*</label>
-                            <div class="input-group">
-                                <span class="input-group-text">₡</span>
-                                <input type="number" step="0.01" min="0" class="form-control" id="precio" th:field="*{precio}" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="imagen" class="form-label">Imagen del Producto</label>
-                            <div class="mb-2" th:if="${producto.imagen != null}">
-                                <img th:src="@{${producto.imagen}}" alt="Imagen actual" class="img-thumbnail" style="max-height: 150px;">
-                                <p class="text-muted small">Imagen actual</p>
-                            </div>
-                            <input type="file" class="form-control" id="imagen" name="imagenFile" accept="image/*">
-                            <small class="text-muted">Formatos permitidos: JPG, JPEG, PNG, GIF. Máximo 5MB.</small>
-                            <input type="hidden" th:field="*{imagen}">
-                        </div>
-                    </div>
-                    
-                    <div class="form-check mb-4">
-                        <input class="form-check-input" type="checkbox" th:field="*{activo}">
-                        <label class="form-check-label" for="activo">
-                            Producto activo
-                        </label>
-                    </div>
-                    
-                    <!-- Gestión de inventario en edición de producto -->
-                    <div class="mb-4">
-                        <h5>Inventario por Color y Talla</h5>
-                        <div class="table-responsive mb-3">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Color</th>
-                                        <th>Talla</th>
-                                        <th>Existencias</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="pct, iter : ${producto.productoColorTallas}">
-                                        <td th:text="${pct.color != null ? pct.color.nombreColor : 'N/A'}"></td>
-                                        <td th:text="${pct.talla != null ? pct.talla.nombreTalla : 'N/A'}"></td>
-                                        <td>
-                                            <form th:action="@{/admin/productos/inventario/guardar}" method="post" class="d-flex align-items-center">
-                                                <input type="hidden" name="id" th:value="${pct.idProductoColorTalla}" />
-                                                <input type="hidden" name="producto.idProducto" th:value="${producto.idProducto}" />
-                                                <input type="hidden" name="color.idColor" th:value="${pct.color != null ? pct.color.idColor : ''}" />
-                                                <input type="hidden" name="talla.idTalla" th:value="${pct.talla != null ? pct.talla.idTalla : ''}" />
-                                                <input type="number" name="existencias" th:value="${pct.existencias}" class="form-control form-control-sm me-2" min="0" style="width: 100px;" required />
-                                                <button type="submit" class="btn btn-primary btn-sm">Actualizar</button>
-                                            </form>
-                                        </td>
-                                        <td>
-                                            <form th:action="@{/admin/productos/inventario/eliminar/{id}(id=${pct.idProductoColorTalla})}" onclick="return confirm('¿Está seguro de eliminar esta combinación?')" method="post"><button type="submit" class="btn btn-danger btn-sm">Eliminar</button></form>
-                                        </td>
-                                    </tr>
-                                    <tr th:if="${#lists.isEmpty(producto.productoColorTallas)}">
-                                        <td colspan="4" class="text-center">No hay combinaciones registradas</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <form th:action="@{/admin/productos/inventario/guardar}" method="post" class="row g-3 align-items-end">
-                            <input type="hidden" name="producto.idProducto" th:value="${producto.idProducto}" />
-                            <div class="col-md-4">
-                                <label for="colorNuevo" class="form-label">Color</label>
-                                <select class="form-select" id="colorNuevo" name="color.idColor" required>
-                                    <option value="" selected disabled>Seleccionar color</option>
-                                    <option th:each="color : ${colores}" th:value="${color.idColor}" th:text="${color.nombreColor}"></option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="tallaNueva" class="form-label">Talla</label>
-                                <select class="form-select" id="tallaNueva" name="talla.idTalla" required>
-                                    <option value="" selected disabled>Seleccionar talla</option>
-                                    <option th:each="talla : ${tallas}" th:value="${talla.idTalla}" th:text="${talla.nombreTalla}"></option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="existenciasNueva" class="form-label">Existencias</label>
-                                <input type="number" class="form-control" id="existenciasNueva" name="existencias" min="0" value="0" required>
-                            </div>
-                            <div class="col-md-1">
-                                <button type="submit" class="btn btn-success w-100">Agregar</button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div class="d-flex justify-content-end">
-                        <a th:href="@{/admin/productos/listado}" class="btn btn-secondary me-2">Cancelar</a>
-                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Fragmento para la gestión de inventario -->
-    <div th:fragment="gestionInventario" sec:authorize="hasRole('ROLE_ADMIN')">
-        <div class="card">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0">Gestión de Inventario - <span th:text="${producto.descripcion}"></span></h5>
-            </div>
-            <div class="card-body">
-                <div class="row mb-4">
-                    <!-- Formulario para agregar nueva combinación de inventario -->
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0">Agregar combinación</h5>
-                            </div>
-                            <div class="card-body">
-                                <form th:action="@{/admin/productos/inventario/guardar}" method="post">
-                                    <input type="hidden" name="producto.idProducto" th:value="${producto.idProducto}">
-                                    
-                                    <div class="mb-3">
-                                        <label for="color" class="form-label">Color</label>
-                                        <select class="form-select" id="color" name="color.idColor" required>
-                                            <option value="" selected disabled>Seleccionar color</option>
-                                            <option th:each="color : ${colores}" 
-                                                   th:value="${color.idColor}" 
-                                                   th:text="${color.descripcion}"></option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label for="talla" class="form-label">Talla</label>
-                                        <select class="form-select" id="talla" name="talla.idTalla" required>
-                                            <option value="" selected disabled>Seleccionar talla</option>
-                                            <option th:each="talla : ${tallas}" 
-                                                   th:value="${talla.idTalla}" 
-                                                   th:text="${talla.descripcion}"></option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label for="existencias" class="form-label">Existencias</label>
-                                        <input type="number" class="form-control" id="existencias" name="existencias" min="0" value="0" required>
-                                    </div>
-                                    
-                                    <button type="submit" class="btn btn-primary w-100">Guardar</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Tabla de combinaciones existentes -->
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header bg-dark text-white">
-                                <h5 class="mb-0">Combinaciones existentes</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Color</th>
-                                                <th>Talla</th>
-                                                <th>Existencias</th>
-                                                <th>Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr th:if="${inventario.empty}">
-                                                <td colspan="4" class="text-center">No hay combinaciones registradas</td>
-                                            </tr>
-                                            <tr th:each="item : ${inventario}">
-                                                <td th:text="${item.color.descripcion}"></td>
-                                                <td th:text="${item.talla.descripcion}"></td>
-                                                <td th:text="${item.existencias}"></td>
-                                                <td>
-                                                    <div class="btn-group">
-                                                        <form th:action="@{/admin/productos/inventario/eliminar/} + ${item.id}"
 
-                                                           onclick="return confirm('¿Está seguro de eliminar esta combinación?');" method="post"><button type="submit" class="btn btn-danger btn-sm">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button></form>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+    <!-- Tabla de listado de productos -->
+    <div th:fragment="listadoProductos" sec:authorize="hasRole('ROLE_ADMIN')">
+        <div class="panel-card">
+            <div class="panel-card__header">
+                <h2 class="panel-card__title">Productos Registrados</h2>
+                <span class="status-badge status-badge--info tabular-nums"
+                      th:text="${#lists.size(productos) + ' registros'}">0 registros</span>
+            </div>
+            <div class="table-wrap">
+                <table class="data-table data-table--stack" aria-label="Listado administrativo de productos">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Imagen</th>
+                            <th scope="col">Producto</th>
+                            <th scope="col">Categoría</th>
+                            <th scope="col">Precio</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Stock Activo</th>
+                            <th scope="col" class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${productos.empty}">
+                            <td colspan="8" class="text-center text-secondary py-4">No hay productos registrados</td>
+                        </tr>
+                        <tr th:each="producto : ${productos}">
+                            <td data-label="ID" class="tabular-nums fw-bold" th:text="${producto.idProducto}">1</td>
+                            <td data-label="Imagen">
+                                <img th:if="${!#strings.isEmpty(producto.imagen)}"
+                                     th:src="@{${producto.imagen}}"
+                                     th:alt="${producto.descripcion}"
+                                     style="width: 44px; height: 44px; object-fit: contain; background: #f2f5f3; border-radius: 6px; padding: 3px; border: 1px solid #d8e0dc;">
+                                <span th:unless="${!#strings.isEmpty(producto.imagen)}" class="status-badge status-badge--neutral">Sin imagen</span>
+                            </td>
+                            <td data-label="Producto">
+                                <div class="fw-bold" th:text="${producto.descripcion}">Nombre</div>
+                                <div class="field-hint text-truncate" style="max-width: 280px;" th:text="${producto.detalle}">Detalle</div>
+                            </td>
+                            <td data-label="Categoría">
+                                <span class="status-badge status-badge--neutral"
+                                      th:text="${producto.categoria != null ? producto.categoria.descripcion : 'Sin categoría'}">Categoría</span>
+                            </td>
+                            <td data-label="Precio" class="price-tag fw-bold">
+                                ₡ <span th:text="${#numbers.formatDecimal(producto.precio, 0, 'COMMA', 2, 'POINT')}">0.00</span>
+                            </td>
+                            <td data-label="Estado">
+                                <span th:if="${producto.activo}" class="status-badge status-badge--success">Activo</span>
+                                <span th:unless="${producto.activo}" class="status-badge status-badge--danger">Inactivo</span>
+                            </td>
+                            <td data-label="Stock Activo" class="tabular-nums fw-bold" th:text="${producto.existencias}">0</td>
+                            <td data-label="Acciones" class="text-end">
+                                <div class="d-inline-flex flex-wrap gap-1 justify-content-end">
+                                    <a th:href="@{/admin/productos/editar/} + ${producto.idProducto}"
+                                       class="btn btn-sm btn-outline-primary"
+                                       title="Editar producto y variantes">
+                                        Editar
+                                    </a>
+                                    <a th:href="@{/admin/productos/inventario/} + ${producto.idProducto}"
+                                       class="btn btn-sm btn-outline-secondary"
+                                       title="Gestionar inventario y bitácora">
+                                        Inventario
+                                    </a>
+                                    <form th:action="@{/admin/productos/estado}" method="post" class="d-inline">
+                                        <input type="hidden" name="idProducto" th:value="${producto.idProducto}" />
+                                        <input type="hidden" name="activo" th:value="${!producto.activo}" />
+                                        <button type="submit"
+                                                th:class="${producto.activo} ? 'btn btn-sm btn-outline-warning' : 'btn btn-sm btn-outline-success'"
+                                                th:text="${producto.activo} ? 'Desactivar' : 'Activar'">Estado</button>
+                                    </form>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="d-flex justify-content-between mt-4">
-                    <a th:href="@{/admin/productos/listado}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Volver al listado
-                    </a>
-                    <a th:href="@{/admin/productos/editar/} + ${producto.idProducto}" class="btn btn-primary">
-                        <i class="bi bi-pencil"></i> Editar producto
-                    </a>
-                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

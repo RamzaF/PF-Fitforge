@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      lang="es">
     <head th:replace="~{layout/plantilla :: head}">
-        <title>Categoría</title>
+        <title>Categoría - FitForge</title>
     </head>
     <body>
         <header th:replace="~{layout/plantilla :: header}"></header>
-
-        <section th:replace="~{categoria/fragmentos :: listado-categoria}"></section>
-
+        <main id="mainContent" class="main-container" tabindex="-1">
+            <section th:replace="~{categoria/fragmentos :: listado-categoria}"></section>
+        </main>
         <footer th:replace="~{layout/plantilla :: footer}"></footer>
-        <!-- Incluir scripts -->
         <th:block th:replace="~{layout/plantilla :: scripts}"/>
     </body>
 </html>

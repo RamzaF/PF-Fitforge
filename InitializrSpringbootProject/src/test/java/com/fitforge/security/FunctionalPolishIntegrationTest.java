@@ -130,4 +130,50 @@ class FunctionalPolishIntegrationTest {
                 .andExpect(status().isForbidden());
         }
     }
+
+    @Test void argonRefinementAppliesProgressiveCatalogAndUnifiedAdminCrudNavigation() throws Exception {
+        var css = page("/css/estilos.css");
+        assertThat(css).contains("--ff-primary: #117a42", "--ff-teal: #0e6b78", "prefers-reduced-motion: reduce");
+
+        var homeHtml = page("/");
+        assertThat(homeHtml).contains("class=\"skip-link\"", "class=\"demo-banner\"", "Camiseta deportiva")
+            .doesNotContain("Camiseta de la colección deportiva");
+
+        var storeHtml = page("/tienda/listado");
+        assertThat(storeHtml).contains("class=\"skip-link\"", "class=\"demo-banner\"", "id=\"botonAbrirModal\"",
+                "data-testid=\"catalog-product-card\"", "Camiseta deportiva", "Disponible")
+            .doesNotContain("Camiseta de la colección deportiva");
+
+        var detailHtml = page("/productos/1");
+        assertThat(detailHtml).contains("Camiseta deportiva", "Camiseta de la colección deportiva",
+                "id=\"variante\"", "Stock: 5", "data-testid=\"variant-pill\"");
+        assertThat(detailHtml.split("data-testid=\"detail-main-image\"", -1)).hasSize(2);
+
+        var clientOrdersHtml = mvc.perform(get("/pedidos").with(user("cliente@fitforge.example").roles("USER")))
+            .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertThat(clientOrdersHtml).contains("Mis pedidos").doesNotContain("class=\"admin-shell-bar\"");
+
+        for (String adminPath : new String[]{
+                "/admin",
+                "/admin/productos/listado",
+                "/admin/productos/editar/1",
+                "/admin/productos/inventario/1",
+                "/admin/categorias/listado",
+                "/admin/colores/listado",
+                "/admin/tallas/listado",
+                "/admin/inventario",
+                "/admin/pedidos"
+        }) {
+            var adminHtml = mvc.perform(get(adminPath).with(user("admin@fitforge.example").roles("ADMIN")))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            assertThat(adminHtml).as("Admin shell on " + adminPath)
+                .contains("class=\"admin-shell-bar\"",
+                        "href=\"/admin/productos/listado\"",
+                        "href=\"/admin/categorias/listado\"",
+                        "href=\"/admin/colores/listado\"",
+                        "href=\"/admin/tallas/listado\"",
+                        "href=\"/admin/inventario\"",
+                        "href=\"/admin/pedidos\"");
+        }
+    }
 }

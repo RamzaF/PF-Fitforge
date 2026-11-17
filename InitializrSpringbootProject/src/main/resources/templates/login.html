@@ -1,51 +1,31 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"
+      lang="es">
     <head th:replace="~{layout/plantilla :: head}">
-        <title>Login - FitForge</title>
+        <title>Iniciar Sesión - FitForge</title>
     </head>
     <body>
-        <!-- Header -->
         <header th:replace="~{layout/plantilla :: header}"/>
 
-        <!-- Mensajes -->
-        <div th:if="${param.registerSuccess}" class="alert alert-success text-center">
-            ¡Registro exitoso! Por favor, inicia sesión.
-        </div>
-        <div th:if="${param.error}" role="alert" class="alert alert-danger text-center">
-            Correo o contraseña incorrectos.
-        </div>
-        <div th:if="${param.logout}" class="alert alert-info text-center">
-            Has cerrado sesión correctamente.
-        </div>
-        
-        <!-- Hero Section -->
-        <section class="position-relative hero-section">
-            <!-- Imagen de fondo con overlay para mejor contraste -->
-            <div class="hero-bg position-absolute top-0 start-0 w-100" style="min-height: 50vh;">
-                <div class="overlay-dark position-absolute top-0 start-0 w-100 h-100"></div>
-                <img th:src="@{/Uploads/Banner.PNG}" alt="Background" class="w-100 h-100 object-fit-cover position-absolute top-0 start-0">
-            </div>
-            <!-- Hero con animación y colores de marca -->
-            <div class="position-relative hero-content d-flex align-items-center justify-content-center w-100" style="min-height: 50vh;">
-                <div class="container text-center text-white py-5">
-                    <div class="row justify-content-center">
-                        <div class="col-12 col-md-10 col-lg-8">
-                            <h1 class="display-2 fw-bold mb-3 fade-in">INICIAR SESIÓN</h1>
-                            <p class="lead fs-3 mb-4 slide-up">Accede a tu cuenta FitForge y comienza tu experiencia</p>
-                        </div>
+        <main id="mainContent" class="main-container" tabindex="-1">
+            <div class="row justify-content-center py-3">
+                <div class="col-md-6 col-lg-5">
+                    <div th:if="${param.registerSuccess}" class="alert alert-success" role="status">
+                        ¡Registro exitoso! Por favor, inicia sesión.
                     </div>
-                </div>
-            </div>
-        </section>
+                    <div th:if="${param.error}" role="alert" class="alert alert-danger">
+                        Correo o contraseña incorrectos.
+                    </div>
+                    <div th:if="${param.logout}" class="alert alert-info" role="status">
+                        Has cerrado sesión correctamente.
+                    </div>
 
-        <!-- Sección de login -->
-        <section class="py-5" style="background-color: #D9D9D9; min-height: 100%;">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-6 col-lg-5">
-                        <div class="card shadow-sm p-4 bg-white rounded">
-                            <h2 class="text-center fw-bold mb-4">Ingresa tus datos</h2>
+                    <div class="panel-card">
+                        <div class="panel-card__header">
+                            <h1 class="panel-card__title h4 mb-0">Iniciar Sesión</h1>
+                        </div>
+                        <div class="panel-card__body">
                             <form th:action="@{/login}" method="post">
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Correo Electrónico</label>
@@ -55,19 +35,20 @@
                                     <label for="password" class="form-label">Contraseña</label>
                                     <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
                                 </div>
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <a href="/forgot-password" class="text-primary text-decoration-none">¿Olvidaste tu contraseña?</a>
+                                <div class="d-flex justify-content-between align-items-center mb-3 small">
+                                    <a href="/forgot-password" class="text-primary text-decoration-none fw-semibold">¿Olvidaste tu contraseña?</a>
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100 fw-bold">Iniciar Sesión</button>
+                                <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
                             </form>
-                            <p class="text-center mt-3">¿No tienes cuenta? <a href="/register" class="text-primary text-decoration-none">Regístrate aquí</a></p>
+                            <p class="text-center small mt-3 mb-0">
+                                ¿No tienes cuenta? <a href="/register" class="text-primary text-decoration-none fw-semibold">Regístrate aquí</a>
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
-        </section> 
+        </main>
 
-        <!-- Footer -->
         <footer th:replace="~{layout/plantilla :: footer}"/>
         <th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
     </body>

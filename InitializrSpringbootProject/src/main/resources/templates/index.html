@@ -1,80 +1,70 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="es">
     <head th:replace="~{layout/plantilla :: head}">
-        <title>FitForge - Forjando tu estilo</title>
-        <meta name="description" content="La mejor tienda de ropa deportiva para tus entrenamientos">
+        <title>FitForge — Tienda Deportiva</title>
     </head>
     <body>
         <header th:replace="~{layout/plantilla :: header}"/>
-        
-        <!-- Banner principal con animación -->
-        <section class="hero-banner">
-            <div class="container-fluid p-0">
-                <div th:replace="~{Home/fragmentos :: hero-section}"></div>
-            </div>
-        </section>
-        
-        <!-- Catálogo de productos -->
-        <section class="products-catalog py-5">
-            <div class="container">
-                <h2 class="text-center mb-5 fw-bold section-title">Nuestra Colección</h2>
-                <div th:if="${#lists.isEmpty(productos)}" class="text-center text-muted py-4">
-                    <p class="mb-2">Aún no hay productos disponibles en el catálogo.</p>
+
+        <section th:replace="~{Home/fragmentos :: hero-section}"></section>
+
+        <main id="mainContent" class="main-container" tabindex="-1">
+            <div class="store-header-bar">
+                <div>
+                    <h2 class="store-header-bar__title">Nuestra Colección</h2>
+                    <p class="store-header-bar__subtitle">
+                        Artículos activos en tienda con disponibilidad verificada por variante.
+                    </p>
                 </div>
-                <div class="row g-4" th:unless="${#lists.isEmpty(productos)}">
-                    <!-- Tarjeta de producto -->
-                    <div class="col-md-4 mb-4" th:each="producto : ${productos}">
-                        <div class="card h-100 border-0 shadow product-card">
-                            <div class="overflow-hidden">
-                                <img th:src="${!#strings.isEmpty(producto.imagen)} ? @{${producto.imagen}} : @{/uploads/FitForge.png}"
-                                     class="card-img-top product-img" th:alt="${producto.descripcion}">
-                            </div>
-                            <div class="card-body text-center">
-                                <h5 class="card-title fw-bold" th:text="${producto.descripcion}">Descripción Producto</h5>
-                                <p class="card-text text-muted" th:text="${producto.detalle}">Detalle del producto</p>
-                            </div>
-                            <div class="card-footer bg-white border-0 text-center">
-                                <p class="h4 text-primary fw-bold mb-3" th:text="'₡ ' + ${producto.precio}">₡ Precio</p>
-                                <a th:href="@{'/productos/' + ${producto.idProducto}}" class="btn btn-outline-primary w-100 product-btn">Ver detalles</a>
-                            </div>
+                <a href="/tienda/listado" class="btn btn-outline-primary btn-sm">Ir al catálogo completo →</a>
+            </div>
+
+            <div th:if="${#lists.isEmpty(productos)}" class="empty-state">
+                <p class="mb-2 text-secondary">Aún no hay productos disponibles en el catálogo.</p>
+                <a href="/tienda/listado" class="btn btn-primary btn-sm">Explorar tienda</a>
+            </div>
+
+            <div class="product-grid" th:unless="${#lists.isEmpty(productos)}">
+                <article class="product-card"
+                         data-testid="catalog-product-card"
+                         th:each="producto : ${productos}">
+                    <div class="product-card__media">
+                        <div class="product-card__top-badges">
+                            <span th:if="${producto.existencias > 0}" class="status-badge status-badge--success">Disponible</span>
+                            <span th:if="${producto.existencias <= 0}" class="status-badge status-badge--danger">Agotado</span>
+                        </div>
+                        <img th:src="${!#strings.isEmpty(producto.imagen)} ? @{${producto.imagen}} : @{/uploads/FitForge.png}"
+                             class="product-card__img"
+                             th:alt="${producto.descripcion}"
+                             loading="lazy">
+                    </div>
+                    <div class="product-card__body">
+                        <div>
+                            <div class="product-card__category"
+                                 th:text="${producto.categoria != null ? producto.categoria.descripcion : 'Catálogo'}">Categoría</div>
+                            <h3 class="product-card__title" th:text="${producto.descripcion}">Producto</h3>
+                        </div>
+                        <div class="product-card__footer">
+                            <span class="product-card__price price-tag"
+                                  th:text="'₡ ' + ${#numbers.formatDecimal(producto.precio, 0, 'COMMA', 2, 'POINT')}">₡ 0.00</span>
+                            <a th:href="@{'/productos/' + ${producto.idProducto}}"
+                               class="btn btn-primary btn-sm">Ver detalles</a>
                         </div>
                     </div>
-                </div>
+                </article>
             </div>
-        </section>
-        
-        <!-- Call to Action Banner -->
-        <div th:replace="~{Home/fragmentos :: cta-banner}"></div>
-        
-        <!-- Sección de marcas -->
-        <section class="brands-section py-5">
+        </main>
+
+        <section class="brands-section">
             <div class="container">
-                <h2 class="text-center mb-5 fw-bold section-title">Nuestras Marcas</h2>
                 <div th:replace="~{Home/fragmentos :: brands-section}"></div>
             </div>
         </section>
-        
-        <!-- Banner promocional - oculto para administradores -->
-        <section class="promo-banner py-5 text-white text-center" sec:authorize="!hasRole('ROLE_ADMIN')">
-            <div class="container py-4">
-                <h2 class="display-5 fw-bold mb-3">OBTÉN 20% DE DESCUENTO</h2>
-                <p class="lead fs-4 mb-4">En tu primera compra al registrarte en nuestra tienda</p>
-                <!-- Para usuarios anónimos -->
-                <div sec:authorize="isAnonymous()">
-                    <a href="/register" class="btn btn-light btn-lg px-4 py-2 shadow-sm fw-bold">REGÍSTRATE AHORA</a>
-                </div>
-                <!-- Para usuarios autenticados no admin -->
-                <div sec:authorize="isAuthenticated() and !hasRole('ADMIN')">
-                    <p class="lead">¡Bienvenido de nuevo!</p>
-                    <form th:action="@{/logout}" method="post"><button type="submit" class="btn btn-light">Cerrar Sesión</button></form>
-                </div>
-            </div>
-        </section>
-        
+
         <footer th:replace="~{layout/plantilla :: footer}"/>
-        <!-- Incluir scripts -->
         <th:block th:replace="~{layout/plantilla :: scripts}"/>
     </body>
 </html>

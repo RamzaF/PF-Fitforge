@@ -1,166 +1,42 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      lang="es">
     <head th:replace="~{layout/plantilla :: head}">
-        <title>Fitforge</title>
-        <link rel="stylesheet" th:href="@{/css/estilos.css}" />
+        <title>FitForge — Catálogo</title>
     </head>
     <body>
-        <!-- Hero Section (de la versión anterior) -->
-        <div class="hero-section position-relative" th:fragment="hero-section">
-            <!-- Imagen de fondo con overlay para mejor contraste -->
-            <div class="position-absolute top-0 start-0 w-100 h-100 hero-bg">
-                <div class="overlay-dark"></div>
-                <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-4.0.3&auto=format&fit=crop&w=1770&q=80" 
-                     alt="Background" class="w-100 h-100 object-fit-cover">
-            </div>
-            <!-- Hero con animación y colores de marca -->
-            <div class="position-relative hero-content d-flex align-items-center justify-content-center w-100">
-                <div class="container text-center text-white py-hero">
-                    <div class="row justify-content-center">
-                        <div class="col-12 col-md-10 col-lg-8">
-                            <h1 class="display-2 fw-bold mb-3 fade-in">FITFORGE</h1>
-                            <p class="lead fs-3 mb-4 slide-up">Forjando tu estilo Fitness</p>
-                            <a href="/tienda/listado" class="btn btn-accent btn-lg px-4 py-2 fw-bold slide-up-delay">COMPRAR AHORA</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Image Section: Productos destacados (de la versión anterior) -->
-        <div th:fragment="image-section">
-            <div class="row g-4">
-                <!-- Destacado 1 -->
-                <div class="col-md-4">
-                    <div class="card border-0 shadow product-card h-100">
-                        <div class="overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1065&q=80" 
-                                 alt="Ropa Deportiva" class="card-img-top product-img">
-                        </div>
-                        <div class="card-body text-center">
-                            <h4 class="fw-bold">Colección Running</h4>
-                            <p class="card-text text-muted">Máximo rendimiento en cada carrera</p>
-                            <a href="/categoria/running" class="btn btn-brand-primary mt-3">Ver colección</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Destacado 2 -->
-                <div class="col-md-4">
-                    <div class="card border-0 shadow product-card h-100">
-                        <div class="overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1616279967983-ec413476e824?ixlib=rb-4.0.3&auto=format&fit=crop&w=986&q=80" 
-                                 alt="Equipamiento" class="card-img-top product-img">
-                        </div>
-                        <div class="card-body text-center">
-                            <h4 class="fw-bold">Equipamiento Pro</h4>
-                            <p class="card-text text-muted">Calidad premium para tu entrenamiento</p>
-                            <a href="/categoria/equipamiento" class="btn btn-brand-primary mt-3">Ver colección</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Destacado 3 -->
-                <div class="col-md-4">
-                    <div class="card border-0 shadow product-card h-100">
-                        <div class="overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1064&q=80" 
-                                 alt="Yoga" class="card-img-top product-img">
-                        </div>
-                        <div class="card-body text-center">
-                            <h4 class="fw-bold">Yoga & Fitness</h4>
-                            <p class="card-text text-muted">Comodidad y estilo para tu práctica</p>
-                            <a href="/categoria/yoga" class="btn btn-brand-primary mt-3">Ver colección</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Categorías circulares (de la versión anterior) -->
-        <div th:fragment="category-circles" class="py-5">
+        <!-- Hero compacto reutilizable -->
+        <div class="hero-banner-compact" th:fragment="hero-section">
             <div class="container">
-                <h2 class="text-center mb-5 fw-bold section-title">Explora por Categorías</h2>
-                <div class="row g-4 justify-content-center">
-                    <!-- Círculo: Hombre -->
-                    <div class="col-6 col-md-4 col-lg-2 text-center category-item">
-                        <a href="/categoria/hombre" class="text-decoration-none">
-                            <div class="circle-image rounded-circle overflow-hidden d-inline-block mb-3 zoom-effect">
-                                <img src="https://images.unsplash.com/photo-1594381898411-846e7d193883?ixlib=rb-4.0.3&auto=format&fit=crop&w=987&q=80" 
-                                     alt="Hombre" class="img-fluid"/>
-                            </div>
-                            <h5 class="fw-bold category-title">Hombre</h5>
-                        </a>
-                    </div>
-
-                    <!-- Círculo: Mujer -->
-                    <div class="col-6 col-md-4 col-lg-2 text-center category-item">
-                        <a href="/categoria/mujer" class="text-decoration-none">
-                            <div class="circle-image rounded-circle overflow-hidden d-inline-block mb-3 zoom-effect">
-                                <img src="https://images.unsplash.com/photo-1517477804520-40025249bc47?ixlib=rb-4.0.3&auto=format&fit=crop&w=987&q=80" 
-                                     alt="Mujer" class="img-fluid"/>
-                            </div>
-                            <h5 class="fw-bold category-title">Mujer</h5>
-                        </a>
-                    </div>
-
-                    <!-- Círculo: Accesorios -->
-                    <div class="col-6 col-md-4 col-lg-2 text-center category-item">
-                        <a href="/categoria/accesorios" class="text-decoration-none">
-                            <div class="circle-image rounded-circle overflow-hidden d-inline-block mb-3 zoom-effect">
-                                <img src="https://images.unsplash.com/photo-1511556532299-8f662fc26c06?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80" 
-                                     alt="Accesorios" class="img-fluid"/>
-                            </div>
-                            <h5 class="fw-bold category-title">Accesorios</h5>
-                        </a>
-                    </div>
-
-                    <!-- Círculo: Calzado -->
-                    <div class="col-6 col-md-4 col-lg-2 text-center category-item">
-                        <a href="/categoria/calzado" class="text-decoration-none">
-                            <div class="circle-image rounded-circle overflow-hidden d-inline-block mb-3 zoom-effect">
-                                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80" 
-                                     alt="Calzado" class="img-fluid"/>
-                            </div>
-                            <h5 class="fw-bold category-title">Calzado</h5>
-                        </a>
-                    </div>
-
-                    <!-- Círculo: Ofertas -->
-                    <div class="col-6 col-md-4 col-lg-2 text-center category-item">
-                        <a href="/categoria/ofertas" class="text-decoration-none">
-                            <div class="circle-image rounded-circle overflow-hidden d-inline-block mb-3 zoom-effect">
-                                <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80" 
-                                     alt="Ofertas" class="img-fluid"/>
-                            </div>
-                            <h5 class="fw-bold category-title">Ofertas</h5>
-                        </a>
-                    </div>
-                </div>
+                <h1 class="hero-banner-compact__title">Entrená con equipamiento de alto desempeño</h1>
+                <p class="hero-banner-compact__lead">
+                    Indumentaria deportiva, suplementación y accesorios con disponibilidad por variante.
+                </p>
+                <a href="/tienda/listado" class="btn btn-primary">Ver catálogo</a>
             </div>
         </div>
 
-        <!-- Marcas (de la versión anterior) -->
+        <!-- Franja de marcas -->
         <div th:fragment="brands-section" class="brands-container">
-            <div class="row align-items-center justify-content-center">
-                <div class="col-6 col-md-3 col-lg-2 text-center mb-4">
+            <div class="row align-items-center justify-content-center g-3">
+                <div class="col-6 col-md-3 text-center">
                     <div class="brand-logo">
                         <img th:src="@{/uploads/gymshark-limited-logo.png}" alt="Gymshark" class="img-fluid">
                     </div>
                 </div>
-                <div class="col-6 col-md-3 col-lg-2 text-center mb-4">
+                <div class="col-6 col-md-3 text-center">
                     <div class="brand-logo">
-                        <img th:src="@{/uploads/Youngla-Logo-Png-Vector.jpg}" alt="Youngla" class="img-fluid">
+                        <img th:src="@{/uploads/Youngla-Logo-Png-Vector.jpg}" alt="YoungLA" class="img-fluid">
                     </div>
                 </div>
-                <div class="col-6 col-md-3 col-lg-2 text-center mb-4">
+                <div class="col-6 col-md-3 text-center">
                     <div class="brand-logo">
                         <img th:src="@{/uploads/Pursue Fitness.jpeg}" alt="Pursue Fitness" class="img-fluid">
                     </div>
                 </div>
-                <div class="col-6 col-md-3 col-lg-2 text-center mb-4">
+                <div class="col-6 col-md-3 text-center">
                     <div class="brand-logo">
                         <img th:src="@{/uploads/Logo-black2_copy_110x.webp}" alt="Lazuli Label" class="img-fluid">
                     </div>
@@ -168,162 +44,194 @@
             </div>
         </div>
 
-        <!-- Call to Action (de la versión anterior) -->
-        <div th:fragment="cta-banner" class="cta-banner py-5 text-center" sec:authorize="!hasRole('ROLE_ADMIN')">
-            <div class="container py-4">
-                <h2 class="display-6 fw-bold mb-3 text-white">ENTRENA CON ESTILO</h2>
-                <p class="lead mb-4 text-white">Descubre nuestra nueva colección diseñada para maximizar tu rendimiento</p>
-                <a href="/tienda/listado" class="btn btn-light-accent btn-lg px-5 py-2">Explorar Ahora</a>
-            </div>
-        </div>
-
-        <!-- Tienda Productos (de la versión actual) -->
-        <section th:fragment="tienda-productos" class="pb-5">
-            <!-- Botón de filtro con activación de modal y barra de búsqueda -->
-            <div class="container mt-4 mb-4">
-                <div class="row justify-content-center align-items-center">
-                    <div class="col-md-4 text-center">
-                        <button class="btn btn-outline-secondary d-flex align-items-center mx-auto" 
-                                data-bs-toggle="modal" data-bs-target="#filtroModal">
-                            <i class="bi bi-funnel me-2"></i>
-                            <span>Filtros</span>
-                        </button>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="search-bar">
-                            <form th:action="@{/tienda/buscar}" method="get" class="d-flex">
-                                <input type="text" class="form-control" name="termino" aria-label="Buscar productos"
-                                       placeholder="Buscar productos..." th:value="${terminoBusqueda}">
-                                <button type="submit" aria-label="Buscar" class="btn btn-accent ms-2">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+        <!-- Catálogo principal de la tienda -->
+        <section th:fragment="tienda-productos" aria-labelledby="headingCatalogoTienda">
+            <div class="store-header-bar">
+                <div>
+                    <h1 id="headingCatalogoTienda" class="store-header-bar__title">Catálogo de Productos</h1>
+                    <p class="store-header-bar__subtitle">
+                        Consultá precios y disponibilidad; abrí cada producto para elegir talla, color y ver su descripción.
+                    </p>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="status-badge status-badge--info tabular-nums"
+                          th:text="${#lists.size(productos) + ' artículos'}">0 artículos</span>
                 </div>
             </div>
 
-            <!-- Modal de filtros -->
+            <!-- Barra compacta de búsqueda y filtrado -->
+            <div class="catalog-toolbar" role="search" aria-label="Buscar y filtrar productos">
+                <div class="catalog-toolbar__top">
+                    <form th:action="@{/tienda/buscar}" method="get" class="catalog-search-form">
+                        <input type="text"
+                               class="form-control"
+                               name="termino"
+                               aria-label="Buscar productos"
+                               placeholder="Buscar por nombre o categoría..."
+                               th:value="${terminoBusqueda}">
+                        <button type="submit" aria-label="Buscar" class="btn btn-primary">
+                            <i class="bi bi-search" aria-hidden="true"></i>
+                            <span>Buscar</span>
+                        </button>
+                    </form>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button"
+                                id="botonAbrirModal"
+                                class="btn btn-outline-secondary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#filtroModal">
+                            <i class="bi bi-sliders" aria-hidden="true"></i>
+                            <span>Filtros</span>
+                        </button>
+                        <a th:if="${terminoBusqueda != null or param.categorias != null or param.colores != null or param.tallas != null}"
+                           th:href="@{/tienda/listado}"
+                           class="btn btn-outline-secondary">
+                            Limpiar
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Accesos rápidos por categoría activa -->
+                <div class="category-chips" th:if="${not #lists.isEmpty(categorias)}" role="navigation" aria-label="Categorías del catálogo">
+                    <span class="small fw-bold text-secondary me-1">Categorías:</span>
+                    <a th:href="@{/tienda/listado}"
+                       class="category-chip"
+                       th:classappend="${param.categorias == null and (terminoBusqueda == null or #strings.isEmpty(terminoBusqueda))} ? ' is-active'">
+                        Todas
+                    </a>
+                    <a th:each="cat : ${categorias}"
+                       th:href="@{/categoria/{nombre}(nombre=${cat.descripcion})}"
+                       class="category-chip"
+                       th:text="${cat.descripcion}">
+                        Categoría
+                    </a>
+                </div>
+            </div>
+
+            <!-- Modal de filtros detallados (compatible con static/js/rutinas.js) -->
             <div class="modal fade" id="filtroModal" tabindex="-1" aria-labelledby="filtroModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content filter-modal">
-                        <div class="modal-header" style="background-color: #1E1E1E; color: #FFFFFF;">
-                            <h5 class="modal-title" id="filtroModalLabel">Filtrar Productos</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <div class="modal-header">
+                            <h2 class="modal-title h5 mb-0" id="filtroModalLabel">Filtrar Productos</h2>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                         </div>
                         <div class="modal-body">
-                            <!-- Filtro por Categorías -->
-                            <div class="mb-4">
-                                <h6 class="fw-bold">Categorías</h6>
-                                <div th:each="categoria : ${categorias}">
-                                    <div class="form-check">
-                                        <input class="form-check-input filter-checkbox" type="checkbox" 
-                                               th:value="${categoria.idCategoria}" 
-                                               th:id="'categoria-' + ${categoria.idCategoria}" 
+                            <div class="mb-3">
+                                <h3 class="h6 fw-bold mb-2">Categorías</h3>
+                                <div th:if="${#lists.isEmpty(categorias)}" class="text-muted small">Sin categorías activas.</div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <div class="form-check me-2" th:each="categoria : ${categorias}">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               th:value="${categoria.idCategoria}"
+                                               th:id="'categoria-' + ${categoria.idCategoria}"
                                                name="categorias">
-                                            <label class="form-check-label" 
-                                                   th:for="'categoria-' + ${categoria.idCategoria}" 
-                                                   th:text="${categoria.descripcion}"></label>
+                                        <label class="form-check-label"
+                                               th:for="'categoria-' + ${categoria.idCategoria}"
+                                               th:text="${categoria.descripcion}"></label>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Filtro por Colores -->
-                            <div class="mb-4">
-                                <h6 class="fw-bold">Colores</h6>
-                                <div th:each="color : ${colores}">
-                                    <div class="form-check">
-                                        <input class="form-check-input filter-checkbox" type="checkbox" 
-                                               th:value="${color.idColor}" 
-                                               th:id="'color-' + ${color.idColor}" 
+                            <div class="mb-3">
+                                <h3 class="h6 fw-bold mb-2">Colores</h3>
+                                <div th:if="${#lists.isEmpty(colores)}" class="text-muted small">Sin colores activos.</div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <div class="form-check me-2" th:each="color : ${colores}">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               th:value="${color.idColor}"
+                                               th:id="'color-' + ${color.idColor}"
                                                name="colores">
-                                            <label class="form-check-label" 
-                                                   th:for="'color-' + ${color.idColor}" 
-                                                   th:text="${color.nombreColor}"></label>
+                                        <label class="form-check-label"
+                                               th:for="'color-' + ${color.idColor}"
+                                               th:text="${color.nombreColor}"></label>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Filtro por Tallas -->
-                            <div class="mb-4">
-                                <h6 class="fw-bold">Tallas</h6>
-                                <div th:each="talla : ${tallas}">
-                                    <div class="form-check">
-                                        <input class="form-check-input filter-checkbox" type="checkbox" 
-                                               th:value="${talla.idTalla}" 
-                                               th:id="'talla-' + ${talla.idTalla}" 
+                            <div class="mb-3">
+                                <h3 class="h6 fw-bold mb-2">Tallas</h3>
+                                <div th:if="${#lists.isEmpty(tallas)}" class="text-muted small">Sin tallas activas.</div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <div class="form-check me-2" th:each="talla : ${tallas}">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               th:value="${talla.idTalla}"
+                                               th:id="'talla-' + ${talla.idTalla}"
                                                name="tallas">
-                                            <label class="form-check-label" 
-                                                   th:for="'talla-' + ${talla.idTalla}" 
-                                                   th:text="${talla.nombreTalla}"></label>
+                                        <label class="form-check-label"
+                                               th:for="'talla-' + ${talla.idTalla}"
+                                               th:text="${talla.nombreTalla}"></label>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Filtro por Precio -->
-                            <div class="mb-4">
-                                <h6 class="fw-bold">Rango de Precio</h6>
-                                <div class="row">
-                                    <div class="col">
+                            <div class="mb-3">
+                                <h3 class="h6 fw-bold mb-2">Rango de Precio (₡)</h3>
+                                <div class="row g-2">
+                                    <div class="col-6">
                                         <label for="precioMin" class="form-label">Mínimo</label>
-                                        <input type="number" id="precioMin" name="precioMin" class="form-control" th:value="${precioMin}" placeholder="₡0">
+                                        <input type="number" id="precioMin" name="precioMin" class="form-control tabular-nums" th:value="${precioMin}" placeholder="0">
                                     </div>
-                                    <div class="col">
+                                    <div class="col-6">
                                         <label for="precioMax" class="form-label">Máximo</label>
-                                        <input type="number" id="precioMax" name="precioMax" class="form-control" th:value="${precioMax}" placeholder="₡40000">
+                                        <input type="number" id="precioMax" name="precioMax" class="form-control tabular-nums" th:value="${precioMax}" placeholder="999999">
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-light-accent" data-bs-dismiss="modal">Cerrar</button>
-                                <button type="button" class="btn btn-accent" id="aplicarFiltros">Aplicar Filtros</button>
-                            </div>
                         </div>
-                    </div> 
-                </div>
-            </div> 
-            <!-- Catálogo de productos -->
-            <div class="products-catalog py-1">
-                <div class="container pb-5">
-                    <h2 class="text-center mb-5 fw-bold section-title">Tienda</h2>
-                    <!-- Mensaje cuando no hay resultados -->
-                    <div th:if="${productos.isEmpty()}">
-                        <p class="text-center text-muted" style="font-size: 1.2rem;">
-                            No se encontraron productos disponibles con los criterios seleccionados.
-                        </p>
-                    </div>
-                    <!-- Mostrar productos si los hay -->
-                    <div class="row g-1" th:unless="${productos.isEmpty()}">
-                        <div class="col-12 col-md-6 col-lg-4 mb-2" th:each="producto : ${productos}">
-                            <div class="card h-100 border-0 shadow product-card" style="height: 100%; width: 100%;">
-                                <div class="overflow-hidden">
-                                    <img th:src="${!#strings.isEmpty(producto.imagen)} ? @{${producto.imagen}} : @{/uploads/FitForge.png}"
-                                         class="card-img-top product-img" 
-                                         th:alt="${producto.descripcion}" style="height: 300px; object-fit: cover; width: 100%;">
-                                </div>
-                                <div class="card-body text-center">
-                                    <h5 class="card-title fw-bold" th:text="${producto.descripcion}" style="font-size: 1.5rem;">
-                                        Descripción Producto
-                                    </h5>
-                                    <p class="card-text text-muted" th:text="${producto.detalle}" style="font-size: 1.1rem;">
-                                        Detalle del producto
-                                    </p>
-                                </div>
-                                <div class="card-footer bg-white border-0 text-center">
-                                    <p class="h4 text-primary fw-bold mb-3" th:text="'₡ ' + ${producto.precio}" style="font-size: 1.8rem;">
-                                        ₡ Precio
-                                    </p>
-                                    <a th:href="@{'/productos/' + ${producto.idProducto}}" 
-                                       class="btn btn-outline-primary w-100 product-btn" style="font-size: 1.2rem;">
-                                        Ver detalles
-                                    </a>
-                                </div>
-                            </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+                            <button type="button" class="btn btn-primary" id="aplicarFiltros">Aplicar Filtros</button>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Estado vacío -->
+            <div th:if="${productos.isEmpty()}" class="empty-state">
+                <h2 class="h5 fw-bold mb-2">No se encontraron productos disponibles</h2>
+                <p class="text-secondary mb-3">
+                    No se encontraron productos disponibles con los criterios seleccionados.
+                </p>
+                <a th:href="@{/tienda/listado}" class="btn btn-primary">Restablecer catálogo</a>
+            </div>
+
+            <!-- Grilla de productos (solo imagen, nombre, precio, disponibilidad breve y CTA) -->
+            <div class="product-grid" th:unless="${productos.isEmpty()}">
+                <article class="product-card"
+                         data-testid="catalog-product-card"
+                         th:each="producto : ${productos}">
+                    <div class="product-card__media">
+                        <div class="product-card__top-badges">
+                            <span th:if="${producto.existencias > 0}" class="status-badge status-badge--success">Disponible</span>
+                            <span th:if="${producto.existencias <= 0}" class="status-badge status-badge--danger">Agotado</span>
+                        </div>
+                        <img th:src="${!#strings.isEmpty(producto.imagen)} ? @{${producto.imagen}} : @{/uploads/FitForge.png}"
+                             class="product-card__img"
+                             th:alt="${producto.descripcion}"
+                             loading="lazy">
+                    </div>
+                    <div class="product-card__body">
+                        <div>
+                            <div class="product-card__category"
+                                 th:text="${producto.categoria != null ? producto.categoria.descripcion : 'Catálogo'}">Categoría</div>
+                            <h2 class="product-card__title" th:text="${producto.descripcion}">Nombre del Producto</h2>
+                        </div>
+                        <div class="product-card__footer">
+                            <span class="product-card__price price-tag"
+                                  th:text="'₡ ' + ${#numbers.formatDecimal(producto.precio, 0, 'COMMA', 2, 'POINT')}">₡ 0.00</span>
+                            <a th:href="@{'/productos/' + ${producto.idProducto}}"
+                               class="btn btn-primary btn-sm">
+                                Ver detalles
+                            </a>
+                        </div>
+                    </div>
+                </article>
             </div>
         </section>
     </body>
 </html>
-``` 

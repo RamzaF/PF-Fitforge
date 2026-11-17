@@ -1,54 +1,53 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"
+      lang="es">
     <head th:replace="~{layout/plantilla :: head}">
         <title>Mi Cuenta - FitForge</title>
     </head>
     <body>
-        <!-- Header -->
         <header th:replace="~{layout/plantilla :: header}"/>
-        
-        <!-- Sección de perfiil -->
-        <section class="py-5" style="background-color: #D9D9D9; min-height: 100%;">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-6 col-lg-5">
-                        <div class="card shadow-sm p-4 bg-white rounded">
-                            <h2 class="text-center fw-bold mb-4">Mi Cuenta</h2>
+
+        <main id="mainContent" class="main-container" tabindex="-1">
+            <div class="row justify-content-center py-3">
+                <div class="col-md-6 col-lg-5">
+                    <div class="panel-card">
+                        <div class="panel-card__header">
+                            <h1 class="panel-card__title h4 mb-0">Mi Cuenta</h1>
+                        </div>
+                        <div class="panel-card__body">
+                            <div th:if="${error}" class="alert alert-danger" role="alert">
+                                <span th:text="${error}"></span>
+                            </div>
                             <form th:action="@{/perfil}" method="post">
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold">Nombre de usuario</label>
-                                    <input type="text" class="form-control" name="username" th:value="${usuario.username}" required>
+                                    <label for="perfilUsername" class="form-label">Nombre de usuario</label>
+                                    <input type="text" id="perfilUsername" class="form-control" name="username" th:value="${usuario.username}" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold">Nombre</label>
-                                    <input type="text" class="form-control" name="nombre" th:value="${usuario.nombre}" required>
+                                    <label for="perfilNombre" class="form-label">Nombre</label>
+                                    <input type="text" id="perfilNombre" class="form-control" name="nombre" th:value="${usuario.nombre}" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold">Correo</label>
-                                    <input type="email" class="form-control" name="correo" th:value="${usuario.correo}" required>
+                                    <label for="perfilCorreo" class="form-label">Correo</label>
+                                    <input type="email" id="perfilCorreo" class="form-control" name="correo" th:value="${usuario.correo}" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold">Nueva contraseña (opcional)</label>
-                                    <input type="password" class="form-control" name="password" placeholder="Dejar en blanco para no cambiar">
+                                    <label for="perfilPassword" class="form-label">Nueva contraseña (opcional)</label>
+                                    <input type="password" id="perfilPassword" class="form-control" name="password" placeholder="Dejar en blanco para no cambiar">
                                 </div>
-                                <div th:if="${error}" class="alert alert-danger">
-                                    <span th:text="${error}"></span>
-                                </div>
-                                <div class="text-center mt-3">
+                                <div class="d-flex gap-2 justify-content-end mt-4">
+                                    <a href="/" class="btn btn-outline-secondary">Volver</a>
                                     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                                    <a href="/" class="btn btn-secondary">Volver</a>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
-        </section> 
+        </main>
 
-        <!-- Footer -->
         <footer th:replace="~{layout/plantilla :: footer}"/>
-        
-        <div th:replace="~{layout/plantilla :: scripts}"/>
+        <th:block th:replace="~{layout/plantilla :: scripts}"/>
     </body>
 </html>

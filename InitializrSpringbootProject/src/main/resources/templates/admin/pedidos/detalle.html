@@ -1,106 +1,171 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head th:replace="~{layout/plantilla :: head}">
+    <title th:text="${'Pedido #' + detalle.pedido.id + ' - Admin FitForge'}">Detalle de Pedido - FitForge</title>
 </head>
 <body>
 <header th:replace="~{layout/plantilla :: header}"/>
-<main class="container py-5">
-<a href="/admin/pedidos">Volver a pedidos</a>
-<h1 th:text="${'Pedido #' + detalle.pedido.id}">
-</h1>
-<p>Registro interno ficticio. Sin pago ni envío físico.</p>
-<p th:if="${mensaje}" role="status" class="alert alert-success" th:text="${mensaje}">
-</p>
-<dl>
-<dt>Dueño</dt>
-<dd th:text="${detalle.pedido.correo}">
-</dd>
-<dt>Fecha</dt>
-<dd th:text="${detalle.pedido.fecha}">
-</dd>
-<dt>Estado</dt>
-<dd th:text="${detalle.pedido.estado}">
-</dd>
-</dl>
-<section class="border rounded p-3 my-4">
-<h2 class="h5">Destino ficticio registrado</h2>
-<dl class="mb-0">
-<dt>Destinatario</dt>
-<dd th:text="${detalle.entrega.destinatario}">
-</dd>
-<dt>Teléfono ficticio</dt>
-<dd th:text="${detalle.entrega.telefono}">
-</dd>
-<dt>Dirección ficticia</dt>
-<dd th:text="${detalle.entrega.direccion}">
-</dd>
-<dt>Nota</dt>
-<dd th:text="${detalle.entrega.nota.isEmpty() ? 'Sin nota' : detalle.entrega.nota}">
-</dd>
-</dl>
-<small>Datos de demostración. Despacho manual sin envío físico.</small>
-</section>
-<div class="table-responsive">
-<table class="table">
-<thead>
-<tr>
-<th>Producto</th>
-<th>Color / talla</th>
-<th>Cantidad</th>
-<th>Precio snapshot</th>
-<th>Subtotal</th>
-</tr>
-</thead>
-<tbody>
-<tr th:each="l : ${detalle.lineas}">
-<td th:text="${l.producto}">
-</td>
-<td th:text="${l.color + ' / ' + l.talla}">
-</td>
-<td th:text="${l.cantidad}">
-</td>
-<td th:text="${#numbers.formatDecimal(l.precio,1,2)}">
-</td>
-<td th:text="${#numbers.formatDecimal(l.subtotal,1,2)}">
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<h2 th:text="${'Total: ₡ ' + #numbers.formatDecimal(detalle.pedido.total,1,2)}">
-</h2>
-<form th:if="${detalle.pedido.estado != 'Despachado'}" th:action="@{/admin/pedidos/{id}/estado(id=${detalle.pedido.id})}" method="post" class="my-4">
-<input type="hidden" name="origen" th:value="${detalle.pedido.estado}"/>
-<input type="hidden" name="destino" th:value="${detalle.pedido.estado == 'Pendiente' ? 'En preparación' : 'Despachado'}"/>
-<button class="btn btn-primary" th:text="${detalle.pedido.estado == 'Pendiente' ? 'Preparar pedido' : 'Registrar despacho manual'}">
-</button>
-</form>
-<h2 class="h4 mt-4">Auditoría</h2>
-<p th:if="${detalle.eventos.isEmpty()}">Sin transiciones registradas.</p>
-<div class="table-responsive">
-<table class="table" th:unless="${detalle.eventos.isEmpty()}">
-<thead>
-<tr>
-<th>Fecha</th>
-<th>Administrador</th>
-<th>Origen</th>
-<th>Destino</th>
-</tr>
-</thead>
-<tbody>
-<tr th:each="e : ${detalle.eventos}">
-<td th:text="${e.fecha}">
-</td>
-<td th:text="${e.actor}">
-</td>
-<td th:text="${e.origen}">
-</td>
-<td th:text="${e.destino}">
-</td>
-</tr>
-</tbody>
-</table>
-</div>
+<main id="mainContent" class="main-container" tabindex="-1">
+    <div th:replace="~{layout/plantilla :: adminSubnav('pedidos')}"></div>
+
+    <div class="store-header-bar">
+        <div>
+            <h1 class="store-header-bar__title" th:text="${'Pedido #' + detalle.pedido.id}">Pedido #1</h1>
+            <p class="store-header-bar__subtitle">Registro interno ficticio · Revisión de líneas, destino y transición operativa.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="status-badge"
+                  th:classappend="${detalle.pedido.estado == 'Despachado'} ? ' status-badge--success' : (${detalle.pedido.estado == 'En preparación'} ? ' status-badge--info' : ' status-badge--warning')"
+                  th:text="${detalle.pedido.estado}">Estado</span>
+            <a href="/admin/pedidos" class="btn btn-outline-secondary btn-sm">← Volver a pedidos</a>
+        </div>
+    </div>
+
+    <p th:if="${mensaje}" role="status" class="alert alert-success" th:text="${mensaje}"></p>
+
+    <div class="row g-4">
+        <!-- Columna izquierda: Resumen, Destino y Líneas -->
+        <div class="col-lg-7">
+            <div class="panel-card mb-4">
+                <div class="panel-card__header">
+                    <h2 class="panel-card__title">Datos Generales y Destino Ficticio</h2>
+                </div>
+                <div class="panel-card__body">
+                    <dl class="kv-grid pb-3 mb-3 border-bottom">
+                        <div>
+                            <dt>Dueño</dt>
+                            <dd th:text="${detalle.pedido.correo}"></dd>
+                        </div>
+                        <div>
+                            <dt>Fecha</dt>
+                            <dd class="tabular-nums" th:text="${detalle.pedido.fecha}"></dd>
+                        </div>
+                        <div>
+                            <dt>Estado</dt>
+                            <dd th:text="${detalle.pedido.estado}"></dd>
+                        </div>
+                        <div>
+                            <dt>Total snapshot</dt>
+                            <dd class="price-tag fw-bold" style="color: var(--ff-teal);"
+                                th:text="${'₡ ' + #numbers.formatDecimal(detalle.pedido.total,1,2)}"></dd>
+                        </div>
+                    </dl>
+
+                    <section class="p-3 rounded border" style="background-color: var(--ff-surface-subtle);">
+                        <h3 class="h6 fw-bold mb-2">Destino ficticio registrado</h3>
+                        <dl class="kv-grid">
+                            <div>
+                                <dt>Destinatario</dt>
+                                <dd th:text="${detalle.entrega.destinatario}"></dd>
+                            </div>
+                            <div>
+                                <dt>Teléfono ficticio</dt>
+                                <dd class="tabular-nums" th:text="${detalle.entrega.telefono}"></dd>
+                            </div>
+                            <div style="grid-column: 1 / -1;">
+                                <dt>Dirección ficticia</dt>
+                                <dd th:text="${detalle.entrega.direccion}"></dd>
+                            </div>
+                            <div style="grid-column: 1 / -1;">
+                                <dt>Nota</dt>
+                                <dd th:text="${detalle.entrega.nota.isEmpty() ? 'Sin nota' : detalle.entrega.nota}"></dd>
+                            </div>
+                        </dl>
+                    </section>
+                </div>
+            </div>
+
+            <div class="panel-card">
+                <div class="panel-card__header">
+                    <h2 class="panel-card__title">Líneas Confirmadas</h2>
+                    <span class="price-tag fw-bold" style="color: var(--ff-teal);"
+                          th:text="${'Total: ₡ ' + #numbers.formatDecimal(detalle.pedido.total,1,2)}">Total</span>
+                </div>
+                <div class="table-wrap">
+                    <table class="data-table data-table--stack" aria-label="Líneas del pedido">
+                        <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Color / talla</th>
+                            <th>Cantidad</th>
+                            <th>Precio snapshot</th>
+                            <th>Subtotal</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="l : ${detalle.lineas}">
+                            <td data-label="Producto" class="fw-bold" th:text="${l.producto}"></td>
+                            <td data-label="Color / talla" th:text="${l.color + ' / ' + l.talla}"></td>
+                            <td data-label="Cantidad" class="tabular-nums" th:text="${l.cantidad}"></td>
+                            <td data-label="Precio snapshot" class="price-tag" th:text="${'₡ ' + #numbers.formatDecimal(l.precio,1,2)}"></td>
+                            <td data-label="Subtotal" class="price-tag fw-bold" th:text="${'₡ ' + #numbers.formatDecimal(l.subtotal,1,2)}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna derecha: Transición de Estado y Auditoría -->
+        <div class="col-lg-5">
+            <div class="panel-card mb-4">
+                <div class="panel-card__header">
+                    <h2 class="panel-card__title">Acción Operativa</h2>
+                </div>
+                <div class="panel-card__body">
+                    <div th:if="${detalle.pedido.estado == 'Despachado'}" class="alert alert-success mb-0">
+                        Este pedido ya se encuentra en estado <strong>Despachado</strong>.
+                    </div>
+                    <form th:if="${detalle.pedido.estado != 'Despachado'}"
+                          th:action="@{/admin/pedidos/{id}/estado(id=${detalle.pedido.id})}"
+                          method="post"
+                          class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div>
+                            <div class="small text-secondary fw-semibold">Siguiente estado permitido</div>
+                            <div class="fw-bold"
+                                 th:text="${detalle.pedido.estado + ' → ' + (detalle.pedido.estado == 'Pendiente' ? 'En preparación' : 'Despachado')}">Transición</div>
+                        </div>
+                        <input type="hidden" name="origen" th:value="${detalle.pedido.estado}"/>
+                        <input type="hidden" name="destino" th:value="${detalle.pedido.estado == 'Pendiente' ? 'En preparación' : 'Despachado'}"/>
+                        <button type="submit" class="btn btn-primary"
+                                th:text="${detalle.pedido.estado == 'Pendiente' ? 'Preparar pedido' : 'Registrar despacho manual'}">
+                            Avanzar estado
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="panel-card">
+                <div class="panel-card__header">
+                    <h2 class="panel-card__title">Auditoría</h2>
+                    <span class="status-badge status-badge--neutral tabular-nums" th:text="${#lists.size(detalle.eventos)}">0</span>
+                </div>
+                <div class="panel-card__body" th:if="${detalle.eventos.isEmpty()}">
+                    <p class="text-secondary mb-0">Sin transiciones registradas.</p>
+                </div>
+                <div class="table-wrap" th:unless="${detalle.eventos.isEmpty()}">
+                    <table class="data-table data-table--stack" aria-label="Auditoría de transiciones del pedido">
+                        <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Administrador</th>
+                            <th>Origen</th>
+                            <th>Destino</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="e : ${detalle.eventos}">
+                            <td data-label="Fecha" class="tabular-nums small" style="overflow-wrap: anywhere;" th:text="${e.fecha}"></td>
+                            <td data-label="Administrador" class="small" style="overflow-wrap: anywhere;" th:text="${e.actor}"></td>
+                            <td data-label="Origen" class="small" th:text="${e.origen}"></td>
+                            <td data-label="Destino" class="fw-bold small" th:text="${e.destino}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 <footer th:replace="~{layout/plantilla :: footer}"/>
 <th:block th:replace="~{layout/plantilla :: scripts}"/>

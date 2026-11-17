@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"
+      lang="es">
 <head th:replace="~{layout/plantilla :: head}">
-    <title>Prueba</title>
+    <title>Catálogo Tienda - FitForge</title>
 </head>
 <body>
     <header th:replace="~{layout/plantilla :: header}"/>
-    <section>
-        <div th:replace="~{layout/plantilla :: Banner-p}"/>
+    <main id="mainContent" class="main-container" tabindex="-1">
         <div th:replace="~{tienda/fragmentos :: tienda-productos}"/>
-    </section>
+    </main>
     <footer th:replace="~{layout/plantilla :: footer}"/>
-    <!-- Incluir scripts -->
     <th:block th:replace="~{layout/plantilla :: scripts}"/>
 </body>
 </html>
