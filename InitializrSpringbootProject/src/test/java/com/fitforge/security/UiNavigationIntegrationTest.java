@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc(print = org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint.NONE)
 @Transactional
-class FunctionalPolishIntegrationTest {
+class UiNavigationIntegrationTest {
     @Autowired MockMvc mvc;
     @Autowired JdbcTemplate jdbc;
 
@@ -131,7 +131,7 @@ class FunctionalPolishIntegrationTest {
         }
     }
 
-    @Test void argonRefinementAppliesProgressiveCatalogAndUnifiedAdminCrudNavigation() throws Exception {
+    @Test void catalogAndAdminNavigationUseProgressiveDisclosure() throws Exception {
         var css = page("/css/estilos.css");
         assertThat(css).contains("--ff-primary: #117a42", "--ff-teal: #0e6b78", "prefers-reduced-motion: reduce");
 

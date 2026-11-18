@@ -1,85 +1,90 @@
-> Esta rama añade operación de pedidos en paralelo a media/stock. Guía vigente: [ORDER-OPERATIONS.md](ORDER-OPERATIONS.md). Las URLs y comandos anteriores que siguen son evidencia histórica; para esta entrega usar el overlay y proyecto OrderOps.
+# Instalación y pruebas locales con Docker
 
-# FitForge local: solo Docker
+Demo ficticia; no usar datos personales ni credenciales reales. No realiza cobros, envíos ni correo real. El comprobante no es una factura fiscal.
 
-**Integración ecommerce local:** seguir [ECOMMERCE-INTEGRATION.md](ECOMMERCE-INTEGRATION.md). Requiere BD NUEVA y compose.yaml + compose.order-ops.yaml con límites explícitos y ejecución secuencial. La evidencia de las entregas anteriores que sigue es histórica.
+## Requisitos y elección de recursos
 
-**Estado actual: rama `portfolio/fitforge-media-consistency` (imágenes persistentes, consistencia archivo/BD e inventario auditable).** Seguir [ORDERS.md](ORDERS.md) y los comandos de esta sección para build, pruebas y arranque en proyectos y volúmenes nuevos. No usar las imágenes nuevas con volúmenes de BD anteriores: no se migran.
+Docker Engine/Desktop con Compose y Python 3 estándar. Java, Maven, MySQL y Node se ejecutan solo en Docker. Las imágenes se fijan por digest en los manifiestos; el build inicial puede descargar dependencias dentro del contenedor. El navegador carga algunas fuentes y recursos externos.
 
-### Almacenamiento de imágenes y mantenimiento (`portfolio/fitforge-media-consistency`)
+Usar siempre `compose.yaml` + `compose.order-ops.yaml`. El overlay contiene límites de memoria y el tercer SQL de inicialización. **Solo base nueva**: el inicio aplica schema, seed y operación de pedidos, en ese orden. No existe migración de datos de versiones anteriores. No conectar la imagen a volúmenes previos.
 
-- `compose.yaml` monta el volumen nombrado exclusivo `uploads-data` en `/var/fitforge/uploads` (`FITFORGE_UPLOADS_DIR=/var/fitforge/uploads`) con usuario `10001:10001`, manteniendo la raíz del contenedor `app` en `read_only: true` y sin montar `uploads-data` en Nginx.
-- Formatos aceptados: **PNG y JPG/JPEG** hasta **5 MB** (límite multipart 10 MB), validados por extensión, magic bytes, decodificación real vía `ImageIO` y dimensiones (`<= 8192x8192`, `<= 25 MP`). Los archivos se guardan con nombre UUID bajo `/media/{uuid}.{png|jpg}` y cabeceras `X-Content-Type-Options: nosniff` y `Content-Security-Policy: default-src 'none'`.
-- Consistencia y límites documentados: no existe transacción distribuida 2PC entre sistema de archivos y MySQL. La escritura pasa por un archivo temporal `.tmp-<uuid>.part` en el mismo directorio antes del movimiento atómico y la transacción BD. En edición sin archivo, la preservación se decide leyendo la imagen vigente bajo el lock `FOR UPDATE` del producto. Si la transacción BD confirma rollback (`STATUS_ROLLED_BACK`) y la nueva imagen no está referenciada en BD, la compensación elimina el archivo recién creado conservando la imagen previa. Si el resultado del commit es incierto o falla la limpieza/consulta posterior al commit, nunca se elimina el archivo potencialmente comprometido ni se afirma rollback; pueden quedar huérfanos seguros en disco (además de `.tmp-*.part` ante `SIGKILL`, que se depuran al reiniciar la app sin tocar archivos finales ni assets históricos de `/uploads/**`).
-
-Las instrucciones de Entregas 1–3 que siguen conservan su registro histórico. Aplicación académica existente; no usar como tienda real.
-Requisitos del host: Docker Engine/Desktop, Compose y Python 3 estándar para transmitir el contexto. No requiere Java, Maven ni MySQL instalados en macOS. No instala paquetes en el host.
-
-## Versiones
-
-Spring Boot 3.4.2 y Java 21 según `pom.xml`. Imágenes fijadas por versión y digest en Dockerfile/Compose: Maven 3.9.9 con Temurin 21, runtime Temurin 21.0.6_7, MySQL 8.4.4 y Nginx 1.28.0-alpine para entrada local. Docker 29.9.3 y Compose 5.7.0 usados en la verificación. El digest también fija el JDK concreto de la imagen Maven; consultar VERIFICATION para las versiones observadas.
-
-## Build, pruebas y arranque
-
-Desde la raíz del repo, en la rama `portfolio/fitforge-access-cart` (base Docker `ac0bcc4`):
+Antes de ejecutar, revisar recursos:
 
 ```sh
-python3 scripts/docker-build.py
-docker compose config --quiet
-docker compose up -d --no-build db
-docker compose -p fitforge-access-cart-tests up -d --no-build --wait db
-docker compose -p fitforge-access-cart-tests run --rm test
-docker compose -p fitforge-access-cart-tests run --rm test mvn -o -B -ntp package
-docker compose up -d --no-build --wait app web
-docker compose ps
+docker info --format '{{.MemTotal}}'
+docker stats --no-stream
+docker compose ls
+docker network ls
+docker volume ls
 ```
 
-El script transmite únicamente Dockerfile, .dockerignore, pom y fuentes/recursos de tipos revisados. Construye ambas imágenes locales y excluye atributos extendidos, AppleDouble, enlaces simbólicos, Git, configuración del host, logs y dumps. Usar este script en este volumen externo: `docker compose build` falla por los atributos de AppleDouble. No borrar ni reparar esos archivos.
+Elegir un tag, proyecto y puerto nuevos; no sobreescribir imágenes o contenedores de otra demo. En un motor de aproximadamente 7.75 GiB, ejecutar secuencialmente build → pruebas → detener BD de pruebas → demo. No detener otros proyectos ni usar prune, reinicios globales o borrado de volúmenes para liberar recursos.
 
-El build puede descargar dependencias; tests y ejecución usan la red interna aislada. La primera compilación empaqueta con tests omitidos; eso **no** prueba la aplicación. La suite funcional y package se ejecutan contra MySQL en el proyecto exclusivo `fitforge-access-cart-tests`, con volumen propio; no reutilizar datos personales ni la demo de revisión como destino de pruebas. Si fallan, conservar el error y no asumir que el entorno está verificado.
+## Build y arranque integrado
 
-Abrir <http://127.0.0.1:18081/tienda/listado>. Cambiar el puerto con `FITFORGE_PORT=18083 docker compose up -d --no-build --wait app web` si estuviera ocupado; siempre se publica en loopback.
-
-## Datos y aislamiento
-
-Se crea `fitforge-demo_demo-db` al primer arranque. MySQL ejecuta exclusivamente `schema.sql` y `seed-demo.sql` de esta carpeta. No importar `DBActualizado v2.txt`: contiene destinos/cuentas históricos y operaciones destructivas. La inicialización solo ocurre en un volumen vacío; editar el seed no cambia una BD existente.
-
-Dos productos ficticios, dos categorías y tres variantes (incluida una sin stock). Usuarios `admin@fitforge.example` y `cliente@fitforge.example`, contraseña **exclusivamente ficticia** `FitForge-demo-2026!`. Hashes BCrypt generados dentro del contenedor Java; para repetir la demo se usa el seed versionado. No reutilizar estas claves para ningún otro entorno.
-
-Las claves MySQL de Compose/SQL son públicas y exclusivas de la demo. El usuario `fitforge_app` tiene solo SELECT/INSERT/UPDATE/DELETE sobre `fitforge_demo.*`. La aplicación no recibe la clave root. Hibernate valida el esquema, no lo crea ni modifica. Spring no carga `.env` automáticamente; Compose entrega explícitamente las variables y activa `local`.
-
-App, tests y MySQL solo están en la red `internal: true` del proyecto. SMTP apunta al puerto cerrado 1 de loopback dentro del contenedor, con timeout de 1 segundo: cualquier envío falla localmente. No hay SMTP real ni receptor público. No se montan Docker socket ni carpetas ajenas. La app y el proxy usan UID sin privilegios, raíz de solo lectura y /tmp temporal.
-
-Docker 29 omite los puertos publicados de un contenedor conectado solo a una red interna. Por eso `web` (Nginx) tiene también una red de ingreso propia y publica exclusivamente `127.0.0.1:18081`. Su upstream es fijo `app:8080`; no es proxy abierto, no recibe credenciales BD/SMTP, tiene todas las capacidades eliminadas y forwarding IP deshabilitado. Solo este proxy dispone de una red no interna; app, MySQL y tests siguen sin ruta externa. La salud HTTP del proxy comprueba el catálogo real antes de que `up --wait` termine.
-
-El navegador sí usa recursos existentes externos: jsDelivr, Google Fonts (y su CDN gstatic) y una imagen de respaldo de Unsplash. No son conexiones salientes del backend. No se cambiaron diseño ni recursos de terceros; los derechos de distribución quedan pendientes para etapas posteriores.
-
-## Segunda instalación independiente
-
-Elegir un nombre de proyecto nuevo; verificar que no exista antes de ejecutarlo. No eliminar el primer volumen:
+Desde la raíz del repositorio:
 
 ```sh
-docker volume ls --filter label=com.docker.compose.project=fitforge-demo-repro
-FITFORGE_PORT=18082 docker compose -p fitforge-demo-repro up -d --no-build db
-FITFORGE_PORT=18082 docker compose -p fitforge-demo-repro run --rm test
-FITFORGE_PORT=18082 docker compose -p fitforge-demo-repro run --rm test mvn -o -B -ntp package
-FITFORGE_PORT=18082 docker compose -p fitforge-demo-repro up -d --no-build --wait app web
+export FITFORGE_IMAGE_TAG=portfolio-local-20261118
+export COMPOSE_PROJECT_NAME=fitforge-portfolio-local-20261118
+export FITFORGE_PORT=18128
+docker volume ls --filter label=com.docker.compose.project="$COMPOSE_PROJECT_NAME"
+python3 scripts/docker-build.py --tag "$FITFORGE_IMAGE_TAG"
+docker compose -f compose.yaml -f compose.order-ops.yaml config --quiet
+docker compose -f compose.yaml -f compose.order-ops.yaml up -d --no-build --wait db app web
+docker compose -f compose.yaml -f compose.order-ops.yaml ps
 ```
 
-Abrir <http://127.0.0.1:18082/tienda/listado>. Ambos proyectos usan las mismas imágenes construidas; redes y volúmenes son independientes. Parar la repetición con `docker compose -p fitforge-demo-repro down`; conserva sus datos.
+El primer comando de volúmenes debe mostrar que el proyecto escogido no tiene datos anteriores. Si existe, escoger otro nombre antes del arranque. Verificar que el puerto no esté ocupado. Abrir <http://127.0.0.1:18128/tienda/listado>.
 
-## Parada y eliminación opcional
+El script construye app y test mediante una lista permitida de archivos. Excluye Git, diagnósticos, dumps, archivos del host y metadatos AppleDouble; rechaza enlaces simbólicos en fuentes. El empaquetado del build omite pruebas y **no equivale a una suite aprobada**.
+
+El esquema nuevo incorpora catálogo, variantes, movimientos de inventario, cabecera/detalle de pedido y eventos. Hibernate valida el esquema sin modificarlo. Los SQL de inicialización solo se ejecutan sobre volumen vacío.
+
+## Datos de ejemplo y aislamiento
+
+Usuarios `admin@fitforge.example` y `cliente@fitforge.example`; contraseña pública solo demo `FitForge-demo-2026!`. El seed trae dos productos, dos categorías y tres variantes, una sin existencias. Las capturas incluyen cambios posteriores hechos en la demo; no representan exactamente el seed inicial.
+
+Las claves de MySQL versionadas son públicas y exclusivas de esta demo. La app usa una cuenta con permisos SELECT/INSERT/UPDATE/DELETE, sin root. El servicio de pruebas recibe root únicamente para fixtures y triggers de fallo en su base desechable. SMTP apunta a loopback, puerto cerrado y timeout acotado. Contacto y recuperación por correo no ofrecen un envío real.
+
+La app y BD usan red interna; Nginx añade una red de entrada y publica solo `127.0.0.1`. El proxy no recibe credenciales BD. La app y el proxy usan raíz de solo lectura y directorio temporal. `uploads-data` conserva las imágenes nuevas en un volumen del proyecto, separado del archivo JAR.
+
+Los límites del overlay son BD 768 MiB, app 768 MiB, test 1152 MiB y proxy 64 MiB. Maven de pruebas usa 128 MiB; Surefire, 384 MiB y cache de contextos de tamaño 2. No ejecutar la demo a la vez que build/suites en el motor acotado.
+
+Si el pool automático de redes está agotado, inspeccionar subredes existentes y añadir un override **externo** con IPAM para subredes libres. No copiar ciegamente rangos usados en otra máquina ni modificar redes ajenas. Aplicar el mismo override en todos los comandos de ese proyecto.
+
+## Pruebas contra MySQL real
+
+Detener primero la demo propia, conservando volúmenes. Elegir un proyecto de pruebas nuevo con el prefijo obligatorio `fitforge-orders-tests-`. Los fixtures son destructivos dentro de esa base: jamás apuntarlos a una demo o base personal.
 
 ```sh
-docker compose stop
-# Volver a levantar sin reconstruir:
-docker compose up -d --no-build
-# Eliminar solo contenedores y red de esta demo; conserva el volumen:
-docker compose down
+export COMPOSE_PROJECT_NAME=fitforge-orders-tests-portfolio-20261118
+docker volume ls --filter label=com.docker.compose.project="$COMPOSE_PROJECT_NAME"
+docker compose -f compose.yaml -f compose.order-ops.yaml config --quiet
+docker compose -f compose.yaml -f compose.order-ops.yaml up -d --no-build --wait db
+docker compose -f compose.yaml -f compose.order-ops.yaml run --rm --no-deps test mvn -o -B -ntp '-DargLine=-Xmx384m -XX:MaxMetaspaceSize=256m -Dspring.test.context.cache.maxSize=2' test
+docker compose -f compose.yaml -f compose.order-ops.yaml run --rm --no-deps test mvn -o -B -ntp '-DargLine=-Xmx384m -XX:MaxMetaspaceSize=256m -Dspring.test.context.cache.maxSize=2' package
+docker compose -f compose.yaml -f compose.order-ops.yaml stop db
 ```
 
-**Destructivo, opcional:** `docker compose down --volumes` borra definitivamente la BD de **este** proyecto demo. No es necesario para repetir la instalación. Para la segunda demo, el comando equivalente es `docker compose -p fitforge-demo-repro down --volumes`. Nunca usar prune ni borrar volúmenes ajenos.
+Conservar el tag construido previamente. Ejecutar suite y package por separado, secuencialmente; comprobar sus salidas. Las pruebas usan MySQL, no la base de datos H2. Las referencias al caso de concurrencia denominado H2 son un identificador de regresión.
 
-## Límites
+Contrato JavaScript sin red y con repo de solo lectura:
 
-Tarea 2 restringe administración a ADMIN y carrito a USER, habilita CSRF y valida cantidades/stock/precios en servidor. Consultar [matriz de acceso y contrato](ACCESS-CART.md). Recuperación de contraseña y contacto están deshabilitados honestamente, sin envío real. Confirmación de pedido, comprobantes y `/pedidos/**` están bloqueados hasta Tarea 3; no anunciar ventas/pagos reales. Tareas 3–5 no se ejecutan. La subida de archivos del código original necesita rediseñar su almacenamiento para ejecución como jar; no está validada y la raíz de la app es de solo lectura. El catálogo y sus imágenes estáticas son el objetivo de esta entrega. El favicon referenciado por el template original no existe y devuelve 404. El proxy traduce /Uploads a /uploads para servir las rutas históricas en Linux. En esta entrega no hay push, merge, PR, publicación ni licencia nueva. La rama Docker base sí se publicó anteriormente; el registro de Tarea 1 describe el estado previo a ese push.
+```sh
+docker run --rm --network none --memory 128m --memory-swap 128m -v "$PWD:/repo:ro" -w /repo node:24.22.1-alpine node --max-old-space-size=64 scripts/test-rutinas.js InitializrSpringbootProject/src/main/resources/static/js/rutinas.js
+```
+
+El [protocolo integrado](ECOMMERCE-INTEGRATION.md) resume los contratos. Los resultados efectivos se registran en [VERIFICATION](../portfolio/VERIFICATION.md), separados de estos comandos de reproducción.
+
+## Detener y reanudar
+
+Seleccionar de nuevo el nombre del proyecto demo y el mismo tag/puerto. Detener conserva datos:
+
+```sh
+export COMPOSE_PROJECT_NAME=fitforge-portfolio-local-20261118
+docker compose -f compose.yaml -f compose.order-ops.yaml stop
+docker compose -f compose.yaml -f compose.order-ops.yaml up -d --no-build --wait db app web
+```
+
+No usar `down --volumes` como rutina. Cambiar el seed no actualiza una BD ya inicializada. Si hay un error de esquema, no importar un dump histórico: conservar los datos y revisar la incompatibilidad.
