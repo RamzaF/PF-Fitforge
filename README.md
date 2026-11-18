@@ -131,7 +131,7 @@ docker compose -f compose.yaml -f compose.order-ops.yaml stop
 
 Coordiné y organicé este proyecto junto con mis compañeros en 2025 como parte de la carrera de **Ingeniería en Desarrollo de Software en la Universidad Fidélitas**. En esa etapa construimos en equipo la base de la tienda en Spring Boot: catálogo, variantes de talla y color, carrito, control de acceso y primeras pantallas administrativas.
 
-En 2026 retomé FitForge para completar la operación de la tienda y mejorar su interfaz, manteniendo la base original y los aportes del equipo. Organicé la evolución mediante entregas incrementales, apoyándome en desarrollo asistido por IA, revisión independiente y pruebas sobre MySQL y navegador.
+En 2026 retomé FitForge para completar la operación de la tienda y mejorar su interfaz, manteniendo la base original y los aportes del equipo. Organicé la evolución mediante entregas incrementales, revisión independiente y pruebas sobre MySQL y navegador.
 
 En esta etapa definí el alcance y coordiné la integración del entorno Docker, los pedidos persistentes, la gestión de imágenes e inventario y la operación administrativa. El refinamiento visual completó la navegación de cliente y administración.
 
