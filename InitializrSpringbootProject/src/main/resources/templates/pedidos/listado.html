@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head th:replace="~{layout/plantilla :: head}">
+    <title th:text="${administrativo ? 'Operación de pedidos - FitForge' : 'Mis pedidos - FitForge'}">Pedidos - FitForge</title>
+</head>
+<body>
+<header th:replace="~{layout/plantilla :: header}"/>
+<main id="mainContent" class="main-container" tabindex="-1">
+    <th:block th:if="${administrativo}">
+        <div th:replace="~{layout/plantilla :: adminSubnav('pedidos')}"></div>
+    </th:block>
+
+    <div class="store-header-bar">
+        <div>
+            <h1 class="store-header-bar__title" th:text="${administrativo ? 'Operación de pedidos' : 'Mis pedidos'}">Pedidos</h1>
+            <p class="store-header-bar__subtitle">
+                <span th:if="${administrativo}">Cola operativa de pedidos y transición de estados de despacho.</span>
+                <span th:unless="${administrativo}">Consultá el estado y comprobante interno de tus pedidos registrados.</span>
+            </p>
+        </div>
+        <span class="status-badge status-badge--info tabular-nums" th:text="${'Resultados: ' + resultado.total}">Resultados: 0</span>
+    </div>
+
+    <!-- Conteos por estado desde base de datos -->
+    <div class="ops-strip" aria-label="Conteos de pedidos por estado">
+        <div class="ops-metric" th:each="c : ${resultado.conteos}">
+            <span class="ops-metric__label" th:text="${c.key}">Estado</span>
+            <span class="ops-metric__value tabular-nums" th:text="${c.value}">0</span>
+        </div>
+        <div class="ops-metric">
+            <span class="ops-metric__label">Total filtrados</span>
+            <span class="ops-metric__value tabular-nums" style="color: var(--ff-teal);" th:text="${resultado.total}">0</span>
+        </div>
+    </div>
+
+    <!-- Filtro de pedidos -->
+    <div class="panel-card mb-4">
+        <div class="panel-card__body py-3">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-5" th:if="${administrativo}">
+                    <label for="q" class="form-label">Buscar por ID, correo o destinatario ficticio</label>
+                    <input id="q" name="q" maxlength="100" th:value="${q}" class="form-control" placeholder="Ej. 1, cliente@fitforge.example..."/>
+                </div>
+                <div th:class="${administrativo ? 'col-md-4' : 'col-md-8'}">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select id="estado" name="estado" class="form-select">
+                        <option value="">Todos</option>
+                        <option th:each="e : ${estados}" th:value="${e}" th:text="${e}" th:selected="${e == estado}"></option>
+                    </select>
+                </div>
+                <div th:class="${administrativo ? 'col-md-3 d-flex gap-2' : 'col-md-4 d-flex gap-2'}">
+                    <button type="submit" class="btn btn-primary flex-grow-1">Filtrar</button>
+                    <a th:href="@{${administrativo ? '/admin/pedidos' : '/pedidos'}}" class="btn btn-outline-secondary">Limpiar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div th:if="${resultado.pedidos.isEmpty()}" class="empty-state">
+        <p class="mb-0 text-secondary">No hay pedidos para esta consulta.</p>
+    </div>
+
+    <div class="panel-card" th:unless="${resultado.pedidos.isEmpty()}">
+        <div class="panel-card__header">
+            <h2 class="panel-card__title" th:text="${administrativo ? 'Cola de Pedidos' : 'Historial de Pedidos'}">Pedidos</h2>
+            <span class="status-badge status-badge--neutral tabular-nums" th:text="${'Página ' + (resultado.pagina + 1)}">Página 1</span>
+        </div>
+        <div class="table-wrap">
+            <table class="data-table data-table--stack" aria-label="Listado de pedidos">
+                <thead>
+                <tr>
+                    <th>Pedido</th>
+                    <th th:if="${administrativo}">Dueño ficticio</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Total</th>
+                    <th class="text-end">Detalle</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${resultado.pedidos}">
+                    <td data-label="Pedido" class="tabular-nums fw-bold" th:text="${'#' + p.id}">#1</td>
+                    <td th:if="${administrativo}" data-label="Dueño ficticio" th:text="${p.correo}">correo</td>
+                    <td data-label="Fecha" class="tabular-nums" th:text="${p.fecha}">2026-11-17</td>
+                    <td data-label="Estado">
+                        <span class="status-badge"
+                              th:classappend="${p.estado == 'Despachado'} ? ' status-badge--success' : (${p.estado == 'En preparación'} ? ' status-badge--info' : ' status-badge--warning')"
+                              th:text="${p.estado}">Estado</span>
+                    </td>
+                    <td data-label="Total" class="price-tag fw-bold" th:text="${'₡ ' + #numbers.formatDecimal(p.total,1,2)}">₡ 0.00</td>
+                    <td data-label="Detalle" class="text-end">
+                        <a th:href="${(administrativo ? '/admin/pedidos/' : '/pedidos/') + p.id}"
+                           th:aria-label="${'Ver pedido ' + p.id}"
+                           class="btn btn-sm btn-outline-primary">Ver detalle</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="p-3 border-top d-flex justify-content-between align-items-center" style="background-color: var(--ff-surface-subtle);">
+            <nav aria-label="Paginación" class="d-flex align-items-center gap-3">
+                <a th:if="${resultado.anterior()}"
+                   th:href="@{${administrativo ? '/admin/pedidos' : '/pedidos'}(estado=${estado},q=${q},pagina=${resultado.pagina - 1})}"
+                   class="btn btn-sm btn-outline-secondary">← Anterior</a>
+                <span class="small fw-semibold tabular-nums" th:text="${'Página ' + (resultado.pagina + 1)}">Página 1</span>
+                <a th:if="${resultado.siguiente()}"
+                   th:href="@{${administrativo ? '/admin/pedidos' : '/pedidos'}(estado=${estado},q=${q},pagina=${resultado.pagina + 1})}"
+                   class="btn btn-sm btn-outline-secondary">Siguiente →</a>
+            </nav>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{layout/plantilla :: footer}"/>
+<th:block th:replace="~{layout/plantilla :: scripts}"/>
+</body>
+</html>

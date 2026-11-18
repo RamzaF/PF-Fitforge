@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="es">
+    <head th:replace="~{layout/plantilla :: head}">
+        <title>Admin - Gestión de Tallas - FitForge</title>
+    </head>
+    <body sec:authorize="hasRole('ROLE_ADMIN')">
+        <header th:replace="~{layout/plantilla :: header}"></header>
+
+        <main id="mainContent" class="main-container" tabindex="-1">
+            <div th:replace="~{layout/plantilla :: adminSubnav('tallas')}"></div>
+
+            <div th:if="${mensaje != null}"
+                 th:class="'alert alert-' + (${tipo} ?: 'info') + ' alert-dismissible fade show'"
+                 role="alert">
+                <span th:text="${mensaje}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="store-header-bar">
+                <div>
+                    <h1 class="store-header-bar__title">Gestión de Tallas</h1>
+                    <p class="store-header-bar__subtitle">
+                        Administrá las tallas y presentaciones utilizadas por las variantes de productos.
+                    </p>
+                </div>
+                <span class="status-badge status-badge--info tabular-nums"
+                      th:text="${#lists.size(tallas) + ' tallas'}">0 tallas</span>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="panel-card">
+                        <div class="panel-card__header">
+                            <h2 class="panel-card__title" th:text="${tallaForm.idTalla != null ? 'Editar Talla' : 'Nueva Talla'}">Nueva Talla</h2>
+                        </div>
+                        <div class="panel-card__body">
+                            <form th:action="@{/admin/tallas/guardar}" method="post">
+                                <input type="hidden" name="idTalla" th:value="${tallaForm.idTalla}" />
+                                <div class="mb-3">
+                                    <label for="nombreTalla" class="form-label">Nombre de la talla <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="nombreTalla" name="nombreTalla"
+                                           th:value="${tallaForm.nombreTalla}" required minlength="1" maxlength="50"
+                                           placeholder="Ej. M" />
+                                    <div class="field-hint">Entre 1 y 50 caracteres. Sin duplicados.</div>
+                                </div>
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="activo" name="activo" value="true"
+                                           th:checked="${tallaForm.activo}" />
+                                    <label class="form-check-label" for="activo">Talla activa</label>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary"
+                                            th:text="${tallaForm.idTalla != null ? 'Guardar cambios' : 'Crear talla'}">Guardar</button>
+                                    <a th:if="${tallaForm.idTalla != null}" th:href="@{/admin/tallas/listado}"
+                                       class="btn btn-outline-secondary">Cancelar</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="panel-card">
+                        <div class="panel-card__header">
+                            <h2 class="panel-card__title">Tallas Registradas</h2>
+                            <span class="status-badge status-badge--neutral tabular-nums" th:text="${#lists.size(tallas)}">0</span>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="data-table data-table--stack" aria-label="Listado de tallas">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Estado</th>
+                                        <th class="text-end">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${#lists.isEmpty(tallas)}">
+                                        <td colspan="4" class="text-center py-4 text-secondary">No hay tallas registradas todavía.</td>
+                                    </tr>
+                                    <tr th:each="talla : ${tallas}">
+                                        <td data-label="ID" class="tabular-nums fw-bold" th:text="${talla.idTalla}">1</td>
+                                        <td data-label="Nombre" class="fw-semibold" th:text="${talla.nombreTalla}">Talla</td>
+                                        <td data-label="Estado">
+                                            <span th:if="${talla.activo}" class="status-badge status-badge--success">Activa</span>
+                                            <span th:unless="${talla.activo}" class="status-badge status-badge--neutral">Inactiva</span>
+                                        </td>
+                                        <td data-label="Acciones" class="text-end">
+                                            <div class="d-inline-flex gap-1 justify-content-end">
+                                                <a th:href="@{/admin/tallas/listado(editarId=${talla.idTalla})}"
+                                                   class="btn btn-sm btn-outline-primary">Editar</a>
+                                                <form th:action="@{/admin/tallas/estado}" method="post" class="d-inline">
+                                                    <input type="hidden" name="idTalla" th:value="${talla.idTalla}" />
+                                                    <input type="hidden" name="activo" th:value="${!talla.activo}" />
+                                                    <button type="submit"
+                                                            th:class="${talla.activo} ? 'btn btn-sm btn-outline-warning' : 'btn btn-sm btn-outline-success'"
+                                                            th:text="${talla.activo} ? 'Desactivar' : 'Activar'">Estado</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
+        <th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
+    </body>
+</html>

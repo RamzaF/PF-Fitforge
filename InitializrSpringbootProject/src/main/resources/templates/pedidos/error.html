@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head th:replace="~{layout/plantilla :: head}">
+    <title th:text="${titulo ?: 'No se confirmó un nuevo cambio'}">Estado de Pedido - FitForge</title>
+</head>
+<body>
+<header th:replace="~{layout/plantilla :: header}"/>
+<main id="mainContent" class="main-container" tabindex="-1">
+    <div class="panel-card mx-auto" style="max-width: 580px;">
+        <div class="panel-card__header">
+            <h1 class="panel-card__title" th:text="${titulo ?: 'No se confirmó un nuevo cambio'}">No se confirmó un nuevo cambio</h1>
+        </div>
+        <div class="panel-card__body">
+            <p class="alert alert-warning" role="alert" th:text="${mensaje}"></p>
+            <a href="/admin/pedidos" th:href="${volver ?: '/admin/pedidos'}" class="btn btn-primary">Volver a pedidos</a>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{layout/plantilla :: footer}"/>
+<th:block th:replace="~{layout/plantilla :: scripts}"/>
+</body>
+</html>

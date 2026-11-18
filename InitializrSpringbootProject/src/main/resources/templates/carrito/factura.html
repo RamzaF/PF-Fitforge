@@ -1,28 +1,79 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head th:replace="~{layout/plantilla :: head}">
-    <title>Factura - FitForge</title>
+    <title>Comprobante interno - FitForge</title>
 </head>
 <body>
 <header th:replace="~{layout/plantilla :: header}"/>
-<div class="container py-5">
+
+<main id="mainContent" class="main-container" tabindex="-1">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-success text-white text-center">
-                    <h2 class="mb-0">Factura generada</h2>
-                </div>
-                <div class="card-body">
-                    <div class="mb-4 text-center">
-                        <h4 class="fw-bold">N° Factura: <span th:text="${factura.idFactura}"></span></h4>
-                        <p class="mb-1">Fecha: <span th:text="${#dates.format(factura.fecha, 'dd/MM/yyyy')}"></span></p>
-                        <p class="mb-1">Estado: <span class="badge bg-info" th:text="${factura.estado}"></span></p>
+        <div class="col-lg-9">
+            <div class="panel-card">
+                <div class="panel-card__header">
+                    <div>
+                        <h1 class="h4 fw-bold mb-0">Pedido registrado</h1>
+                        <div class="field-hint">Comprobante interno, sin pago recibido ni validez fiscal.</div>
                     </div>
-                    <hr>
-                    <h5 class="mb-3">Detalle de productos</h5>
-                    <div class="table-responsive">
-                        <table class="table table-bordered align-middle">
-                            <thead class="table-light">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="status-badge status-badge--neutral tabular-nums">
+                            N° Pedido: <strong th:text="${factura.idFactura}"></strong>
+                        </span>
+                        <span class="status-badge"
+                              th:classappend="${factura.estado == 'Despachado'} ? ' status-badge--success' : (${factura.estado == 'En preparación'} ? ' status-badge--info' : ' status-badge--warning')"
+                              th:text="${factura.estado}">Estado</span>
+                    </div>
+                </div>
+
+                <div class="panel-card__body">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <section class="p-3 rounded border h-100" style="background-color: var(--ff-surface-subtle);">
+                                <h2 class="h6 fw-bold mb-2">Destino ficticio registrado</h2>
+                                <dl class="kv-grid">
+                                    <div>
+                                        <dt>Destinatario</dt>
+                                        <dd th:text="${factura.entrega.destinatario}"></dd>
+                                    </div>
+                                    <div>
+                                        <dt>Teléfono ficticio</dt>
+                                        <dd class="tabular-nums" th:text="${factura.entrega.telefono}"></dd>
+                                    </div>
+                                    <div style="grid-column: 1 / -1;">
+                                        <dt>Dirección ficticia</dt>
+                                        <dd th:text="${factura.entrega.direccion}"></dd>
+                                    </div>
+                                    <div style="grid-column: 1 / -1;">
+                                        <dt>Nota</dt>
+                                        <dd th:text="${factura.entrega.nota.isEmpty() ? 'Sin nota' : factura.entrega.nota}"></dd>
+                                    </div>
+                                </dl>
+                            </section>
+                        </div>
+
+                        <div class="col-md-6">
+                            <section class="p-3 rounded border h-100" style="background-color: var(--ff-surface-subtle);">
+                                <h2 class="h6 fw-bold mb-2">Historial de estado</h2>
+                                <p class="small mb-2">
+                                    Fecha de registro: <strong class="tabular-nums" th:text="${factura.fecha}"></strong> — Pendiente
+                                </p>
+                                <p th:if="${factura.hitos.isEmpty()}" class="field-hint mb-0">
+                                    Aún no se registran cambios de estado.
+                                </p>
+                                <ol th:unless="${factura.hitos.isEmpty()}" class="small mb-0 ps-3">
+                                    <li th:each="h : ${factura.hitos}" class="mb-1">
+                                        <time class="tabular-nums" th:text="${h.fecha}"></time> (UTC):
+                                        <strong th:text="${h.origen + ' → ' + h.destino}"></strong>
+                                    </li>
+                                </ol>
+                            </section>
+                        </div>
+                    </div>
+
+                    <h2 class="h6 fw-bold mb-2">Detalle de productos</h2>
+                    <div class="table-wrap border rounded mb-3">
+                        <table class="data-table data-table--stack">
+                            <thead>
                                 <tr>
                                     <th>Producto</th>
                                     <th>Color</th>
@@ -34,28 +85,37 @@
                             </thead>
                             <tbody>
                                 <tr th:each="venta : ${ventas}">
-                                    <td th:text="${venta.productoColorTalla.producto.descripcion}"></td>
-                                    <td th:text="${venta.productoColorTalla.color.nombreColor}"></td>
-                                    <td th:text="${venta.productoColorTalla.talla.nombreTalla}"></td>
-                                    <td th:text="${venta.cantidad}"></td>
-                                    <td>₡ <span th:text="${#numbers.formatDecimal(venta.precio, 0, 'COMMA', 2, 'POINT')}"></span></td>
-                                    <td>₡ <span th:text="${#numbers.formatDecimal(venta.precio * venta.cantidad, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                                    <td data-label="Producto" class="fw-semibold" th:text="${venta.producto}"></td>
+                                    <td data-label="Color" th:text="${venta.color}"></td>
+                                    <td data-label="Talla" th:text="${venta.talla}"></td>
+                                    <td data-label="Cantidad" class="tabular-nums" th:text="${venta.cantidad}"></td>
+                                    <td data-label="Precio unitario" class="price-tag">₡ <span th:text="${#numbers.formatDecimal(venta.precio, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                                    <td data-label="Subtotal" class="price-tag fw-bold">₡ <span th:text="${#numbers.formatDecimal(venta.subtotal, 0, 'COMMA', 2, 'POINT')}"></span></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="d-flex justify-content-end">
-                        <h4 class="fw-bold">Total: ₡ <span th:text="${#numbers.formatDecimal(factura.total, 0, 'COMMA', 2, 'POINT')}"></span></h4>
+
+                    <div class="d-flex justify-content-end align-items-center mb-3">
+                        <div class="h4 fw-bold mb-0 price-tag" style="color: var(--ff-teal);">
+                            Total: ₡ <span th:text="${#numbers.formatDecimal(factura.total, 0, 'COMMA', 2, 'POINT')}"></span>
+                        </div>
                     </div>
-                </div>
-                <div class="card-footer text-center">
-                    <a href="/carrito/ver" class="btn btn-primary">Volver al carrito</a>
-                    <a href="/tienda/listado" class="btn btn-outline-success ms-2">Seguir comprando</a>
+
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-3 border-top">
+                        <a href="/pedidos" class="btn btn-outline-primary">Mis pedidos</a>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="/carrito/ver" class="btn btn-outline-secondary">Volver al carrito</a>
+                            <a href="/tienda/listado" class="btn btn-primary">Seguir comprando</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</main>
+
 <footer th:replace="~{layout/plantilla :: footer}"/>
+<th:block th:replace="~{layout/plantilla :: scripts}"/>
 </body>
 </html>

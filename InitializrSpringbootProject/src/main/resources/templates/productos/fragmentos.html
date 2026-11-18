@@ -1,116 +1,155 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="es">
     <head th:replace="~{layout/plantilla :: head}">
-        <title>Fitforge</title>
+        <title>Detalle de Producto - FitForge</title>
     </head>
     <body>
-        <!-- Fragmento para las imágenes a la izquierda -->
+        <!-- Fragmento conservado por compatibilidad si otra vista lo referencia -->
         <aside th:fragment="aside" class="aside-images">
-            <div class="mb-3">
-                <img th:src="@{${producto.imagen}}" alt="Imagen 1" class="img-fluid rounded-4" style="width: 230px; height: 300px; object-fit: cover;">
-            </div>
-
+            <img th:src="${!#strings.isEmpty(producto.imagen)} ? @{${producto.imagen}} : @{/uploads/FitForge.png}"
+                 th:alt="${producto.descripcion}"
+                 class="detail-media__img">
         </aside>
 
-        <!-- Fragmento de detalles del producto -->
+        <!-- Vista principal refinada de detalle de producto (sin duplicar imagen) -->
         <section th:fragment="product-details" class="product-details-section">
-            <div class="container mt-4">
-                <div class="row">
-                    <div class="col-md-6">
-                        <img th:src="@{${producto.imagen}}" alt="Imagen Principal" class="img-fluid rounded-4">
-                    </div>
-                    <div class="col-md-6">
-                        <h1 th:text="${producto.descripcion}">Camiseta Gymshark</h1>
-                        <p class="product-price" th:text="'₡ ' + ${#numbers.formatDecimal(producto.precio, 0, 'COMMA', 2, 'POINT')}">$25,000.00</p>
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <a th:href="@{/tienda/listado}" class="btn btn-outline-secondary btn-sm">
+                    ← Volver al catálogo
+                </a>
+                <a th:if="${producto.categoria != null}"
+                   th:href="@{/categoria/{nombre}(nombre=${producto.categoria.descripcion})}"
+                   class="status-badge status-badge--info text-decoration-none"
+                   th:text="${producto.categoria.descripcion}">Categoría</a>
+            </div>
 
-                        <!-- Si es admin, mostrar solo botón de editar -->
+            <div class="detail-card">
+                <div class="detail-grid">
+                    <div class="detail-media">
+                        <img data-testid="detail-main-image"
+                             th:src="${!#strings.isEmpty(producto.imagen)} ? @{${producto.imagen}} : @{/uploads/FitForge.png}"
+                             th:alt="${producto.descripcion}"
+                             class="detail-media__img">
+                    </div>
+
+                    <div class="detail-content">
+                        <div class="product-card__category"
+                             th:text="${producto.categoria != null ? producto.categoria.descripcion : 'Catálogo'}">Categoría</div>
+                        <h1 class="detail-title" th:text="${producto.descripcion}">Nombre del Producto</h1>
+                        <p class="detail-price price-tag"
+                           th:text="'₡ ' + ${#numbers.formatDecimal(producto.precio, 0, 'COMMA', 2, 'POINT')}">₡ 0.00</p>
+                        <p class="text-secondary mb-4" th:text="${producto.detalle}">Descripción detallada del artículo.</p>
+
+                        <!-- Vista para administradores -->
                         <div th:if="${esAdmin}">
-                            <a th:href="@{'/admin/productos/modifica/' + ${producto.idProducto}}" class="btn btn-warning">
+                            <a th:href="@{'/admin/productos/editar/' + ${producto.idProducto}}" class="btn btn-primary">
                                 Editar producto
                             </a>
                         </div>
-                        <!-- Si no es admin, mostrar tallas, colores, cantidad y botón agregar al carrito -->
+
+                        <!-- Vista de compra para clientes -->
                         <div th:if="${!esAdmin}">
-                            <!-- Validación para categoría "Suplementos" (idCategoria = 2) -->
-                            <div th:if="${producto.categoria != null and producto.categoria.idCategoria != 2}">
-                                <!-- Colores dinámicos -->
-                                <div class="product-color">
-                                    <h2>Colores disponibles:</h2>
-                                    <div class="color-options">
-                                        <button th:each="pct : ${producto.productoColorTallas}"
-                                                th:class="'color-option ' + ${pct.color != null ? pct.color.nombreColor.toLowerCase() : 'no-color'}"
-                                                th:style="'background-color: ' + ${pct.color != null ? pct.color.nombreColor : 'gray'}"
-                                                th:title="${pct.color != null ? pct.color.nombreColor : 'Sin color'}">
+                            <div th:if="${#lists.isEmpty(variantesActivas)}" class="alert alert-warning" role="alert">
+                                Este producto aún no tiene variantes disponibles.
+                            </div>
+
+                            <!-- Píldoras rápidas de combinación y stock sincronizadas con el select contractual -->
+                            <div th:unless="${#lists.isEmpty(variantesActivas)}" class="mb-3">
+                                <span class="form-label d-block">Combinaciones registradas (Color / Talla y Stock):</span>
+                                <div class="variant-pills" role="group" aria-label="Seleccionar combinación de color y talla">
+                                    <button type="button"
+                                            class="variant-pill"
+                                            data-testid="variant-pill"
+                                            th:each="pct : ${variantesActivas}"
+                                            th:attr="data-variant-id=${pct.idProductoColorTalla},data-variant-stock=${pct.existencias != null ? pct.existencias : 0},aria-pressed='false'"
+                                            th:disabled="${pct.existencias == null or pct.existencias == 0}">
+                                        <span th:text="${(pct.color != null ? pct.color.nombreColor : 'Sin color') + ' / ' + (pct.talla != null ? pct.talla.nombreTalla : 'Única')}">Color / Talla</span>
+                                        <span class="status-badge"
+                                              th:classappend="${pct.existencias == null or pct.existencias == 0} ? ' status-badge--danger' : (${pct.existencias <= 5} ? ' status-badge--warning' : ' status-badge--success')"
+                                              th:text="${(pct.existencias == null or pct.existencias == 0) ? 'Agotado (0)' : ('Stock: ' + pct.existencias)}">Stock</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <form th:action="@{/carrito/agregar}"
+                                  method="post"
+                                  id="agregarCarritoForm"
+                                  class="p-3 rounded border"
+                                  style="background-color: var(--ff-surface-subtle);">
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-md-7">
+                                        <label for="variante" class="form-label">Color / Talla</label>
+                                        <select id="variante" name="id" class="form-select" required>
+                                            <option value="">Seleccioná una variante</option>
+                                            <option th:each="pct : ${variantesActivas}"
+                                                    th:value="${pct.idProductoColorTalla}"
+                                                    th:attr="data-stock=${pct.existencias != null ? pct.existencias : 0}"
+                                                    th:disabled="${pct.existencias == null or pct.existencias == 0}"
+                                                    th:text="${(pct.color != null ? pct.color.nombreColor : 'Sin color') + ' / ' + (pct.talla != null ? pct.talla.nombreTalla : 'Única') + ' — Stock: ' + pct.existencias}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6 col-md-2">
+                                        <label for="cantidad" class="form-label">Cantidad</label>
+                                        <input type="number"
+                                               id="cantidad"
+                                               name="cantidad"
+                                               class="form-control tabular-nums"
+                                               value="1"
+                                               min="1"
+                                               required>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <button type="submit"
+                                                class="btn btn-primary add-to-cart w-100"
+                                                th:disabled="${#lists.isEmpty(variantesActivas)}">
+                                            Agregar al carrito
                                         </button>
-                                        <span th:if="${#lists.isEmpty(producto.productoColorTallas)}" class="text-muted">Sin colores disponibles</span>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- Tallas dinámicas -->
-                            <div class="product-size">
-                                <h2>Tallas disponibles:</h2>
-                                <div class="size-options">
-                                    <span th:if="${isTallaUnica}" class="badge-talla-unica">
-                                        Artículo talla única
-                                    </span>
-                                    <span th:unless="${isTallaUnica}">
-                                        <button th:each="pct : ${producto.productoColorTallas}"
-                                                th:if="${pct.talla != null and pct.existencias > 0}"
-                                                th:class="'size-option ' + ${pct.talla != null ? pct.talla.nombreTalla : ''}"
-                                                th:text="${pct.talla != null ? pct.talla.nombreTalla : ''}">
-                                        </button>
-                                        <span th:if="${#lists.isEmpty(producto.productoColorTallas) or not hasAvailableTallas}"
-                                              class="text-muted">
-                                            Sin tallas disponibles
-                                        </span>
-                                    </span>
-                                </div>
-                            </div>
-                            <!-- Cantidad y botón agregar al carrito -->
-                            <div class="product-quantity"></div>
-                                <h2>Cantidad</h2>
-                                <div class="quantity-control">
-                                    <button type="button" class="quantity-btn minus">-</button>
-                                    <input type="text" class="quantity-input" value="1" readonly>
-                                    <button class="quantity-btn plus">+</button>
-                                    <span th:attr="data-stock=${producto.productoColorTallas[0].existencias != null ? producto.productoColorTallas[0].existencias : 0}" style="display:none;"></span>
-                                </div>
-                            </div>
-                            <a th:if="${!#lists.isEmpty(producto.productoColorTallas) and producto.productoColorTallas[0].idProductoColorTalla != null}"
-                               th:href="@{'/carrito/agregar/' + ${producto.productoColorTallas[0].idProductoColorTalla}}"
-                               class="btn btn-primary add-to-cart">
-                                Agregar al carrito
-                            </a>
+                            </form>
+
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    var selectEl = document.getElementById('variante');
+                                    var qtyInput = document.getElementById('cantidad');
+                                    var pills = document.querySelectorAll('.variant-pill[data-variant-id]');
+                                    if (!selectEl) return;
+
+                                    function syncFromSelect() {
+                                        var currentVal = selectEl.value;
+                                        pills.forEach(function (btn) {
+                                            var match = btn.getAttribute('data-variant-id') === currentVal;
+                                            btn.setAttribute('aria-pressed', match ? 'true' : 'false');
+                                        });
+                                        var opt = selectEl.options[selectEl.selectedIndex];
+                                        if (opt && qtyInput) {
+                                            var maxStock = parseInt(opt.getAttribute('data-stock') || '0', 10);
+                                            if (maxStock > 0) {
+                                                qtyInput.max = String(maxStock);
+                                                if (parseInt(qtyInput.value || '1', 10) > maxStock) {
+                                                    qtyInput.value = String(maxStock);
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    pills.forEach(function (btn) {
+                                        btn.addEventListener('click', function () {
+                                            if (btn.disabled) return;
+                                            selectEl.value = btn.getAttribute('data-variant-id');
+                                            syncFromSelect();
+                                        });
+                                    });
+
+                                    selectEl.addEventListener('change', syncFromSelect);
+                                });
+                            </script>
                         </div>
                     </div>
                 </div>
             </div>
-            </div>
-            
-            <!-- Script para manejar los botones de cantidad -->
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const minusBtn = document.querySelector('.quantity-btn.minus');
-                    const plusBtn = document.querySelector('.quantity-btn.plus');
-                    const quantityInput = document.querySelector('.quantity-input');
-                    
-                    if (minusBtn && plusBtn && quantityInput) {
-                        // Evento para el botón menos
-                        minusBtn.addEventListener('click', function() {
-                            let value = parseInt(quantityInput.value, 10);
-                            if (value > 1) {
-                                quantityInput.value = value - 1;
-                            }
-                        });
-                        
-                        // Evento para el botón más
-                        plusBtn.addEventListener('click', function() {
-                            let value = parseInt(quantityInput.value, 10);
-                            quantityInput.value = value + 1;
-                        });
-                    }
-                });
-            </script>
         </section>
     </body>
 </html>

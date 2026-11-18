@@ -55,7 +55,7 @@
                 <p class="text-center mt-4">
                     <a href="/admin" class="btn btn-secondary me-2">Volver</a>
                     <a href="/admin/productos/nuevo" class="btn btn-primary me-2">Agregar Producto</a>
-                    <a href="/logout" class="btn btn-danger">Cerrar Sesión</a>
+                    <form th:action="@{/logout}" method="post"><button type="submit" class="btn btn-light">Cerrar Sesión</button></form>
                 </p>
             </div>
         </div>

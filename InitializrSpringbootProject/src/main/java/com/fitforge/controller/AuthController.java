@@ -85,8 +85,8 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     public String forgotPassword(@RequestParam String email, Model model) {
-        model.addAttribute("message", "Ve a tu correo a restablecer la contraseña.");
-        return "forgot-password";
+        throw new org.springframework.web.server.ResponseStatusException(
+            org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "Recuperación de contraseña no disponible en esta demo.");
     }
 
     @GetMapping("/home")

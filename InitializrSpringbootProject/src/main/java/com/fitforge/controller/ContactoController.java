@@ -26,11 +26,7 @@ public class ContactoController {
 
     @PostMapping("/enviar")
     public String enviarContacto(@Valid Contacto contacto, BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            return "contacto/contacto"; // Volver al formulario si hay errores
-        }
-        contacto.setActivo(true);
-        contactoService.saveContacto(contacto);
-        return "redirect:/contacto?exito";
+        throw new org.springframework.web.server.ResponseStatusException(
+            org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "Envío de contacto no disponible en esta demo.");
     }
 }

@@ -28,10 +28,8 @@ public class TiendaController {
     @Autowired
     private CategoriaService categoriaService;
 
-    @GetMapping({"/", "/listado", "/productos"})
-    public String mostrarListado(Model model) {
-        List<Producto> lista = tiendaService.getProducto(true);
-        List<Categoria> categorias = categoriaService.getCategoria(false);
+    private void cargarFiltros(Model model, List<Producto> lista) {
+        List<Categoria> categorias = categoriaService.getCategoria(true);
         model.addAttribute("productos", lista != null ? lista : Collections.emptyList());
         model.addAttribute("categorias", categorias != null ? categorias : Collections.emptyList());
         model.addAttribute("colores", tiendaService.getColores());
@@ -39,6 +37,12 @@ public class TiendaController {
         model.addAttribute("precioMin", tiendaService.getPrecioMinimo());
         model.addAttribute("precioMax", tiendaService.getPrecioMaximo());
         model.addAttribute("totalProductos", lista != null ? lista.size() : 0);
+    }
+
+    @GetMapping({"/", "/listado", "/productos"})
+    public String mostrarListado(Model model) {
+        List<Producto> lista = tiendaService.getProducto(true);
+        cargarFiltros(model, lista);
         return "tienda/listado";
     }
 
@@ -51,13 +55,7 @@ public class TiendaController {
             @RequestParam(value = "precioMax", required = false) Double precioMax,
             Model model) {
         List<Producto> lista = tiendaService.getProductosFiltrados(categorias, colores, tallas, precioMin, precioMax);
-        model.addAttribute("productos", lista != null ? lista : Collections.emptyList());
-        model.addAttribute("categorias", categoriaService.getCategoria(false));
-        model.addAttribute("colores", tiendaService.getColores());
-        model.addAttribute("tallas", tiendaService.getTallas());
-        model.addAttribute("precioMin", tiendaService.getPrecioMinimo());
-        model.addAttribute("precioMax", tiendaService.getPrecioMaximo());
-        model.addAttribute("totalProductos", lista != null ? lista.size() : 0);
+        cargarFiltros(model, lista);
         return "tienda/listado";
     }
     
@@ -66,13 +64,7 @@ public class TiendaController {
         @RequestParam(value = "termino", required = false) String termino,
         Model model) {
         List<Producto> lista = tiendaService.buscarProductos(termino);
-        model.addAttribute("productos", lista != null ? lista : Collections.emptyList());
-        model.addAttribute("categorias", categoriaService.getCategoria(false));
-        model.addAttribute("colores", tiendaService.getColores());
-        model.addAttribute("tallas", tiendaService.getTallas());
-        model.addAttribute("precioMin", tiendaService.getPrecioMinimo());
-        model.addAttribute("precioMax", tiendaService.getPrecioMaximo());
-        model.addAttribute("totalProductos", lista != null ? lista.size() : 0);
+        cargarFiltros(model, lista);
         model.addAttribute("terminoBusqueda", termino);
         return "tienda/listado";
     }

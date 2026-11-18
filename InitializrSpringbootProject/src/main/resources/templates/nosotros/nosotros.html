@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"
+      lang="es">
     <head th:replace="~{layout/plantilla :: head}">
-        <title>FitForge - Sobre Nosotros</title>
+        <title>Sobre Nosotros - FitForge</title>
     </head>
     <body>
         <header th:replace="~{layout/plantilla :: header}"/>
-        <!-- Banner -->
-        <section th:replace="~{layout/plantilla :: Banner-p}"></section>
-        <!-- Contenido de "Nosotros" -->
-        <section th:replace="~{nosotros/fragmentos :: nosotros}"></section>
-        <footer th:replace="~{layout/plantilla :: footer}"/>       
+        <main id="mainContent" class="main-container" tabindex="-1">
+            <section th:replace="~{nosotros/fragmentos :: nosotros}"></section>
+        </main>
+        <footer th:replace="~{layout/plantilla :: footer}"/>
+        <th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
     </body>
 </html>

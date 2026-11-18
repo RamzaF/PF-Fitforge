@@ -16,6 +16,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Data
 @Entity
@@ -40,9 +42,13 @@ public class Producto implements Serializable {
     
     @ManyToOne
     @JoinColumn(name = "id_categoria")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Categoria categoria;
     
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<ProductoColorTalla> productoColorTallas = new ArrayList<>();
     
     public Producto() {
@@ -75,10 +81,11 @@ public class Producto implements Serializable {
         return this.rutaImagen;
     }
     
-    // Calculate total existencias from productoColorTallas
+    // Calculate total existencias from active productoColorTallas
     public int getExistencias() {
         return productoColorTallas.stream()
-                .mapToInt(pct -> pct.getExistencias())
+                .filter(ProductoColorTalla::isActivo)
+                .mapToInt(pct -> pct.getExistencias() != null ? pct.getExistencias() : 0)
                 .sum();
     }
     

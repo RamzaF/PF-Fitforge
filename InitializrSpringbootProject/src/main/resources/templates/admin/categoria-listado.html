@@ -1,90 +1,65 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="es">
     <head th:replace="~{layout/plantilla :: head}">
-        <title>Productos por Categoría</title>
+        <title>Productos por Categoría - FitForge</title>
     </head>
-    <body>
+    <body sec:authorize="hasRole('ROLE_ADMIN')">
         <header th:replace="~{layout/plantilla :: header}"></header>
 
-        <div class="container mt-4 mb-5">
-            <div class="row">
-                <div class="col-md-12">
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a th:href="@{/}">Inicio</a></li>
-                            <li class="breadcrumb-item"><a th:href="@{/admin/productos}">Productos</a></li>
-                            <li class="breadcrumb-item active" aria-current="page" th:text="${categoria}">Categoría</li>
-                        </ol>
-                    </nav>
-                    
-                    <!-- Mensajes de retroalimentación -->
-                    <div th:if="${mensaje != null}" class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle"></i> <span th:text="${mensaje}"></span>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    <div th:if="${error != null}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                            <h4 class="mb-0" th:text="${'Productos - ' + categoria}">Productos por Categoría</h4>
-                            <a th:href="@{/admin/productos/nuevo}" class="btn btn-light btn-sm">
-                                <i class="fas fa-plus-circle"></i> Nuevo Producto
-                            </a>
-                        </div>
-                        <div class="card-body">
-                            <!-- Listado de productos -->
-                            <div class="row" th:if="${not #lists.isEmpty(productos)}">
-                                <div class="col-md-4 mb-4" th:each="producto : ${productos}">
-                                    <div class="card h-100">
-                                        <img th:if="${producto.rutaImagen != null}" th:src="@{${producto.rutaImagen}}" class="card-img-top" alt="Imagen del producto" style="height: 200px; object-fit: cover;">
-                                        <img th:if="${producto.rutaImagen == null}" th:src="@{/images/default-product.jpg}" class="card-img-top" alt="Imagen predeterminada" style="height: 200px; object-fit: cover;">
-                                        <div class="card-body">
-                                            <h5 class="card-title" th:text="${producto.nombre}">Nombre del producto</h5>
-                                            <p class="card-text" th:text="${#strings.abbreviate(producto.descripcion, 100)}">Descripción del producto...</p>
-                                            <p class="card-text">
-                                                <span class="badge bg-info" th:text="${producto.categoria.descripcion}">Categoría</span>
-                                                <span class="badge bg-secondary" th:text="${'$' + #numbers.formatDecimal(producto.precio, 0, 'COMMA', 2, 'POINT')}">Precio</span>
-                                            </p>
-                                        </div>
-                                        <div class="card-footer bg-white">
-                                            <div class="d-flex justify-content-between">
-                                                <a th:href="@{/admin/productos/editar/{id}(id=${producto.idProducto})}" class="btn btn-primary btn-sm">
-                                                    <i class="fas fa-edit"></i> Editar
-                                                </a>
-                                                <a th:href="@{/admin/productos/inventario/{id}(id=${producto.idProducto})}" class="btn btn-success btn-sm">
-                                                    <i class="fas fa-boxes"></i> Inventario
-                                                </a>
-                                                <a th:href="@{/admin/productos/eliminar/{id}(id=${producto.idProducto})}" class="btn btn-danger btn-sm" 
-                                                   onclick="return confirm('¿Está seguro de eliminar este producto?')">
-                                                    <i class="fas fa-trash"></i> Eliminar
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Mensaje si no hay productos -->
-                            <div class="alert alert-info text-center" th:if="${#lists.isEmpty(productos)}">
-                                <i class="fas fa-info-circle"></i> No hay productos disponibles en esta categoría.
-                                <div class="mt-3">
-                                    <a th:href="@{/admin/productos/nuevo}" class="btn btn-primary">
-                                        <i class="fas fa-plus-circle"></i> Agregar Nuevo Producto
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <main id="mainContent" class="main-container" tabindex="-1">
+            <div th:replace="~{layout/plantilla :: adminSubnav('productos')}"></div>
+
+            <div class="store-header-bar">
+                <div>
+                    <h1 class="store-header-bar__title" th:text="${'Productos — ' + categoria}">Productos por Categoría</h1>
+                    <p class="store-header-bar__subtitle">Administrá los productos de esta categoría o su inventario por variante.</p>
                 </div>
+                <a th:href="@{/admin/productos/listado}" class="btn btn-outline-primary btn-sm">Ir a todos los productos</a>
             </div>
-        </div>
+
+            <div th:if="${mensaje != null}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${mensaje}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+            <div th:if="${error != null}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(productos)}">
+                <p class="mb-3 text-secondary">No hay productos disponibles en esta categoría.</p>
+                <a th:href="@{/admin/productos/listado}" class="btn btn-primary btn-sm">Ir a productos</a>
+            </div>
+
+            <div class="product-grid" th:if="${not #lists.isEmpty(productos)}">
+                <article class="product-card" th:each="producto : ${productos}">
+                    <div class="product-card__media">
+                        <img th:src="${!#strings.isEmpty(producto.rutaImagen)} ? @{${producto.rutaImagen}} : @{/uploads/FitForge.png}"
+                             class="product-card__img"
+                             th:alt="${producto.descripcion}">
+                    </div>
+                    <div class="product-card__body">
+                        <div>
+                            <div class="product-card__category" th:text="${producto.categoria.descripcion}">Categoría</div>
+                            <h2 class="product-card__title" th:text="${producto.descripcion}">Producto</h2>
+                        </div>
+                        <div class="product-card__footer">
+                            <span class="product-card__price price-tag"
+                                  th:text="${'₡ ' + #numbers.formatDecimal(producto.precio, 0, 'COMMA', 2, 'POINT')}">₡ 0.00</span>
+                            <div class="d-flex gap-1">
+                                <a th:href="@{/admin/productos/editar/{id}(id=${producto.idProducto})}" class="btn btn-primary btn-sm">Editar</a>
+                                <a th:href="@{/admin/productos/inventario/{id}(id=${producto.idProducto})}" class="btn btn-outline-secondary btn-sm">Inventario</a>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </main>
 
         <footer th:replace="~{layout/plantilla :: footer}"></footer>
+        <th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
     </body>
 </html>
-

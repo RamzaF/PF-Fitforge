@@ -11,8 +11,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.fitforge.domain.Producto;
+import com.fitforge.domain.ProductoColorTalla;
 import com.fitforge.service.CategoriaService;
+import com.fitforge.service.ProductoColorTallaService;
 import com.fitforge.service.ProductoService;
+import java.util.List;
 
 /**
  *
@@ -25,6 +28,9 @@ public class ProductoController {
     @Autowired
     private ProductoService productoService;
 
+    @Autowired
+    private ProductoColorTallaService productoColorTallaService;
+
     private final CategoriaService categoriaService;
 
     @Autowired // Inyección por constructor
@@ -34,12 +40,7 @@ public class ProductoController {
 
     @GetMapping
     public String listado(Model model) {
-        var lista = productoService.getProductos(true); 
-        var categoria = categoriaService.getCategoria(false); 
-        model.addAttribute("productos", lista);
-        model.addAttribute("categoria", categoria);
-        model.addAttribute("totalProductos", lista.size());
-        return "/productos/productos"; 
+        return "redirect:/tienda/listado";
     }
 
     @GetMapping("/{id}")
@@ -58,12 +59,17 @@ public class ProductoController {
             return "redirect:/admin/productos/listado";
         }
         Producto producto = productoService.getProductoById(id);
-        if (producto != null) {
-            boolean isTallaUnica = producto.getProductoColorTallas().stream()
-                    .anyMatch(pct -> pct.getExistencias() > 0 && pct.getTalla() == null);
-            boolean hasAvailableTallas = producto.getProductoColorTallas().stream()
-                    .anyMatch(pct -> pct.getTalla() != null && pct.getExistencias() > 0);
+        if (producto != null && producto.isActivo()
+                && producto.getCategoria() != null && producto.getCategoria().isActivo()) {
+            List<ProductoColorTalla> variantesActivas = productoColorTallaService.listarPorProducto(id).stream()
+                    .filter(ProductoColorTalla::isActivo)
+                    .toList();
+            boolean isTallaUnica = variantesActivas.stream()
+                    .anyMatch(pct -> pct.getExistencias() != null && pct.getExistencias() > 0 && pct.getTalla() == null);
+            boolean hasAvailableTallas = variantesActivas.stream()
+                    .anyMatch(pct -> pct.getTalla() != null && pct.getExistencias() != null && pct.getExistencias() > 0);
             model.addAttribute("producto", producto);
+            model.addAttribute("variantesActivas", variantesActivas);
             model.addAttribute("isTallaUnica", isTallaUnica);
             model.addAttribute("hasAvailableTallas", hasAvailableTallas);
             model.addAttribute("esAdmin", false);

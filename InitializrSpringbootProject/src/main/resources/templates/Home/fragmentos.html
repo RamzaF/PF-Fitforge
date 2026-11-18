@@ -1,126 +1,63 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      lang="es">
     <head th:replace="~{layout/plantilla :: head}">
-        <title>Fitforge</title>
+        <title>FitForge</title>
     </head>
     <body>
-
-        <!-- Hero Section -->
-        <div th:fragment="hero-section" class="position-relative hero-section">
-            <!-- Imagen de fondo con overlay para mejor contraste -->
-            <div class="hero-bg position-absolute top-0 start-0 w-100" style="min-height: 50vh;">
-                <div class="overlay-dark position-absolute top-0 start-0 w-100 h-100"></div>
-                <img th:src="@{/uploads/Banner.PNG}" alt="Background" class="w-100 h-100 object-fit-cover position-absolute top-0 start-0">
-            </div>
-            <!-- Hero con animación y colores de marca -->
-            <div class="position-relative hero-content d-flex align-items-center justify-content-center w-100" style="min-height: 50vh;">
-                <div class="container text-center text-white py-5">
-                    <div class="row justify-content-center">
-                        <div class="col-12 col-md-10 col-lg-8">
-                            <h1 class="display-2 fw-bold mb-3 fade-in">FITFORGE</h1>
-                            <p class="lead fs-3 mb-4 slide-up">Forjando tu estilo Fitness</p>
-                            <a href="/tienda/listado" class="btn btn-accent btn-lg px-4 py-2 fw-bold slide-up-delay">COMPRAR AHORA</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div th:fragment="Banner" class="position-relative hero-section">
-            <!-- Imagen de fondo con overlay para mejor contraste -->
-            <div class="hero-bg position-absolute top-0 start-0 w-100" style="min-height: 50vh;">
-                <div class="overlay-dark position-absolute top-0 start-0 w-100 h-100"></div>
-                <img th:src="@{/uploads/Banner.PNG}" alt="Background" class="w-100 h-100 object-fit-cover position-absolute top-0 start-0">
-            </div>
-            <!-- Hero con animación y colores de marca -->
-            <div class="position-relative hero-content d-flex align-items-center justify-content-center w-100" style="min-height: 50vh;">
-                <div class="container text-center text-white py-5">
-                    <div class="row justify-content-center">
-                        <div class="col-12 col-md-10 col-lg-8">
-                            <h1 class="display-2 fw-bold mb-3 fade-in">FITFORGE</h1>
-                            <p class="lead fs-3 mb-4 slide-up">Forjando tu estilo Fitness</p>
+        <!-- Hero compacto y sobrio -->
+        <div th:fragment="hero-section" class="hero-banner-compact">
+            <div class="container">
+                <div class="row align-items-center gy-3">
+                    <div class="col-lg-8">
+                        <h1 class="hero-banner-compact__title">FitForge — Rendimiento y Estilo Deportivo</h1>
+                        <p class="hero-banner-compact__lead mb-3">
+                            Indumentaria técnica, suplementación y accesorios con consulta de tallas y colores disponibles.
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="/tienda/listado" class="btn btn-primary">Explorar Catálogo</a>
+                            <a href="/register" class="btn btn-outline-light" sec:authorize="isAnonymous()">Crear cuenta</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <section th:fragment="tienda-productos">
-
-            <!-- Botón de filtro -->
-            <div class="d-flex align-items-center mb-4">
-                <button class="btn btn-outline-secondary d-flex align-items-center">
-                    <i class="bi bi-funnel me-2"></i>
-                    <span>Filtro</span>
-                </button>
-            </div>
-
-            <!-- Catálogo de productos -->
-            <div class="products-catalog py-1">
-                <div class="container">
-                    <h2 class="text-center mb-5 fw-bold section-title">Tienda</h2>
-                    <div class="row g-1"> <!-- Reducido de g-4 a g-1 para un espacio mínimo -->
-                        <!-- Tarjeta de producto -->
-                        <div class="col-12 col-md-6 col-lg-4 mb-2" th:each="producto : ${productos}">
-                            <div class="card h-100 border-0 shadow product-card-tienda" style="height: 100%; width: 100%;">
-                                <div class="overflow-hidden">
-                                    <!-- Imagen con efecto hover, tamaño aumentado -->
-                                    <img th:src="@{${producto.imagen}}" class="card-img-top product-img-tienda" th:alt="${producto.descripcion}" style="height: 300px; object-fit: cover; width: 100%;">
-                                </div>
-
-                                <div class="card-body text-center">
-                                    <!-- Descripción del producto con fuente más grande -->
-                                    <h5 class="card-title fw-bold" th:text="${producto.descripcion}" style="font-size: 1.5rem;">Descripción Producto</h5>
-                                    <!-- Detalle con limitación de caracteres -->
-                                    <p class="card-text text-muted" th:text="${producto.detalle}" style="font-size: 1.1rem;">Detalle del producto</p>
-                                </div>
-
-                                <div class="card-footer bg-white border-0 text-center">
-                                    <!-- Precio con estilo destacado -->
-                                    <p class="h4 text-primary fw-bold mb-3 product-price-tienda" th:text="'₡ ' + ${producto.precio}" style="font-size: 1.8rem;">₡ Precio</p>
-                                    <!-- Botón con efecto hover -->
-                                    <a th:if="${esAdmin}" th:href="@{'/admin/productos/editar/' + ${producto.idProducto}}" class="btn btn-warning w-100">
-                                        Editar
-                                    </a>
-                                    <a th:if="${!esAdmin}" th:href="@{'/productos/' + ${producto.idProducto}}" class="btn btn-outline-primary w-100 product-btn-tienda" style="font-size: 1.2rem;">
-                                        Ver detalles
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <div th:fragment="cta-banner" class="cta-banner py-5 text-center" sec:authorize="!hasRole('ROLE_ADMIN')">
-            <div class="container py-4">
-                <h2 class="display-6 fw-bold mb-3 text-white">ENTRENA CON ESTILO</h2>
-                <p class="lead mb-4 text-white">Descubre nuestra nueva colección diseñada para maximizar tu rendimiento</p>
-                <a href="tienda/listado" class="btn btn-light-accent btn-lg px-5 py-2">Explorar Ahora</a>
+        <div th:fragment="Banner" class="hero-banner-compact">
+            <div class="container">
+                <h1 class="hero-banner-compact__title">FitForge</h1>
+                <p class="hero-banner-compact__lead mb-0">Forjando tu estilo deportivo.</p>
             </div>
         </div>
-        
-        <!-- fragmento: Marcas -->
+
+        <div th:fragment="cta-banner" class="py-4 bg-dark text-white text-center" sec:authorize="!hasRole('ROLE_ADMIN')">
+            <div class="container">
+                <h2 class="h4 fw-bold mb-2">Equipate para tu próximo entrenamiento</h2>
+                <a href="/tienda/listado" class="btn btn-primary btn-sm">Ver productos disponibles</a>
+            </div>
+        </div>
+
+        <!-- Marcas -->
         <div th:fragment="brands-section" class="brands-container">
-            <div class="row align-items-center justify-content-center">
-                <div class="col-6 col-md-3 col-lg-2 text-center mb-4">
+            <div class="row align-items-center justify-content-center g-3">
+                <div class="col-6 col-md-3 text-center">
                     <div class="brand-logo">
                         <img th:src="@{/uploads/gymshark-limited-logo.png}" alt="Gymshark" class="img-fluid">
                     </div>
                 </div>
-                <div class="col-6 col-md-3 col-lg-2 text-center mb-4">
+                <div class="col-6 col-md-3 text-center">
                     <div class="brand-logo">
-                        <img th:src="@{/uploads/Youngla-Logo-Png-Vector.jpg}" alt="Youngla" class="img-fluid">
+                        <img th:src="@{/uploads/Youngla-Logo-Png-Vector.jpg}" alt="YoungLA" class="img-fluid">
                     </div>
                 </div>
-                <div class="col-6 col-md-3 col-lg-2 text-center mb-4">
+                <div class="col-6 col-md-3 text-center">
                     <div class="brand-logo">
                         <img th:src="@{/uploads/Pursue Fitness.jpeg}" alt="Pursue Fitness" class="img-fluid">
                     </div>
                 </div>
-                <div class="col-6 col-md-3 col-lg-2 text-center mb-4">
+                <div class="col-6 col-md-3 text-center">
                     <div class="brand-logo">
                         <img th:src="@{/uploads/Logo-black2_copy_110x.webp}" alt="Lazuli Label" class="img-fluid">
                     </div>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head th:replace="~{layout/plantilla :: head}"><title>Confirmación pendiente - FitForge</title></head>
+<body>
+<header th:replace="~{layout/plantilla :: header}"/>
+<main id="mainContent" class="main-container" tabindex="-1">
+    <div class="panel-card mx-auto" style="max-width: 580px;">
+        <div class="panel-card__header">
+            <h1 class="panel-card__title">No se pudo confirmar el resultado</h1>
+        </div>
+        <div class="panel-card__body">
+            <p class="alert alert-warning" role="alert">
+                Tu carrito se conserva. Volvé al carrito y reintentá con la misma confirmación para consultar o registrar el pedido sin duplicarlo.
+            </p>
+            <a href="/carrito/ver" class="btn btn-primary">Volver al carrito para reintentar</a>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{layout/plantilla :: footer}"/>
+<th:block th:replace="~{layout/plantilla :: scripts}"/>
+</body>
+</html>

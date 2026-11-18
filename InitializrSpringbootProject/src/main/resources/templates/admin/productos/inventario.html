@@ -1,176 +1,225 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="es">
     <head th:replace="~{layout/plantilla :: head}">
-        <title>Inventario de Productos</title>
+        <title>Inventario de Producto - FitForge</title>
     </head>
-    <body>
+    <body sec:authorize="hasRole('ROLE_ADMIN')">
         <header th:replace="~{layout/plantilla :: header}"></header>
 
-        <div class="container mt-4 mb-5">
-            <div class="row">
-                <div class="col-md-12">
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a th:href="@{/}">Inicio</a></li>
-                            <li class="breadcrumb-item"><a th:href="@{/admin/productos}">Productos</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Inventario</li>
-                        </ol>
-                    </nav>
-                    
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                            <h4 class="mb-0">Inventario del Producto</h4>
-                            <a th:href="@{/admin/productos}" class="btn btn-light btn-sm">Volver a Productos</a>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-4">
-                                <div class="col-md-4">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <h5 class="card-title" th:text="${producto.nombre}"></h5>
-                                            <p class="card-text" th:text="${producto.descripcion}"></p>
-                                            <p class="card-text">
-                                                <span class="badge bg-info">Categoría: </span>
-                                                <span th:text="${producto.categoria.descripcion}"></span>
-                                            </p>
-                                            <p class="card-text">
-                                                <span class="badge bg-secondary">Precio: </span>
-                                                <span th:text="${'$' + #numbers.formatDecimal(producto.precio, 0, 'COMMA', 2, 'POINT')}"></span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-8">
-                                    <div class="alert alert-info">
-                                        <i class="fas fa-info-circle"></i> 
-                                        Administre las combinaciones de colores y tallas disponibles para este producto, así como las existencias de cada combinación.
-                                    </div>
-                                    
-                                    <!-- Mensajes de retroalimentación -->
-                                    <div th:if="${mensaje != null}" class="alert alert-success alert-dismissible fade show" role="alert">
-                                        <i class="fas fa-check-circle"></i> <span th:text="${mensaje}"></span>
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                    </div>
-                                    <div th:if="${error != null}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Tabla de inventario actual -->
-                            <div class="row mb-4">
-                                <div class="col-md-12">
-                                    <h5>Inventario Actual</h5>
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-hover">
-                                            <thead class="table-dark">
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Color</th>
-                                                    <th>Talla</th>
-                                                    <th>Existencias</th>
-                                                    <th>Acciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr th:if="${inventario.empty}">
-                                                    <td colspan="5" class="text-center">No hay combinaciones registradas para este producto</td>
-                                                </tr>
-                                                <tr th:each="item, status : ${inventario}">
-                                                    <td th:text="${status.count}"></td>
-                                                    <td th:text="${item.color.nombre}"></td>
-                                                    <td th:text="${item.talla.descripcion}"></td>
-                                                    <td>
-                                                        <form th:action="@{/admin/productos/inventario/guardar}" method="post" class="d-flex align-items-center">
-                                                            <input type="hidden" name="id" th:value="${item.id}" />
-                                                            <input type="hidden" name="producto.idProducto" th:value="${producto.idProducto}" />
-                                                            <input type="hidden" name="color.idColor" th:value="${item.color.idColor}" />
-                                                            <input type="hidden" name="talla.idTalla" th:value="${item.talla.idTalla}" />
-                                                            <input type="number" name="existencias" th:value="${item.existencias}" class="form-control form-control-sm me-2" min="0" style="width: 100px;" required />
-                                                            <button type="submit" class="btn btn-primary btn-sm">
-                                                                <i class="fas fa-save"></i>
-                                                            </button>
-                                                        </form>
-                                                    </td>
-                                                    <td>
-                                                        <a th:href="@{/admin/productos/inventario/eliminar/{id}(id=${item.id})}" class="btn btn-danger btn-sm" 
-                                                           onclick="return confirm('¿Está seguro de eliminar esta combinación?')">
-                                                            <i class="fas fa-trash"></i>
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Formulario para agregar nueva combinación -->
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="card">
-                                        <div class="card-header bg-success text-white">
-                                            <h5 class="mb-0">Agregar Nueva Combinación</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <form th:action="@{/admin/productos/inventario/guardar}" method="post" th:object="${nuevaEntrada}">
-                                                <input type="hidden" th:field="*{producto.idProducto}" th:value="${producto.idProducto}" />
-                                                <div class="row g-3">
-                                                    <div class="col-md-4">
-                                                        <label for="color" class="form-label">Color</label>
-                                                        <select class="form-select" id="color" th:field="*{color.idColor}" required>
-                                                            <option value="">Seleccione un color</option>
-                                                            <option th:each="color : ${colores}" th:value="${color.idColor}" th:text="${color.nombre}"></option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label for="talla" class="form-label">Talla</label>
-                                                        <select class="form-select" id="talla" th:field="*{talla.idTalla}" required>
-                                                            <option value="">Seleccione una talla</option>
-                                                            <option th:each="talla : ${tallas}" th:value="${talla.idTalla}" th:text="${talla.descripcion}"></option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label for="existencias" class="form-label">Existencias</label>
-                                                        <input type="number" class="form-control" id="existencias" th:field="*{existencias}" min="0" required />
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex justify-content-end mt-3">
-                                                    <button type="submit" class="btn btn-success">
-                                                        <i class="fas fa-plus-circle"></i> Agregar Combinación
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
+        <main id="mainContent" class="main-container" tabindex="-1">
+            <div th:replace="~{layout/plantilla :: adminSubnav('inventario')}"></div>
+
+            <div th:if="${mensaje != null}"
+                 th:class="'alert alert-' + (${tipo} ?: 'info') + ' alert-dismissible fade show'"
+                 role="alert">
+                <span th:text="${mensaje}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+            <div th:if="${error != null}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+
+            <!-- Cabecera del producto -->
+            <div class="panel-card mb-4">
+                <div class="panel-card__body d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <img th:src="${!#strings.isEmpty(producto.rutaImagen)} ? @{${producto.rutaImagen}} : @{/uploads/FitForge.png}"
+                             th:alt="${producto.descripcion}"
+                             style="width: 68px; height: 68px; object-fit: contain; background: #f2f5f3; border-radius: 8px; padding: 4px; border: 1px solid #d8e0dc;">
+                        <div>
+                            <h1 class="h4 fw-bold mb-1" th:text="${producto.descripcion}">Producto</h1>
+                            <div class="d-flex flex-wrap gap-2 align-items-center small">
+                                <span class="status-badge status-badge--info"
+                                      th:text="${producto.categoria != null ? producto.categoria.descripcion : 'Sin categoría'}">Categoría</span>
+                                <span class="price-tag">Precio: <strong th:text="'₡ ' + ${#numbers.formatDecimal(producto.precio, 0, 'COMMA', 2, 'POINT')}">₡ 0.00</strong></span>
+                                <span class="tabular-nums">Stock activo total: <strong th:text="${producto.existencias}">0</strong></span>
+                                <span th:if="${producto.activo}" class="status-badge status-badge--success">Activo</span>
+                                <span th:unless="${producto.activo}" class="status-badge status-badge--danger">Inactivo</span>
                             </div>
                         </div>
                     </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a th:href="@{/admin/productos/editar/{id}(id=${producto.idProducto})}" class="btn btn-outline-primary btn-sm">
+                            Editar Producto
+                        </a>
+                        <a th:href="@{/admin/inventario}" class="btn btn-outline-secondary btn-sm">
+                            Inventario General
+                        </a>
+                        <a th:href="@{/admin/productos/listado}" class="btn btn-outline-secondary btn-sm">
+                            Volver a Productos
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <!-- Variantes y ajuste de stock -->
+            <div class="panel-card mb-4">
+                <div class="panel-card__header">
+                    <h2 class="panel-card__title">Variantes y Ajuste de Stock</h2>
+                    <span class="status-badge status-badge--info tabular-nums" th:text="${variantes != null ? #lists.size(variantes) : 0}">0</span>
+                </div>
+                <div class="panel-card__body">
+                    <div class="table-wrap border rounded mb-4">
+                        <table class="data-table data-table--stack" aria-label="Variantes del producto y ajuste de stock">
+                            <thead>
+                                <tr>
+                                    <th>Color</th>
+                                    <th>Talla</th>
+                                    <th>Stock Actual</th>
+                                    <th>Estado</th>
+                                    <th>Movimiento de Stock (Sumar o Fijar)</th>
+                                    <th class="text-end">Variante</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(variantes)}">
+                                    <td colspan="6" class="text-center text-secondary py-4">
+                                        Este producto aún no tiene variantes registradas. Agregá una abajo.
+                                    </td>
+                                </tr>
+                                <tr th:each="v : ${variantes}">
+                                    <td data-label="Color" class="fw-semibold" th:text="${v.color != null ? v.color.nombreColor : 'N/A'}">Color</td>
+                                    <td data-label="Talla" th:text="${v.talla != null ? v.talla.nombreTalla : 'N/A'}">Talla</td>
+                                    <td data-label="Stock Actual" class="tabular-nums">
+                                        <span class="fw-bold me-1" th:text="${v.existencias}">0</span>
+                                        <span th:if="${v.activo and v.existencias == 0}" class="status-badge status-badge--danger">Agotado</span>
+                                        <span th:if="${v.activo and v.existencias > 0 and v.existencias <= 5}" class="status-badge status-badge--warning">Bajo</span>
+                                    </td>
+                                    <td data-label="Estado">
+                                        <span th:if="${v.activo}" class="status-badge status-badge--success">Activa</span>
+                                        <span th:unless="${v.activo}" class="status-badge status-badge--neutral">Inactiva</span>
+                                    </td>
+                                    <td data-label="Movimiento de Stock" class="stack-full">
+                                        <form th:if="${v.activo}" th:action="@{/admin/inventario/movimiento}" method="post" class="inv-inline-form">
+                                            <input type="hidden" name="idVariante" th:value="${v.idProductoColorTalla}" />
+                                            <input type="hidden" name="idProducto" th:value="${producto.idProducto}" />
+                                            <select class="form-select form-select-sm" name="tipo" aria-label="Tipo de movimiento" required>
+                                                <option value="INGRESO">Sumar (+)</option>
+                                                <option value="AJUSTE">Fijar (=)</option>
+                                            </select>
+                                            <input type="number" class="form-control form-control-sm tabular-nums" name="cantidad"
+                                                   min="0" step="1" placeholder="Cant." aria-label="Cantidad" required />
+                                            <input type="text" class="form-control form-control-sm" name="motivo"
+                                                   minlength="3" maxlength="200" placeholder="Motivo (ej. Reposición)"
+                                                   aria-label="Motivo del movimiento" required />
+                                            <button type="submit" class="btn btn-sm btn-primary">Aplicar</button>
+                                        </form>
+                                        <span th:unless="${v.activo}" class="field-hint">
+                                            Variante inactiva: activála para ajustar stock.
+                                        </span>
+                                    </td>
+                                    <td data-label="Variante" class="text-end">
+                                        <div class="d-inline-flex gap-1 justify-content-end">
+                                            <form th:action="@{/admin/productos/variantes/estado}" method="post" class="d-inline">
+                                                <input type="hidden" name="idVariante" th:value="${v.idProductoColorTalla}" />
+                                                <input type="hidden" name="idProducto" th:value="${producto.idProducto}" />
+                                                <input type="hidden" name="activo" th:value="${!v.activo}" />
+                                                <input type="hidden" name="origen" value="inventario" />
+                                                <button type="submit"
+                                                        th:class="${v.activo} ? 'btn btn-sm btn-outline-warning' : 'btn btn-sm btn-outline-success'"
+                                                        th:text="${v.activo} ? 'Desactivar' : 'Activar'">Estado</button>
+                                            </form>
+                                            <form th:action="@{/admin/productos/variantes/eliminar/{id}(id=${v.idProductoColorTalla})}"
+                                                  method="post" class="d-inline">
+                                                <input type="hidden" name="origen" value="inventario" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                        th:disabled="${variantesConHistorial != null and variantesConHistorial.contains(v.idProductoColorTalla)}"
+                                                        th:title="${variantesConHistorial != null and variantesConHistorial.contains(v.idProductoColorTalla)} ? 'Tiene pedidos o bitácora registrada; usá Desactivar' : 'Eliminar variante sin historial'">
+                                                    Eliminar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="h6 fw-bold mb-2">Agregar nueva combinación de variante</h3>
+                    <div th:if="${#lists.isEmpty(colores) or #lists.isEmpty(tallas)}" class="alert alert-warning mb-0">
+                        Para agregar variantes necesitás al menos un <a th:href="@{/admin/colores/listado}">color activo</a> y una <a th:href="@{/admin/tallas/listado}">talla activa</a>.
+                    </div>
+                    <form th:unless="${#lists.isEmpty(colores) or #lists.isEmpty(tallas)}"
+                          th:action="@{/admin/productos/variantes/guardar}" method="post" class="row g-3 align-items-end">
+                        <input type="hidden" name="idProducto" th:value="${producto.idProducto}" />
+                        <input type="hidden" name="origen" value="inventario" />
+                        <div class="col-md-4">
+                            <label for="idColorInv" class="form-label">Color</label>
+                            <select class="form-select" id="idColorInv" name="idColor" required>
+                                <option value="" selected disabled>Seleccionar color</option>
+                                <option th:each="c : ${colores}" th:value="${c.idColor}" th:text="${c.nombreColor}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="idTallaInv" class="form-label">Talla</label>
+                            <select class="form-select" id="idTallaInv" name="idTalla" required>
+                                <option value="" selected disabled>Seleccionar talla</option>
+                                <option th:each="t : ${tallas}" th:value="${t.idTalla}" th:text="${t.nombreTalla}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="existenciasInv" class="form-label">Stock inicial</label>
+                            <input type="number" class="form-control tabular-nums" id="existenciasInv" name="existencias" min="0" step="1" value="0" required />
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">Agregar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Bitácora del producto -->
+            <div class="panel-card">
+                <div class="panel-card__header">
+                    <h2 class="panel-card__title">Bitácora de Movimientos del Producto</h2>
+                    <span class="status-badge status-badge--neutral tabular-nums" th:text="${movimientos != null ? #lists.size(movimientos) : 0}">0</span>
+                </div>
+                <div class="table-wrap">
+                    <table class="data-table data-table--stack" aria-label="Bitácora de movimientos del producto">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Variante</th>
+                                <th>Tipo</th>
+                                <th>Antes</th>
+                                <th>Delta</th>
+                                <th>Después</th>
+                                <th>Motivo</th>
+                                <th>Administrador</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(movimientos)}">
+                                <td colspan="8" class="text-center text-secondary py-4">Aún no hay movimientos registrados para este producto.</td>
+                            </tr>
+                            <tr th:each="m : ${movimientos}">
+                                <td data-label="Fecha" class="small text-nowrap tabular-nums" th:text="${#temporals.format(m.fechaCreacion, 'yyyy-MM-dd HH:mm:ss')}">2026-11-16</td>
+                                <td data-label="Variante" th:text="${m.colorNombre + ' / ' + m.tallaNombre}">Negro / M</td>
+                                <td data-label="Tipo">
+                                    <span th:if="${m.tipo == 'INGRESO'}" class="status-badge status-badge--success">INGRESO</span>
+                                    <span th:if="${m.tipo == 'AJUSTE'}" class="status-badge status-badge--warning">AJUSTE</span>
+                                    <span th:if="${m.tipo == 'ALTA'}" class="status-badge status-badge--info">ALTA</span>
+                                </td>
+                                <td data-label="Antes" class="tabular-nums" th:text="${m.cantidadAnterior}">0</td>
+                                <td data-label="Delta" class="tabular-nums">
+                                    <span th:class="${m.cantidadDelta >= 0} ? 'text-success fw-bold' : 'text-danger fw-bold'"
+                                          th:text="${m.cantidadDelta >= 0 ? '+' + m.cantidadDelta : m.cantidadDelta}">+0</span>
+                                </td>
+                                <td data-label="Después" class="fw-bold tabular-nums" th:text="${m.cantidadNueva}">0</td>
+                                <td data-label="Motivo" th:text="${m.motivo}">Motivo</td>
+                                <td data-label="Administrador" class="small text-secondary" th:text="${m.adminNombre + ' (' + m.adminCorreo + ')'}">Admin</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
 
         <footer th:replace="~{layout/plantilla :: footer}"></footer>
-        
-        <script>
-            // Validación adicional para el formulario
-            document.addEventListener('DOMContentLoaded', function () {
-                const form = document.querySelector('form');
-                if (form) {
-                    form.addEventListener('submit', function (event) {
-                        const existencias = document.getElementById('existencias');
-                        if (existencias && existencias.value < 0) {
-                            event.preventDefault();
-                            alert('Las existencias no pueden ser negativas');
-                        }
-                    });
-                }
-            });
-        </script>
+        <th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
     </body>
 </html>
-

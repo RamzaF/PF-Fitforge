@@ -1,0 +1,13 @@
+**
+!InitializrSpringbootProject/
+!InitializrSpringbootProject/pom.xml
+!InitializrSpringbootProject/src/
+!InitializrSpringbootProject/src/**
+**/._*
+**/.DS_Store
+**/.env*
+**/*.log
+**/*.sql
+**/*.dump
+**/.git
+**/target

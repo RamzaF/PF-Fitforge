@@ -1,97 +1,66 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-    <head th:replace="layout/plantilla :: head">
-        <title>Admin - Gestión de Productos</title>
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="es">
+    <head th:replace="~{layout/plantilla :: head}">
+        <title>Admin - Gestión de Productos - FitForge</title>
     </head>
     <body sec:authorize="hasRole('ROLE_ADMIN')">
-        <header th:replace="layout/plantilla :: header"></header>
-        
-        <div class="container py-5">
-            <div class="row mb-4">
-                <div class="col">
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a th:href="@{/admin}">Administración</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Productos</li>
-                        </ol>
-                    </nav>
-                    <h1 class="mb-3">Gestión de Productos</h1>
-                    <p class="text-muted">Administre su catálogo de productos: añada, edite, active/desactive artículos y gestione su inventario.</p>
-                </div>
+        <header th:replace="~{layout/plantilla :: header}"></header>
+
+        <main id="mainContent" class="main-container" tabindex="-1">
+            <div th:replace="~{layout/plantilla :: adminSubnav('productos')}"></div>
+
+            <div th:if="${mensaje != null}"
+                 th:class="'alert alert-' + (${tipo} ?: 'info') + ' alert-dismissible fade show'"
+                 role="alert">
+                <span th:text="${mensaje}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
             </div>
-            
-            <div class="row mb-4">
-                <div class="col">
-                    <!-- Barra de búsqueda y filtros -->
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <form th:action="@{/admin/productos/buscar}" method="get" class="d-flex">
-                                        <input type="text" name="termino" class="form-control" placeholder="Buscar productos..." th:value="${param.termino}">
-                                        <button type="submit" class="btn btn-primary ms-2">
-                                            <i class="bi bi-search"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                                <div class="col-md-6 text-md-end">
-                                    <!-- Botón para agregar nuevo producto -->
-                                    <div th:replace="admin/productos/fragmentos :: botonAgregar"></div>
-                                </div>
-                            </div>
+
+            <div class="store-header-bar">
+                <div>
+                    <h1 class="store-header-bar__title">Gestión de Productos</h1>
+                    <p class="store-header-bar__subtitle">
+                        Creá, editá y activá o desactivá artículos y sus combinaciones de variantes.
+                    </p>
+                </div>
+                <div th:replace="~{admin/productos/fragmentos :: botonAgregar}"></div>
+            </div>
+
+            <!-- Barra compacta de búsqueda administrativa -->
+            <div class="panel-card mb-3">
+                <div class="panel-card__body py-3">
+                    <form th:action="@{/admin/productos/buscar}" method="get" class="row g-2 align-items-center">
+                        <div class="col-md-8">
+                            <label for="adminBuscarProd" class="visually-hidden">Buscar productos</label>
+                            <input type="text"
+                                   id="adminBuscarProd"
+                                   name="termino"
+                                   class="form-control"
+                                   placeholder="Buscar por nombre o descripción..."
+                                   th:value="${terminoBusqueda != null ? terminoBusqueda : param.termino}">
                         </div>
-                    </div>
-                    
-                    <!-- Listado de productos -->
-                    <div th:replace="admin/productos/fragmentos :: listadoProductos"></div>
+                        <div class="col-md-4 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-grow-1">
+                                <i class="bi bi-search" aria-hidden="true"></i>
+                                <span>Buscar</span>
+                            </button>
+                            <a th:href="@{/admin/productos/listado}" class="btn btn-outline-secondary">Limpiar</a>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </div>
-        
+
+            <!-- Listado de productos -->
+            <div th:replace="~{admin/productos/fragmentos :: listadoProductos}"></div>
+        </main>
+
         <!-- Modal para agregar nuevo producto -->
-        <div th:replace="admin/productos/fragmentos :: modalNuevoProducto"></div>
-        
-        <!-- Footer -->
-        <!-- Footer -->
-        <footer th:replace="layout/plantilla :: footer"></footer>
-        
-        <!-- Incluir scripts de la plantilla -->
+        <div th:replace="~{admin/productos/fragmentos :: modalNuevoProducto}"></div>
+
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
         <th:block th:replace="~{layout/plantilla :: scripts}"/>
-        
-        <!-- Scripts específicos para esta página -->
-        <script>
-                // Inicialización de elementos interactivos
-                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                    return new bootstrap.Tooltip(tooltipTriggerEl)
-                });
-                
-                // Mostrar mensajes de error o éxito si existen
-                const urlParams = new URLSearchParams(window.location.search);
-                const mensaje = urlParams.get('mensaje');
-                const tipo = urlParams.get('tipo');
-                
-                if (mensaje) {
-                    // Crear alerta
-                    const alerta = document.createElement('div');
-                    alerta.className = `alert alert-${tipo || 'info'} alert-dismissible fade show`;
-                    alerta.role = 'alert';
-                    alerta.innerHTML = mensaje + 
-                        '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
-                    
-                    // Insertar alerta al inicio del contenedor
-                    const container = document.querySelector('.container');
-                    container.insertBefore(alerta, container.firstChild);
-                    
-                    // Auto cerrar después de 5 segundos
-                    setTimeout(() => {
-                        const bsAlert = new bootstrap.Alert(alerta);
-                        bsAlert.close();
-                    }, 5000);
-                }
-        </script>
     </body>
 </html>
-

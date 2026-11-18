@@ -24,8 +24,17 @@ public class Item {
         this.cantidad = 1;
     }
 
+    public boolean isDisponible() {
+        return productoColorTalla != null
+            && productoColorTalla.isActivo()
+            && productoColorTalla.getProducto() != null
+            && productoColorTalla.getProducto().isActivo()
+            && (productoColorTalla.getProducto().getCategoria() == null
+                || productoColorTalla.getProducto().getCategoria().isActivo());
+    }
+
     public double getSubtotal() {
-        if (productoColorTalla == null || productoColorTalla.getProducto() == null) {
+        if (!isDisponible()) {
             return 0;
         }
         return productoColorTalla.getProducto().getPrecio() * cantidad;

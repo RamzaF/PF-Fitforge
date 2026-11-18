@@ -19,26 +19,12 @@ public class Color implements Serializable {
     @Column(name = "id_color")
     private Long idColor;
 
-    @Column(name = "nombre_color")
+    @Column(name = "nombre_color", nullable = false, length = 50)
     private String nombreColor;
+
+    @Column(nullable = false)
+    private boolean activo = true;
 
     public Color() {
     }
-
-    public Long getIdColor() {
-        return idColor;
-    }
-
-    public void setIdColor(Long idColor) {
-        this.idColor = idColor;
-    }
-
-    public String getNombreColor() {
-        return nombreColor;
-    }
-
-    public void setNombreColor(String nombreColor) {
-        this.nombreColor = nombreColor;
-    }
 }
-

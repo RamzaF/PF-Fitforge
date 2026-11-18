@@ -1,73 +1,44 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+      lang="es">
     <head th:replace="~{layout/plantilla :: head}">
-        <title>Fitforge</title>
+        <title>Contacto - FitForge</title>
     </head>
     <body>
-        <!-- Fragmento para la sección "Visita Nuestra Tienda" -->
-        <div th:fragment="contacto">
-            <h2 class="text-center mb-5 fw-bold section-title">Visita Nuestra Tienda</h2>
-            <div class="row justify-content-center">
-                <div class="col-md-6 text-center">
-                    <i class="bi bi-geo-alt-fill" style="font-size: 2rem; color: #2ECC71;"></i>
-                    <div class="mt-4">
-                        <p class="fw-bold">Dirección</p>
-                        <p>San José, Costa Rica</p>
+        <div th:fragment="contacto" class="panel-card h-100">
+            <div class="panel-card__header">
+                <h1 class="panel-card__title">Información de Contacto</h1>
+            </div>
+            <div class="panel-card__body">
+                <dl class="kv-grid">
+                    <div style="grid-column: 1 / -1;">
+                        <dt>Ubicación</dt>
+                        <dd>San José, Costa Rica</dd>
                     </div>
-                    <div class="mt-3">
-                        <p class="fw-bold">Teléfono</p>
-                        <p>+506 2222-3333</p>
+                    <div>
+                        <dt>Teléfono</dt>
+                        <dd class="tabular-nums">+506 2222-3333</dd>
                     </div>
-                    <div class="mt-3">
-                        <p class="fw-bold">Email</p>
-                        <p>info@fitforge.com</p>
+                    <div>
+                        <dt>Correo</dt>
+                        <dd>info@fitforge.com</dd>
                     </div>
-                    <div class="mt-3">
-                        <p class="fw-bold">Horario de atención</p>
-                        <p>Lunes a Viernes: 9:00 - 18:00<br>Sábado: 10:00 - 14:00</p>
+                    <div style="grid-column: 1 / -1;">
+                        <dt>Horario</dt>
+                        <dd>Lunes a Viernes: 9:00 – 18:00 · Sábado: 10:00 – 14:00</dd>
                     </div>
-                </div>
+                </dl>
             </div>
         </div>
 
-        <!-- Fragmento para la sección "Contáctanos" -->
-        <div th:fragment="contacto-formulario">
-            <h2 class="text-center mb-5 fw-bold section-title">Contáctanos</h2>
-            <div class="row justify-content-center">
-                <div class="col-md-8 col-lg-6">
-                    <div th:if="${param.exito}" class="alert alert-success">
-                        ¡Mensaje enviado con éxito!
-                    </div>
-                    <form th:action="@{/contacto/enviar}" method="post" th:object="${contacto}" class="shadow p-4 rounded" style="background-color: #FFFFFF;">
-                        <div class="mb-3">
-                            <label for="nombre" class="form-label">Nombre</label>
-                            <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
-                            <span th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}" class="text-danger"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label for="apellido" class="form-label">Apellido</label>
-                            <input type="text" class="form-control" id="apellido" th:field="*{apellido}" required>
-                            <span th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}" class="text-danger"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label for="correo" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="correo" th:field="*{correo}" required>
-                            <span th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}" class="text-danger"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label for="mensaje" class="form-label">Mensaje</label>
-                            <textarea class="form-control" id="mensaje" th:field="*{mensaje}" rows="5" required></textarea>
-                            <span th:if="${#fields.hasErrors('mensaje')}" th:errors="*{mensaje}" class="text-danger"></span>
-                        </div>
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-primary btn-lg px-4">Enviar</button>
-                        </div>
-                    </form>
-                </div>
+        <div th:fragment="contacto-formulario" class="panel-card h-100">
+            <div class="panel-card__header">
+                <h2 class="panel-card__title">Mensajería en Línea</h2>
+            </div>
+            <div class="panel-card__body">
+                <p class="alert alert-info mb-0">El formulario de contacto todavía no está habilitado.</p>
             </div>
         </div>
     </body>
 </html>
-

@@ -1,0 +1,44 @@
+._*
+**/._*
+.DS_Store
+.env
+.env.*
+!.env.example
+**/target/
+.superpowers/
+
+# Configuración local de herramientas y editores
+.agents/
+.claude/
+.codex/
+.gemini/
+.cursor/
+.mcp/
+.mcp.json
+mcp.json
+mcp-config*.json
+.github/copilot-instructions.md
+.github/prompts/
+.github/agents/
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.idea/
+.vscode/
+**/nb-configuration.xml
+**/nbactions.xml
+
+# Evidencia privada, respaldos y diagnósticos locales
+*.log
+**/hs_err_pid*
+/backups/
+/evidence/
+
+# Otros artefactos operativos locales
+.aider*
+.continue/
+.cache/
+__pycache__/
+node_modules/
+/prompts/
+/DBActualizado*.txt

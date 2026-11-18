@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="es">
+    <head th:replace="~{layout/plantilla :: head}">
+        <title>Admin - Inventario General y Bitácora - FitForge</title>
+    </head>
+    <body sec:authorize="hasRole('ROLE_ADMIN')">
+        <header th:replace="~{layout/plantilla :: header}"></header>
+
+        <main id="mainContent" class="main-container" tabindex="-1">
+            <div th:replace="~{layout/plantilla :: adminSubnav('inventario')}"></div>
+
+            <div th:if="${mensaje != null}"
+                 th:class="'alert alert-' + (${tipo} ?: 'info') + ' alert-dismissible fade show'"
+                 role="alert">
+                <span th:text="${mensaje}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="store-header-bar">
+                <div>
+                    <h1 class="store-header-bar__title">Inventario General y Bitácora</h1>
+                    <p class="store-header-bar__subtitle">
+                        Consultá existencias por variante, registrá ingresos o ajustes con motivo obligatorio (3 a 200 caracteres) y revisá la bitácora auditable.
+                    </p>
+                </div>
+                <a th:href="@{/admin/productos/listado}" class="btn btn-outline-primary btn-sm">Ir a Productos</a>
+            </div>
+
+            <!-- Indicadores reales desde base de datos -->
+            <div class="ops-strip" aria-label="Indicadores de inventario">
+                <div class="ops-metric">
+                    <span class="ops-metric__label">Variantes registradas</span>
+                    <span class="ops-metric__value tabular-nums" th:text="${totalVariantes}">0</span>
+                </div>
+                <div class="ops-metric">
+                    <span class="ops-metric__label">Unidades activas</span>
+                    <span class="ops-metric__value tabular-nums" style="color: var(--ff-teal);" th:text="${unidadesTotales}">0</span>
+                </div>
+                <div class="ops-metric">
+                    <span class="ops-metric__label">Stock bajo (1–5)</span>
+                    <span class="ops-metric__value tabular-nums" style="color: var(--ff-warning-text);" th:text="${variantesStockBajo}">0</span>
+                </div>
+                <div class="ops-metric">
+                    <span class="ops-metric__label">Variantes agotadas (0)</span>
+                    <span class="ops-metric__value tabular-nums" style="color: var(--ff-danger-text);" th:text="${variantesAgotadas}">0</span>
+                </div>
+            </div>
+
+            <!-- Filtros compactos -->
+            <div class="panel-card mb-4">
+                <div class="panel-card__body py-3">
+                    <form th:action="@{/admin/inventario}" method="get" class="row g-2 align-items-end">
+                        <div class="col-md-6">
+                            <label for="terminoInv" class="form-label">Buscar producto, categoría, color o talla</label>
+                            <input type="text" class="form-control" id="terminoInv" name="termino"
+                                   th:value="${termino}" placeholder="Ej. Camiseta, Negro, M..." />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filtroStock" class="form-label">Nivel de stock</label>
+                            <select class="form-select" id="filtroStock" name="filtroStock">
+                                <option value="todos" th:selected="${filtroStock == 'todos'}">Todas las variantes</option>
+                                <option value="bajo" th:selected="${filtroStock == 'bajo'}">Stock bajo (1 a 5)</option>
+                                <option value="agotado" th:selected="${filtroStock == 'agotado'}">Agotado (0)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-grow-1">Filtrar</button>
+                            <a th:href="@{/admin/inventario}" class="btn btn-outline-secondary">Limpiar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tabla de variantes con ajuste inline -->
+            <div class="panel-card mb-4">
+                <div class="panel-card__header">
+                    <h2 class="panel-card__title">Stock por Producto y Variante</h2>
+                    <span class="status-badge status-badge--info tabular-nums" th:text="${#lists.size(variantes) + ' variantes'}">0 variantes</span>
+                </div>
+                <div class="table-wrap">
+                    <table class="data-table data-table--stack" aria-label="Stock por producto y variante">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Variante</th>
+                                <th>Estado</th>
+                                <th>Stock</th>
+                                <th>Ajuste / Ingreso con Motivo</th>
+                                <th class="text-end">Detalle</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(variantes)}">
+                                <td colspan="6" class="text-center text-secondary py-4">No se encontraron variantes para los filtros seleccionados.</td>
+                            </tr>
+                            <tr th:each="v : ${variantes}">
+                                <td data-label="Producto">
+                                    <div class="fw-bold" th:text="${v.productoDescripcion}">Producto</div>
+                                    <div class="field-hint" th:text="${v.categoriaDescripcion}">Categoría</div>
+                                </td>
+                                <td data-label="Variante">
+                                    <span class="status-badge status-badge--neutral">
+                                        <span th:text="${v.colorNombre}">Negro</span> /
+                                        <span th:text="${v.tallaNombre}">M</span>
+                                    </span>
+                                </td>
+                                <td data-label="Estado">
+                                    <span th:if="${v.varianteActiva}" class="status-badge status-badge--success">Activa</span>
+                                    <span th:unless="${v.varianteActiva}" class="status-badge status-badge--neutral">Inactiva</span>
+                                </td>
+                                <td data-label="Stock" class="tabular-nums">
+                                    <strong class="me-1" th:text="${v.existencias}">0</strong>
+                                    <span th:if="${v.varianteActiva and v.existencias == 0}" class="status-badge status-badge--danger">Agotado</span>
+                                    <span th:if="${v.varianteActiva and v.existencias > 0 and v.existencias <= 5}" class="status-badge status-badge--warning">Bajo</span>
+                                </td>
+                                <td data-label="Ajuste con Motivo" class="stack-full">
+                                    <form th:if="${v.varianteActiva}" th:action="@{/admin/inventario/movimiento}" method="post" class="inv-inline-form">
+                                        <input type="hidden" name="idVariante" th:value="${v.idVariante}" />
+                                        <select class="form-select form-select-sm" name="tipo" aria-label="Tipo de movimiento" required>
+                                            <option value="INGRESO">Sumar (+)</option>
+                                            <option value="AJUSTE">Fijar (=)</option>
+                                        </select>
+                                        <input type="number" class="form-control form-control-sm tabular-nums" name="cantidad"
+                                               min="0" step="1" placeholder="Cant." aria-label="Cantidad" required />
+                                        <input type="text" class="form-control form-control-sm" name="motivo"
+                                               minlength="3" maxlength="200" placeholder="Motivo (3-200 car.)" aria-label="Motivo" required />
+                                        <button type="submit" class="btn btn-sm btn-primary">Aplicar</button>
+                                    </form>
+                                    <span th:unless="${v.varianteActiva}" class="field-hint">
+                                        Variante inactiva
+                                    </span>
+                                </td>
+                                <td data-label="Detalle" class="text-end">
+                                    <a th:href="@{/admin/productos/inventario/{id}(id=${v.idProducto})}"
+                                       class="btn btn-sm btn-outline-secondary">Ver producto</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Bitácora global reciente -->
+            <div class="panel-card">
+                <div class="panel-card__header">
+                    <h2 class="panel-card__title">Bitácora Reciente de Movimientos</h2>
+                    <span class="status-badge status-badge--neutral tabular-nums" th:text="${#lists.size(movimientos) + ' movimientos'}">0 movimientos</span>
+                </div>
+                <div class="table-wrap">
+                    <table class="data-table data-table--stack" aria-label="Bitácora reciente de movimientos de inventario">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Producto</th>
+                                <th>Variante</th>
+                                <th>Tipo</th>
+                                <th>Antes</th>
+                                <th>Delta</th>
+                                <th>Después</th>
+                                <th>Motivo</th>
+                                <th>Administrador</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(movimientos)}">
+                                <td colspan="9" class="text-center text-secondary py-4">Aún no hay movimientos de inventario registrados.</td>
+                            </tr>
+                            <tr th:each="m : ${movimientos}">
+                                <td data-label="Fecha" class="small text-nowrap tabular-nums" th:text="${#temporals.format(m.fechaCreacion, 'yyyy-MM-dd HH:mm:ss')}">Fecha</td>
+                                <td data-label="Producto">
+                                    <a th:href="@{/admin/productos/inventario/{id}(id=${m.idProducto})}"
+                                       class="fw-bold text-decoration-none text-primary"
+                                       th:text="${m.productoDescripcion}">Producto</a>
+                                </td>
+                                <td data-label="Variante" th:text="${m.colorNombre + ' / ' + m.tallaNombre}">Negro / M</td>
+                                <td data-label="Tipo">
+                                    <span th:if="${m.tipo == 'INGRESO'}" class="status-badge status-badge--success">INGRESO</span>
+                                    <span th:if="${m.tipo == 'AJUSTE'}" class="status-badge status-badge--warning">AJUSTE</span>
+                                    <span th:if="${m.tipo == 'ALTA'}" class="status-badge status-badge--info">ALTA</span>
+                                </td>
+                                <td data-label="Antes" class="tabular-nums" th:text="${m.cantidadAnterior}">0</td>
+                                <td data-label="Delta" class="tabular-nums">
+                                    <span th:class="${m.cantidadDelta >= 0} ? 'text-success fw-bold' : 'text-danger fw-bold'"
+                                          th:text="${m.cantidadDelta >= 0 ? '+' + m.cantidadDelta : m.cantidadDelta}">+0</span>
+                                </td>
+                                <td data-label="Después" class="fw-bold tabular-nums" th:text="${m.cantidadNueva}">0</td>
+                                <td data-label="Motivo" th:text="${m.motivo}">Motivo</td>
+                                <td data-label="Administrador" class="small text-secondary" th:text="${m.adminNombre + ' (' + m.adminCorreo + ')'}">Admin</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
+        <th:block th:replace="~{layout/plantilla :: scripts}"></th:block>
+    </body>
+</html>
