@@ -8,24 +8,14 @@ Proyecto académico colaborativo de 2025, recuperado y ampliado en 2026. Esta ve
 
 [Instalación Docker](docs/local/SETUP.md) · [Caso de estudio](docs/portfolio/CASE-STUDY.md) · [Contribuciones y créditos](CONTRIBUTIONS.md) · [Verificación y límites](docs/portfolio/VERIFICATION.md)
 
-## Recorrido visual
-
-Capturas de la aplicación real en Docker, tomadas sobre la base UI `8c73ecea` con datos de demostración. Se recortó el pie de página; no se fabricaron pantallas. Las imágenes de productos visibles conservan permisos de redistribución pendientes: véase [procedencia de recursos](docs/portfolio/ASSETS.md).
-
-[![Catálogo: búsqueda, categorías y disponibilidad por producto](docs/portfolio/screenshots/catalogo.png)](docs/portfolio/screenshots/catalogo.png)
-
-[![Administración: acceso a catálogo, variantes, inventario y pedidos](docs/portfolio/screenshots/administracion.png)](docs/portfolio/screenshots/administracion.png)
-
-[Ver detalle de producto en móvil](docs/portfolio/screenshots/producto-movil.png): selección de talla y color, existencias por variante y agregado al carrito.
-
-## Qué resuelve
+## Capacidades de cliente y administración
 
 - **Cliente:** catálogo, búsqueda y filtros; detalle de producto con variantes; carrito por sesión; confirmación con destino ficticio y consentimiento; comprobante persistente e historial propio.
 - **Administración:** productos e imágenes, categorías, colores, tallas y variantes; ingresos y ajustes de inventario con motivo; consulta y transición de pedidos de Pendiente a En preparación y Despachado.
 - **Consistencia:** una confirmación descuenta stock y persiste cabecera y líneas en una transacción. Reenviar el mismo intento recupera el pedido original; un precio cambiado exige reconfirmación.
 - **Control de acceso:** autenticación JDBC/BCrypt, roles de cliente y administración, CSRF y validación de propietario al consultar comprobantes.
 
-## Stack reproducible
+## Stack y versiones
 
 | Componente | Versión fijada en el proyecto |
 | --- | --- |
@@ -39,7 +29,7 @@ Capturas de la aplicación real en Docker, tomadas sobre la base UI `8c73ecea` c
 
 Las versiones proceden de [pom.xml](InitializrSpringbootProject/pom.xml), [Dockerfile](Dockerfile) y [compose.yaml](compose.yaml). El navegador también carga recursos externos; la demo no es completamente autónoma sin conexión.
 
-## Arquitectura y decisiones técnicas
+## Arquitectura, seguridad y consistencia
 
 Monolito MVC con renderizado en servidor: los controladores reciben HTTP, los servicios aplican reglas de negocio y los repositorios/DAO acceden a MySQL. Thymeleaf presenta el resultado; el JavaScript complementa filtros y selección de variantes. No hay una API ni un frontend desplegados como servicios independientes.
 
@@ -61,7 +51,17 @@ Navegador → Nginx (loopback) → Spring MVC / Security
 
 Detalles y límites en el [caso de estudio](docs/portfolio/CASE-STUDY.md) y el [contrato de pedidos](docs/local/ORDERS.md).
 
-## Ejecutar con Docker
+## Recorrido visual
+
+Capturas de la aplicación real en Docker, tomadas sobre la base UI `8c73ecea` con datos de demostración. Se recortó el pie de página; no se fabricaron pantallas. Las imágenes de productos visibles conservan permisos de redistribución pendientes: véase [procedencia de recursos](docs/portfolio/ASSETS.md).
+
+[![Catálogo: búsqueda, categorías y disponibilidad por producto](docs/portfolio/screenshots/catalogo.png)](docs/portfolio/screenshots/catalogo.png)
+
+[![Administración: acceso a catálogo, variantes, inventario y pedidos](docs/portfolio/screenshots/administracion.png)](docs/portfolio/screenshots/administracion.png)
+
+[Ver detalle de producto en móvil](docs/portfolio/screenshots/producto-movil.png): selección de talla y color, existencias por variante y agregado al carrito.
+
+## Instalación con Docker
 
 Requisitos: Docker con Compose y Python 3 estándar para transmitir el contexto de build. Java, Maven, MySQL y Node se ejecutan exclusivamente en contenedores. No se instalan dependencias en el host.
 
@@ -86,7 +86,7 @@ docker compose -f compose.yaml -f compose.order-ops.yaml stop
 
 La [guía completa](docs/local/SETUP.md) explica instalación, redes, recursos, pruebas aisladas y límites. Ejecutar build, pruebas y demo secuencialmente; no ejecutar fixtures sobre la BD de una demo.
 
-## Verificación documentada
+## Pruebas y validación
 
 | Base y ejecución | Resultado respaldado | Alcance |
 | --- | --- | --- |
@@ -98,16 +98,16 @@ La [guía completa](docs/local/SETUP.md) explica instalación, redes, recursos, 
 
 No se suman ejecuciones ni se transfieren resultados a builds distintos. La [matriz de verificación](docs/portfolio/VERIFICATION.md) distingue evidencia previa, controles de esta preparación y escenarios no ejecutados.
 
-## Orquestación asistida por IA
+## Origen y contribución de Eduin
 
-La recuperación de 2026 se desarrolló con asistencia de IA bajo coordinación de Eduin: planificación del alcance, reparto de tareas en paralelo, conciliación de cambios y supervisión de resultados. El proceso separó implementación, revisión independiente y validación real en Docker y navegador; los informes se contrastaron con diffs, logs y comprobaciones de persistencia.
+La base de 2025 es un proyecto académico colaborativo. Eduin declara haber coordinado y organizado ese trabajo; el historial conserva los aportes del equipo. La atribución personal de cambios académicos requiere confirmar los aliases registrados y no se deduce de líneas o commits.
 
-Eduin conserva las decisiones de alcance y la aceptación de la interfaz. La asistencia no sustituye la revisión humana ni implica que todo el código haya sido escrito manualmente por él, que el proceso fuera totalmente autónomo o que exista autorización para publicar. El historial conserva el trabajo compartido y las herramientas operativas quedan fuera del producto.
+Eduin coordinó la recuperación y ampliación de 2026 mediante entregas incrementales y paralelas, con desarrollo asistido por IA, revisión independiente, pruebas automatizadas y validación funcional en Docker y navegador. Definió el alcance, supervisó la integración y aceptó manualmente la interfaz; esto no implica codificación manual exclusiva ni autonomía total.
 
-## Origen, aportes y límites
+La evolución incorporó el entorno Docker, pedidos persistentes, consistencia de stock e imágenes, auditoría y operación administrativa. [CONTRIBUTIONS.md](CONTRIBUTIONS.md) separa las etapas, la evidencia de aportes y los créditos pendientes.
 
-La base académica pertenece a un trabajo compartido; el historial conserva las identidades originales. Eduin declara haber coordinado y organizado el trabajo académico. La recuperación, integración y ampliación de 2026 se documentan como una etapa posterior. La atribución de cambios académicos a una persona concreta requiere confirmar los aliases del historial; no se deduce del número de líneas ni de commits.
+## Límites y estado de publicación
 
-[CONTRIBUTIONS.md](CONTRIBUTIONS.md) delimita esos aportes y los créditos pendientes. No se concede una licencia global sobre aportes ajenos ni sobre imágenes y marcas de terceros.
+La demo no incluye pagos reales, facturación fiscal, transportista ni correo real. No se probó un corte físico de conexión durante COMMIT, no hay migración automática de datos previos y el esquema monetario heredado usa DOUBLE con validaciones acotadas. Los límites completos están en [VERIFICATION.md](docs/portfolio/VERIFICATION.md).
 
-La aplicación no está certificada para operar una tienda real: no hay pasarela de pago, facturación fiscal, transportista ni correo real. No se probó un corte físico de conexión durante COMMIT, no se ofrece migración de datos previos y el esquema monetario heredado usa DOUBLE con validaciones acotadas. Derechos de recursos y revisión de secretos históricos siguen pendientes antes de publicar.
+La revisión de credenciales históricas y los permisos de participantes y recursos gráficos siguen pendientes antes de publicar. No se concede una licencia global sobre aportes ajenos, imágenes o marcas de terceros.

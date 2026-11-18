@@ -28,12 +28,8 @@ La integración `a40eb6a` registró 150 pruebas por ejecución de suite y packag
 
 La [verificación](VERIFICATION.md) conserva límites y resultados por base. No existe evidencia de clientes reales, ventas comerciales o una operación productiva. El dinero conserva un DOUBLE heredado con controles de escala y representación; una evolución para uso real requeriría revisar el modelo monetario y las migraciones.
 
-## Orquestación y supervisión humana
+## Evolución y responsabilidad compartida
 
-La recuperación de 2026 incorporó asistencia de IA para desarrollar el proyecto por tareas acotadas. Eduin coordinó el alcance, el reparto paralelo y las decisiones; la integración reunió los cambios y una revisión independiente contrastó los contratos antes del cierre. Las suites con MySQL real, los recorridos de navegador y la comparación de persistencia aportaron evidencia para revisar los resultados, en lugar de aceptar únicamente un informe de implementación.
-
-Eduin aceptó manualmente la base visual. Esa aceptación se distingue de las pruebas automatizadas y de una autorización de publicación. Esta experiencia muestra planificación, integración y supervisión de trabajo asistido; no atribuye a Eduin codificación manual exclusiva ni presenta autonomía total. No se incluyen conversaciones, instrucciones operativas ni configuraciones de herramientas en el producto.
-
-## Responsabilidad compartida
+Eduin coordinó la recuperación de 2026 mediante entregas incrementales y paralelas, con desarrollo asistido por IA, revisión independiente y validación real. Definió el alcance, supervisó la integración y aceptó manualmente la interfaz. Esa aceptación se distingue de las pruebas automatizadas y de una autorización de publicación; no se atribuye codificación manual exclusiva ni autonomía total.
 
 [Contribuciones y créditos](../../CONTRIBUTIONS.md) separa el origen académico de la recuperación posterior y evita resolver aliases sin confirmación. Antes de publicar siguen pendientes historia sensible, permisos de participantes y procedencia de recursos. No se atribuye a una empresa la propiedad del trabajo universitario.

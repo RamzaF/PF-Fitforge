@@ -45,7 +45,7 @@ Se reutilizaron cachés y dependencias disponibles: no fue una prueba cold-cache
 
 Se retiraron del árbol el dump histórico, el log JVM y configuraciones de IDE, con copia e inventario privados previos. Se reemplazaron guías de ramas anteriores por documentación técnica vigente. No se incorporan conversaciones, instrucciones operativas, cachés, credenciales privadas ni configuraciones de herramientas. Las exclusiones preventivas de Git se conservan.
 
-El uso asistido por IA se describe de forma explícita en [README](../../README.md) y [caso de estudio](CASE-STUDY.md). Sus referencias históricas son aceptables según Eduin y no constituyen un bloqueo ni justifican reescribir commits.
+El desarrollo asistido por IA se menciona brevemente dentro de la contribución y evolución en [README](../../README.md) y [caso de estudio](CASE-STUDY.md). Sus referencias históricas son aceptables según Eduin y no constituyen un bloqueo ni justifican reescribir commits.
 
 La revisión acotada de commits y blobs alcanzables desde el candidato y las referencias locales de main encontró configuraciones históricas con literales de conexión/credenciales y SQL con cuentas. No se probaron ni se publican valores. No se localizó un scanner especializado en la búsqueda acotada disponible; la revisión por patrones no certifica ausencia de secretos. Es necesario revisar credenciales reales o potenciales y decidir su tratamiento antes de publicar. No se reescribió historia ni se modificaron créditos Git.
 
