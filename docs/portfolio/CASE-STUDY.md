@@ -1,35 +1,41 @@
 # Caso de estudio · FitForge
 
-## Del catálogo académico a un flujo persistente
+## Del catálogo académico a un flujo de compra persistente
 
-El proyecto académico de 2025 reunía catálogo deportivo, variantes, administración y carrito. La recuperación de 2026 buscó hacer reproducible el entorno y conectar la confirmación de pedidos con inventario y consulta posterior, conservando el origen compartido.
+La versión universitaria de FitForge (2025), desarrollada en la Universidad Fidélitas como parte de la carrera de Ingeniería en Desarrollo de Software, contaba con catálogo deportivo, variantes por talla y color, autenticación y carrito de compras. Al retomar el proyecto en 2026, el objetivo técnico fue doble: lograr que toda la aplicación pudiera levantarse de forma reproducible en contenedores sin configurar herramientas en la máquina local, y cerrar el ciclo completo entre la confirmación del carrito, el descuento de inventario y el seguimiento administrativo del pedido.
 
-El reto técnico era mantener coherentes cuatro estados: carrito de sesión, stock por talla/color, pedido persistido e imagen del producto. Un mensaje de éxito sin persistencia no basta para representar una confirmación.
+El problema central de ingeniería consistió en mantener coherentes cuatro estados bajo solicitudes concurrentes: el carrito en sesión HTTP, las existencias por variante en MySQL, el pedido persistido con su historial de eventos y las imágenes de producto almacenadas en disco.
 
-## Decisiones y compromisos
+## Decisiones de diseño y compromisos
 
-| Problema | Decisión implementada | Límite |
+Se conservó la arquitectura monolítica MVC con Spring Boot, Thymeleaf, JPA y JDBC para aprovechar la base construida por el equipo y concentrar el esfuerzo en la integridad transaccional, el aislamiento de contenedores y la claridad de uso.
+
+| Problema técnico | Solución implementada | Alcance y compromiso asumido |
 | --- | --- | --- |
-| Dos compradores compiten por stock | Bloqueo de filas, validación vigente y descuento dentro de la transacción del pedido | No reserva de inventario mientras se navega |
-| Se reenvía una confirmación | Clave y huella por dueño; repetición idéntica recupera el pedido | Cambiar líneas, precio o destino requiere el protocolo de reconfirmación |
-| Cambia el precio durante la compra | El servidor rechaza la confirmación anterior y exige aceptar el precio vigente | El carrito no garantiza precio hasta confirmar |
-| Falla una escritura parcial | Cabecera, líneas y descuento revierten juntos en MySQL | Corte físico durante COMMIT no ejecutado |
-| Dos administradores editan imágenes | Lectura vigente bajo lock; archivo temporal, movimiento y compensación conservadora | No hay 2PC archivo/BD; pueden quedar huérfanos |
-| Se prepara o despacha un pedido | Estado y evento de auditoría en una transacción; repetición sin doble efecto | No envío físico, cancelación ni devolución |
-| Se comparte un comprobante | Validación del dueño autenticado; 404 para ajeno o ausente | No implica auditoría de seguridad exhaustiva |
+| Dos compradores intentan adquirir el último stock disponible | Bloqueo pesimista de filas (`FOR UPDATE`) en orden determinista, validación de existencias vigentes y descuento dentro de la transacción del pedido | El carrito en sesión no reserva unidades mientras se navega; el stock se compromete al confirmar |
+| El usuario reenvía por error el formulario de confirmación | Clave de idempotencia y huella calculada por cliente, líneas y destino; repetir el mismo envío recupera el pedido original sin duplicar descuentos | Si cambian las líneas, el destino o el precio, se solicita una nueva confirmación |
+| Un administrador modifica el precio mientras un cliente tiene el producto en carrito | El servidor compara el importe en sesión con el precio vigente bajo bloqueo y exige confirmar explícitamente el nuevo monto | El carrito refleja el precio al momento de agregar, pero prevalece el valor vigente al cerrar la compra |
+| Falla una escritura a mitad del registro de la compra | Cabecera, líneas de detalle y descuento de inventario comparten transacción en MySQL y revierten en bloque | Cubre rollbacks de negocio y fallos de entrega posteriores al commit; no modela un corte físico del motor durante `COMMIT` |
+| Dos administradores actualizan la imagen o datos del mismo producto | Lectura de imagen y categoría vigentes bajo bloqueo; escritura previa en archivo temporal, movimiento al volumen `/media/` y compensación ante rollback confirmado | No existe commit distribuido (2PC) entre MySQL y archivos; ante un fallo incierto se conserva el archivo para no romper referencias |
+| El pedido avanza a preparación o despacho en administración | Transición de estado (`Pendiente` → `En preparación` → `Despachado`) y registro en `pedido_evento` dentro de una misma transacción, sin alterar el stock ya descontado | Flujo interno de tienda sin conexión a transportistas ni módulo de cancelaciones o devoluciones |
+| Un usuario intenta acceder al comprobante de otro comprador | Verificación del propietario autenticado en `/pedidos` y `/carrito/factura/{id}`, devolviendo `404` ante pedidos ajenos o inexistentes | Control de acceso sobre el flujo de pedidos de la demostración |
 
-Se mantuvo un monolito MVC con Thymeleaf y servicios por dominio para reutilizar la aplicación existente. JPA y JDBC participan en las operaciones transaccionales según el contrato implementado. Docker aporta un entorno con MySQL real y evita depender de instalaciones Java/Maven/MySQL del host.
+En la capa visual (`8c73ecea`) se aplicó divulgación progresiva para reducir el ruido en pantalla: las tarjetas del catálogo muestran únicamente imagen, categoría, nombre, precio en colones (`₡`) y disponibilidad, mientras que la descripción y la selección interactiva de tallas y colores se concentran en la ficha del producto. En el panel administrativo se integró una barra superior común para navegar entre productos, categorías, colores, tallas, inventario con bitácora y pedidos (véanse las capturas de [catálogo](screenshots/catalogo.png) y [administración](screenshots/administracion.png)).
 
-La interfaz concentra el catálogo en imagen, precio y disponibilidad; el detalle expone las variantes. Administración reúne catálogo, inventario y pedidos. Las [capturas](screenshots/catalogo.png) proceden de la aplicación real; la aceptación visual de la base fue declarada por Eduin.
+## Verificación y resultados técnicos
 
-## Evidencia y resultado
+Cada etapa de la evolución se validó sobre contenedores Docker con MySQL `8.4.4` real, sin sustituir la base de datos por motores en memoria:
 
-La integración `a40eb6a` registró 150 pruebas por ejecución de suite y package. La base UI `8c73ecea` registró 151 por ejecución. Son resultados separados, contrastados con sus logs; no se suman ni representan mediciones de rendimiento o impacto comercial. El recorrido de navegador y la comparación tras recrear contenedores verifican persistencia en los escenarios registrados.
+- **Integración funcional (`a40eb6a`):** `150` pruebas automatizadas aprobadas en `mvn test` y `150` en `mvn package`, además de `2` pruebas sobre socket HTTP real para verificar concurrencia en el reemplazo de imágenes de producto.
+- **Refinamiento de interfaz (`8c73ecea`):** `151` pruebas automatizadas aprobadas por ejecución de suite y de empaquetado, junto con la validación en Node (`24.22.1-alpine`) del contrato JavaScript de filtros y foco (`scripts/test-rutinas.js`).
+- **Persistencia en navegador y contenedores:** recorrido completo de usuario y administrador en navegador real y comprobación de que los registros de nueve tablas en MySQL y los archivos de imagen en `/media/` mantienen su integridad byte a byte tras recrear los contenedores (`--force-recreate`).
 
-La [verificación](VERIFICATION.md) conserva límites y resultados por base. No existe evidencia de clientes reales, ventas comerciales o una operación productiva. El dinero conserva un DOUBLE heredado con controles de escala y representación; una evolución para uso real requeriría revisar el modelo monetario y las migraciones.
+El detalle de las ejecuciones y los límites del modelo heredado (como el uso de `DOUBLE` acotado con validaciones de dos decimales mediante `BigDecimal` y la operación exclusiva con datos ficticios) se recogen en [VERIFICATION.md](VERIFICATION.md) y en el [contrato de pedidos](../local/ORDERS.md).
 
-## Evolución y responsabilidad compartida
+## Mi rol en el proyecto
 
-Eduin coordinó la recuperación de 2026 mediante entregas incrementales y paralelas, con desarrollo asistido por IA, revisión independiente y validación real. Definió el alcance, supervisó la integración y aceptó manualmente la interfaz. Esa aceptación se distingue de las pruebas automatizadas y de una autorización de publicación; no se atribuye codificación manual exclusiva ni autonomía total.
+Coordiné y organicé la etapa inicial de 2025 junto con mis compañeros de la carrera de Ingeniería en Desarrollo de Software en la Universidad Fidélitas, donde levantamos la estructura base del catálogo, las variantes y la administración de la tienda.
 
-[Contribuciones y créditos](../../CONTRIBUTIONS.md) separa el origen académico de la recuperación posterior y evita resolver aliases sin confirmación. Antes de publicar siguen pendientes historia sensible, permisos de participantes y procedencia de recursos. No se atribuye a una empresa la propiedad del trabajo universitario.
+En 2026 retomé el proyecto para diseñar e integrar su evolución técnica mediante entregas incrementales, utilizando herramientas de desarrollo asistido por IA combinadas con pruebas automatizadas sobre MySQL y verificación funcional en navegador. Me encargué de definir los contratos de consistencia transaccional e idempotencia, configurar el entorno Docker aislado, completar los módulos de inventario auditable y operación de pedidos, y renovar la interfaz de cliente y administración.
+
+La distinción entre el desarrollo académico compartido y las mejoras incorporadas en 2026 se documenta en [CONTRIBUTIONS.md](../../CONTRIBUTIONS.md).
